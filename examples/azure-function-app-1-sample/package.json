@@ -1,0 +1,43 @@
+{
+  "name": "azure-function-app-1-sample",
+  "type": "module",
+  "main": "dist/main.js",
+  "version": "0.0.0-9830012",
+  "private": true,
+  "scripts": {
+    "ts": "ts-node --files -r dotenv/config",
+    "build": "npx tsc -p tsconfig.build.json",
+    "start:func": "npx func start -p 8080",
+    "start:azurite": "azurite -l ./.azurite",
+    "start:tsc-watcher": "yarn build -w",
+    "prestart": "yarn build",
+    "start": "TZ=UTC concurrently -r -p none --kill-others 'yarn run start:azurite -s' 'yarn start:tsc-watcher' 'yarn run start:func'"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.1",
+    "@bluish/azure": "^0.0.0-9830012",
+    "@bluish/core": "^0.0.0-9830012",
+    "@bluish/cron": "^0.0.0-9830012",
+    "@bluish/http": "^0.0.0-9830012",
+    "@bluish/multipart": "^0.0.0-9830012",
+    "@bluish/omac": "workspace:^",
+    "@bluish/typeorm": "^0.0.0-9830012",
+    "class-transformer": "^0.5.1",
+    "commander": "^11.0.0",
+    "http-errors": "^2.0.0",
+    "omac": "^0.0.0-alpha.4",
+    "sql.js": "^1.8.0",
+    "typeorm": "latest"
+  },
+  "packageManager": "yarn@3.6.3",
+  "devDependencies": {
+    "@types/http-errors": "^2",
+    "@types/node": "^20.12.7",
+    "@types/sql.js": "^1",
+    "azure-functions-core-tools": "^4.0.5413",
+    "azurite": "^3.26.0",
+    "concurrently": "^8.2.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.4.5"
+  }
+}
