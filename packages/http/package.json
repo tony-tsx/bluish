@@ -1,0 +1,41 @@
+{
+  "name": "@bluish/http",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    "types": "./dist/esm/index.d.ts",
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:esm:package.json": "node -e \"require('fs').writeFileSync('./dist/esm/package.json', '{\\\"type\\\": \\\"module\\\"}')\"",
+    "build:cjs:package.json": "node -e \"require('fs').writeFileSync('./dist/cjs/package.json', '{\\\"type\\\": \\\"commonjs\\\"}')\"",
+    "build:esm:tsc": "npx tsc -p tsconfig.build.json --module nodenext --outDir ./dist/esm --declaration",
+    "build:cjs:tsc": "npx tsc -p tsconfig.build.json --module commonjs --outDir ./dist/cjs",
+    "build:esm": "yarn build:esm:tsc && yarn build:esm:package.json",
+    "build:cjs": "yarn build:cjs:tsc && yarn build:cjs:package.json",
+    "build": "yarn run build:esm && yarn run build:cjs",
+    "prepublish": "yarn run build"
+  },
+  "dependencies": {
+    "type-is": "^1.6.18"
+  },
+  "peerDependencies": {
+    "@bluish/core": "^0.0.0",
+    "qs": "*"
+  },
+  "devDependencies": {
+    "@bluish/core": "workspace:^",
+    "@types/busboy": "^1",
+    "@types/qs": "^6.9.8",
+    "@types/type-is": "^1",
+    "qs": "^6.11.2"
+  },
+  "packageManager": "yarn@3.6.3"
+}
