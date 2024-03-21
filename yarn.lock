@@ -537,19 +537,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@bluish/omac@workspace:packages/omac":
-  version: 0.0.0-use.local
-  resolution: "@bluish/omac@workspace:packages/omac"
-  dependencies:
-    "@bluish/http": "workspace:^"
-    omac: 0.0.0-alpha.2
-  peerDependencies:
-    "@bluish/core": "workspace:^"
-    "@bluish/http": "workspace:^"
-    omac: "*"
-  languageName: unknown
-  linkType: soft
-
 "@bluish/typeorm@workspace:^, @bluish/typeorm@workspace:packages/typeorm":
   version: 0.0.0-use.local
   resolution: "@bluish/typeorm@workspace:packages/typeorm"
