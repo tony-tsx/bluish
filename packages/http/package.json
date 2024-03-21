@@ -1,6 +1,6 @@
 {
   "name": "@bluish/http",
-  "version": "0.0.0",
+  "version": "0.0.0-12a3f3b",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
