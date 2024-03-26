@@ -1,6 +1,6 @@
 {
   "name": "@bluish/typeorm",
-  "version": "0.0.0",
+  "version": "0.0.0-5878335",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
