@@ -346,7 +346,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bluish/azure@npm:0.0.0, @bluish/azure@workspace:packages/azure":
+"@bluish/azure@npm:^0.0.0-9830012, @bluish/azure@workspace:packages/azure":
   version: 0.0.0-use.local
   resolution: "@bluish/azure@workspace:packages/azure"
   dependencies:
@@ -357,11 +357,11 @@ __metadata:
     applicationinsights: "npm:beta"
     commander: "npm:^11.0.0"
   peerDependencies:
-    "@bluish/core": "workspace:^"
+    "@bluish/core": ^0.0.0
   languageName: unknown
   linkType: soft
 
-"@bluish/core@npm:0.0.0, @bluish/core@workspace:^, @bluish/core@workspace:packages/core":
+"@bluish/core@npm:^0.0.0-9830012, @bluish/core@workspace:^, @bluish/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@bluish/core@workspace:packages/core"
   dependencies:
@@ -371,15 +371,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@bluish/cron@npm:0.0.0, @bluish/cron@workspace:^, @bluish/cron@workspace:packages/cron":
+"@bluish/cron@npm:^0.0.0-9830012, @bluish/cron@workspace:^, @bluish/cron@workspace:packages/cron":
   version: 0.0.0-use.local
   resolution: "@bluish/cron@workspace:packages/cron"
   peerDependencies:
-    "@bluish/core": "workspace:^"
+    "@bluish/core": ^0.0.0
   languageName: unknown
   linkType: soft
 
-"@bluish/http@npm:0.0.0, @bluish/http@workspace:^, @bluish/http@workspace:packages/http":
+"@bluish/http@npm:^0.0.0-9830012, @bluish/http@workspace:^, @bluish/http@workspace:packages/http":
   version: 0.0.0-use.local
   resolution: "@bluish/http@workspace:packages/http"
   dependencies:
@@ -390,12 +390,12 @@ __metadata:
     qs: "npm:^6.11.2"
     type-is: "npm:^1.6.18"
   peerDependencies:
-    "@bluish/core": "workspace:^"
+    "@bluish/core": ^0.0.0
     qs: "*"
   languageName: unknown
   linkType: soft
 
-"@bluish/multipart@npm:0.0.0, @bluish/multipart@workspace:packages/multipart":
+"@bluish/multipart@npm:^0.0.0-9830012, @bluish/multipart@workspace:packages/multipart":
   version: 0.0.0-use.local
   resolution: "@bluish/multipart@workspace:packages/multipart"
   dependencies:
@@ -408,20 +408,20 @@ __metadata:
     qs: "npm:^6.11.2"
     type-is: "npm:^1.6.18"
   peerDependencies:
-    "@bluish/core": "workspace:^"
-    "@bluish/http": "workspace:^"
+    "@bluish/core": ^0.0.0
+    "@bluish/http": ^0.0.0
     qs: "*"
   languageName: unknown
   linkType: soft
 
-"@bluish/typeorm@npm:0.0.0, @bluish/typeorm@workspace:packages/typeorm":
+"@bluish/typeorm@npm:^0.0.0-9830012, @bluish/typeorm@workspace:packages/typeorm":
   version: 0.0.0-use.local
   resolution: "@bluish/typeorm@workspace:packages/typeorm"
   dependencies:
     "@bluish/core": "workspace:^"
     typeorm: "npm:latest"
   peerDependencies:
-    "@bluish/core": "workspace:^"
+    "@bluish/core": ^0.0.0
     typeorm: "*"
   languageName: unknown
   linkType: soft
@@ -2703,12 +2703,12 @@ __metadata:
   resolution: "azure-function-app-1-sample@workspace:examples/azure-function-app-1-sample"
   dependencies:
     "@azure/functions": "npm:^4.0.1"
-    "@bluish/azure": "npm:0.0.0"
-    "@bluish/core": "npm:0.0.0"
-    "@bluish/cron": "npm:0.0.0"
-    "@bluish/http": "npm:0.0.0"
-    "@bluish/multipart": "npm:0.0.0"
-    "@bluish/typeorm": "npm:0.0.0"
+    "@bluish/azure": "npm:^0.0.0-9830012"
+    "@bluish/core": "npm:^0.0.0-9830012"
+    "@bluish/cron": "npm:^0.0.0-9830012"
+    "@bluish/http": "npm:^0.0.0-9830012"
+    "@bluish/multipart": "npm:^0.0.0-9830012"
+    "@bluish/typeorm": "npm:^0.0.0-9830012"
     "@types/http-errors": "npm:^2"
     "@types/sql.js": "npm:^1"
     azure-functions-core-tools: "npm:^4.0.5413"
