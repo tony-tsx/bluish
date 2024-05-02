@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 import path from 'path';
 
 import busboy, { FileInfo } from 'busboy';
-import { BeforeHandlerExecuteEvent, HandlerExecuteFinishEvent, Middleware } from '@bluish/core';
+import { ActionFinallyEvent, ActionInitializeEvent, Middleware } from '@bluish/core';
 import { is } from 'type-is';
 import qs from 'qs';
 import { Request } from '@bluish/http';
@@ -61,7 +61,7 @@ export class DiskStorageMiddleware<TFile extends DiskStorageFile = DiskStorageFi
     return path.join(destination, filename);
   }
 
-  public onBefore(event: BeforeHandlerExecuteEvent): void | Promise<void> {
+  public onInitialize(event: ActionInitializeEvent): void | Promise<void> {
     if (!(event.context instanceof Request)) return;
 
     const request = event.context;
@@ -145,7 +145,7 @@ export class DiskStorageMiddleware<TFile extends DiskStorageFile = DiskStorageFi
     );
   }
 
-  public async onFinish(event: HandlerExecuteFinishEvent, next: () => void) {
+  public async onFinally(event: ActionFinallyEvent, next: () => void): Promise<void> {
     next();
 
     if (event.context instanceof Request) await this._clear(event.context);

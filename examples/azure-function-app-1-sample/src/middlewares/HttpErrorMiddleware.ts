@@ -1,9 +1,9 @@
-import { Middleware, HandlerExecuteErrorEvent } from '@bluish/core';
+import { Middleware, ActionErrorEvent } from '@bluish/core';
 import { Request } from '@bluish/http';
 import { isHttpError } from 'http-errors';
 
 export class HttpErrorMiddleware extends Middleware {
-  public onError(event: HandlerExecuteErrorEvent): void {
+  public onCatch(event: ActionErrorEvent): void {
     if (!(event.context instanceof Request)) return;
 
     if (!isHttpError(event.error)) return;

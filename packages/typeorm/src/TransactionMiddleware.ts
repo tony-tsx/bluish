@@ -1,9 +1,4 @@
-import {
-  AfterHandlerExecuteEvent,
-  BeforeHandlerExecuteEvent,
-  HandlerExecuteErrorEvent,
-  HandlerExecuteFinishEvent,
-} from '@bluish/core';
+import { ActionErrorEvent, ActionFinallyEvent, ActionInitializeEvent, ActionThenEvent } from '@bluish/core';
 import { DataSource } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel.js';
 
@@ -18,29 +13,31 @@ export class TransactionMiddleware extends QueryRunnerMiddleware {
     super(dataSource, 'master');
   }
 
-  public override async onBefore(event: BeforeHandlerExecuteEvent): Promise<void> {
-    await super.onBefore(event);
+  public override async onInitialize(event: ActionInitializeEvent): Promise<void> {
+    await super.onInitialize(event);
 
     if (event.context[QUERY_RUNNER].isTransactionActive) throw new Error('Transaction is active in query runner');
 
     await event.context[QUERY_RUNNER].startTransaction(this.isolationLevel);
   }
 
-  public async onAfter(event: AfterHandlerExecuteEvent): Promise<void> {
+  public async onThen(event: ActionThenEvent): Promise<void> {
     if (!event.context[QUERY_RUNNER].isTransactionActive) return;
 
     await event.context[QUERY_RUNNER].commitTransaction();
   }
 
-  public async onError(event: HandlerExecuteErrorEvent): Promise<void> {
+  public async onCatch(event: ActionErrorEvent): Promise<void> {
     if (!event.context[QUERY_RUNNER].isTransactionActive) return;
 
     await event.context[QUERY_RUNNER].rollbackTransaction();
   }
 
-  public async onFinish(event: HandlerExecuteFinishEvent): Promise<void> {
+  public override async onFinally(event: ActionFinallyEvent): Promise<void> {
     if (!event.context[QUERY_RUNNER].isTransactionActive) return;
 
     await event.context[QUERY_RUNNER].rollbackTransaction();
+
+    await super.onFinally(event);
   }
 }

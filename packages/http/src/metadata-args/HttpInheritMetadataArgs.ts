@@ -1,7 +1,5 @@
-import { MetadataArgs } from '@bluish/core';
-
-export interface HttpInheritMetadataArgs extends MetadataArgs {
-  propertyKey?: string | symbol;
+export interface HttpInheritMetadataArgs {
+  target: Function;
   get: () => new () => unknown;
 }
 

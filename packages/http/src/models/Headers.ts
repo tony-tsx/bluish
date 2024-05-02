@@ -4,6 +4,7 @@ export class Headers {
   public has(name: string): boolean {
     return !!this.get(name);
   }
+
   public get(): Record<string, string>;
   public get(name: string): string | null;
   public get(name?: string): Record<string, string> | string | null {

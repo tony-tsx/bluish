@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 
-import { BeforeHandlerExecuteEvent, Middleware } from '@bluish/core';
+import { ActionInitializeEvent, Middleware } from '@bluish/core';
 import { is } from 'type-is';
 
 import { Request } from '../models/Request.js';
@@ -57,7 +57,7 @@ export class UrlEncoded extends Middleware {
   }
 
   protected async parseBody(request: Request): Promise<void> {
-    const contentType = request.headers.get('content-type');
+    const contentType = request.headers.get('Content-Type');
 
     if (!contentType) return;
 
@@ -92,7 +92,7 @@ export class UrlEncoded extends Middleware {
     });
   }
 
-  public async onBefore(event: BeforeHandlerExecuteEvent): Promise<void> {
+  public async onInitialize(event: ActionInitializeEvent): Promise<void> {
     if (!(event.context instanceof Request)) return;
 
     await Promise.all([this.parseQuery(event.context), this.parseBody(event.context)]);

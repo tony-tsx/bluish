@@ -1,4 +1,4 @@
-import { Handler } from '@bluish/core';
+import { Action } from '@bluish/core';
 
 import { Path } from './Path.js';
 
@@ -7,8 +7,8 @@ export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 export function Route(method: HttpMethod | [HttpMethod, ...HttpMethod[]], path: string | string[] = []) {
   const methods = Array.isArray(method) ? method : ([method] as const);
 
-  return (target: Object, propertyKey: string | symbol) => {
-    Handler('http', { '@http:methods': methods })(target, propertyKey);
+  return (target: Function | Object, propertyKey: string | symbol) => {
+    Action('http', { '@http:methods': methods })(target, propertyKey);
 
     Path(path)(target, propertyKey);
   };
@@ -16,8 +16,10 @@ export function Route(method: HttpMethod | [HttpMethod, ...HttpMethod[]], path: 
 
 declare global {
   namespace Bluish {
-    interface HandlerMetadataArgs {
-      '@http:methods': HttpMethod[];
+    interface ActionMetadataArgMapByType {
+      http: {
+        '@http:methods': readonly HttpMethod[];
+      };
     }
   }
 }

@@ -1,7 +1,7 @@
-import { IsSchema } from '@bluish/omac';
-import { IsEmail, IsOptional, IsString } from 'omac';
+import { IsGuard } from '@bluish/ornate-guard';
+import { IsEmail, IsOptional, IsString } from 'ornate-guard';
 
-@IsSchema()
+@IsGuard()
 export class UserSaveBody {
   @IsString()
   @IsOptional()

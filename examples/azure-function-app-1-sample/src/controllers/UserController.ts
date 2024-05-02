@@ -1,6 +1,7 @@
 import { DELETE, GET, DefineParam, PATCH, Controller, PUT, UseQuery, UseBody, UseParam } from '@bluish/http';
 import createHttpError from 'http-errors';
 import { Transaction, UseTransaction } from '@bluish/typeorm';
+import { ServiceBus } from '@bluish/azure-function-app/service-bus';
 
 import { dataSource } from '../services/dataSource.js';
 import { User } from '../entities/User.js';
@@ -20,6 +21,10 @@ import { UserPartialBody } from '../schemas/UserPartialBody.js';
 export class UserController {
   public get repository() {
     return dataSource.getRepository(User);
+  }
+
+  public async massiveCreateUser(@ServiceBus.Queue('tests') queueItem: any) {
+    console.log({ queueItem });
   }
 
   @GET

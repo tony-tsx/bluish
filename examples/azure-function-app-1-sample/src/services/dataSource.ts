@@ -2,7 +2,7 @@ import path from 'path';
 
 import { DataSource } from 'typeorm';
 
-import { ROOT } from '../constants/project.js';
+import { ROOT } from '../constants/dirs.js';
 
 export const dataSource = new DataSource({
   type: 'sqljs',

@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 
-import { BeforeHandlerExecuteEvent, Middleware } from '@bluish/core';
+import { ActionInitializeEvent, Middleware } from '@bluish/core';
 import { is } from 'type-is';
 
 import { Request } from '../models/Request.js';
@@ -14,19 +14,19 @@ export class Json extends Middleware {
     super();
   }
 
-  public async onBefore(event: BeforeHandlerExecuteEvent): Promise<void> {
+  public async onInitialize(event: ActionInitializeEvent): Promise<void> {
     if (!(event.context instanceof Request)) return;
 
     const request = event.context;
 
-    const contentType = request.headers.get('content-type');
+    const contentType = request.headers.get('Content-Type');
 
     if (!contentType) return;
 
     if (!is(contentType, '*/json')) return;
 
     if (typeof this.options.limit === 'number') {
-      const contentLength = event.context.headers.get('content-length');
+      const contentLength = event.context.headers.get('Content-Length');
 
       if (!contentLength) return event.prevent({ status: 411 });
 

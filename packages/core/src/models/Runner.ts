@@ -1,27 +1,23 @@
-import { randomBytes } from 'crypto';
-
-import { AfterHandlerExecuteEvent } from '../events/AfterHandlerExecuteEvent.js';
-import { BeforeHandlerExecuteEvent } from '../events/BeforeHandlerExecuteEvent.js';
-import { HandlerExecuteErrorEvent } from '../events/HandlerExecuteErrorEvent.js';
-import { HandlerExecuteFinishEvent } from '../events/HandlerExecuteFinishEvent.js';
-import { HandlerMetadata } from './HandlerMetadata.js';
-import { HandlerExecuteParameterEvent } from '../events/HandlerExecuteParameterEvent.js';
-import { HandlerExecuteParametersEvent } from '../events/HandlerExecuteParametersEvent.js';
-import { Debugger } from '../helpers/Debugger.js';
+import { ActionThenEvent } from '../events/ActionThenEvent.js';
+import { ActionInitializeEvent } from '../events/ActionInitializeEvent.js';
+import { ActionErrorEvent } from '../events/ActionErrorEvent.js';
+import { ActionFinallyEvent } from '../events/ActionFinallyEvent.js';
+import { ActionMetadata } from './ActionMetadata.js';
+import { ActionArgumentEvent } from '../events/ActionArgumentEvent.js';
+import { ActionArgumentsEvent } from '../events/ActionArgumentsEvent.js';
 import { Context } from './Context.js';
 import { ControllerMetadata } from './ControllerMetadata.js';
 import { useNextCallback } from '../tools/useNextCallback.js';
 import { Middleware } from './Middleware.js';
-import { App } from './App.js';
+import { Application } from './Application.js';
+import { ActionMetadataArgType } from '../metadata-args/ActionMetadataArgs.js';
 
-export class Runner {
-  public readonly debug: Debugger;
-
+export class Runner<TType extends ActionMetadataArgType = ActionMetadataArgType> {
   public readonly prop: string;
 
-  public readonly fn: (context: Context, ...args: any[]) => unknown;
+  public readonly call: (context: Context, ...args: any[]) => unknown;
 
-  public readonly app: App;
+  public readonly application: Application;
 
   public readonly controller: ControllerMetadata;
 
@@ -31,174 +27,164 @@ export class Runner {
 
   public readonly tag: string;
 
-  constructor(public readonly handler: HandlerMetadata) {
-    this.debug = Debugger.use(`core:runner:${this.handler.type}`);
+  constructor(public readonly action: ActionMetadata<TType>) {
+    this.application = this.action.controller.app;
 
-    this.app = this.handler.controller.app;
-
-    this.controller = this.handler.controller;
+    this.controller = this.action.controller;
 
     this.prop =
-      typeof this.handler.propertyKey === 'string'
-        ? this.handler.propertyKey
-        : `symbol:${this.handler.propertyKey.description}`;
+      typeof this.action.propertyKey === 'string'
+        ? this.action.propertyKey
+        : `symbol:${this.action.propertyKey.description}`;
 
-    if (this.handler.isIsolated) this.middlewares = this.handler.middlewares.slice();
+    if (this.action.isIsolated) this.middlewares = this.action.middlewares.slice();
     else if (this.controller.isIsolated)
-      this.middlewares = [...this.controller.middlewares, ...this.handler.middlewares];
-    else this.middlewares = [...this.app.middlewares, ...this.controller.middlewares, ...this.handler.middlewares];
+      this.middlewares = [...this.controller.middlewares, ...this.action.middlewares];
+    else
+      this.middlewares = [...this.application.middlewares, ...this.controller.middlewares, ...this.action.middlewares];
 
-    this.name = `${this.handler.target.name}${handler.isStatic ? '::' : '.'}${this.prop}`;
+    this.name = `${this.action.controller.target.name}${typeof this.action.target === 'function' ? '::' : '.'}${this.prop}`;
 
     this.tag = `[${this.name}]`;
 
-    this.middlewares.forEach(middleware => middleware.onRunnerContruct?.(this));
+    this.middlewares.forEach(middleware => middleware.onRunner?.(this));
 
-    this.fn = (context, ...args): unknown => this.handler.call(...args);
+    this.call = (context, ...args): unknown => this.action.call(...args);
 
-    this.fn = this.middlewares.reduce((fn, middleware) => {
-      if (middleware.wrap) return (context, ...args) => middleware.wrap!(() => fn(context, ...args), context);
+    this.call = this.middlewares.reduce((act, middleware) => {
+      if (middleware.wrap) return (context, ...args) => middleware.wrap!(() => act(context, ...args), context);
 
-      return fn;
-    }, this.fn);
+      return act;
+    }, this.call);
+  }
+
+  protected async onContext(context: Context) {
+    await useNextCallback(next => this.application.driver.onContext?.(context, next));
+
+    for (const middleware of this.middlewares) {
+      if (context.stopedPropagation) break;
+
+      await useNextCallback(next => middleware.onContext?.(context, next));
+    }
+
+    return context;
+  }
+
+  protected async onInitialize(event: ActionInitializeEvent) {
+    await useNextCallback(next => this.application.driver.onInitialize?.(event, next));
+
+    for (const middleware of this.middlewares) {
+      if (event.stopedPropagation) break;
+
+      await useNextCallback(next => middleware.onInitialize?.(event, next));
+    }
+
+    return event;
+  }
+
+  protected async onThen(event: ActionThenEvent) {
+    for (const middleware of this.middlewares.reverse()) {
+      if (event.stopedPropagation) break;
+
+      await useNextCallback(next => middleware.onThen?.(event, next));
+    }
+
+    if (!event.stopedPropagation) await useNextCallback(next => this.application.driver.onThen?.(event, next));
+
+    return event;
+  }
+
+  protected async onArgument(event: ActionArgumentEvent) {
+    await useNextCallback(next => this.application.driver.onArgument?.(event, next));
+
+    for (const middleware of this.middlewares) {
+      if (event.stopedPropagation) break;
+
+      await useNextCallback(next => middleware.onArgument?.(event, next));
+    }
+
+    return event;
+  }
+
+  protected async onArguments(actionArgumentsEvent: ActionArgumentsEvent) {
+    await useNextCallback(next => this.application.driver.onArguments?.(actionArgumentsEvent, next));
+
+    for (const middleware of this.middlewares) {
+      if (actionArgumentsEvent.stopedPropagation) break;
+
+      await useNextCallback(next => middleware.onArguments?.(actionArgumentsEvent, next));
+    }
+
+    return actionArgumentsEvent;
+  }
+
+  protected async onCatch(event: ActionErrorEvent) {
+    for (const middleware of this.middlewares.reverse()) {
+      if (event.stopedPropagation) break;
+
+      await useNextCallback(next => middleware.onCatch?.(event, next));
+    }
+
+    if (!event.stopedPropagation) await useNextCallback(next => this.application.driver.onCatch?.(event, next));
+
+    return event;
+  }
+
+  protected async onFinally(event: ActionFinallyEvent) {
+    for (const middleware of this.middlewares.reverse()) {
+      if (event.stopedPropagation) break;
+
+      await useNextCallback(next => middleware.onFinally?.(event, next));
+    }
+
+    if (!event.stopedPropagation) await useNextCallback(next => this.application.driver.onFinally?.(event, next));
+
+    return event;
   }
 
   public async run(...args: any[]) {
-    this.debug.at(`${this.tag} Executing`);
+    const context = await this.application.driver.toContext(this, ...args);
 
-    const context = await this.app.driver.toContext(this, ...args);
+    Object.assign(context, { runner: this });
 
-    // @ts-expect-error: TODO
-    context.id = await new Promise<string>((resolve, reject) => {
-      randomBytes(128, (error, buffer) => {
-        if (error) return reject(error);
-
-        resolve(buffer.toString('base64url'));
-      });
-    });
-
-    // @ts-expect-error: TODO
-    context.runner = this;
+    await context.initialize();
 
     try {
-      for (const middleware of this.middlewares.reverse())
-        await useNextCallback(next => middleware.onContext?.(context, next));
+      await this.onContext(context);
 
       {
-        this.debug.at(`${this.tag} BeforeHandlerExecuteEvent emitting.`);
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        using _ = this.debug.track.time(time => `${this.tag} BeforeHandlerExecuteEvent emitted in ${time}ms.`);
-
-        const event = new BeforeHandlerExecuteEvent(context);
-
-        for (const middleware of this.middlewares) {
-          if (event.stopedPropagation) break;
-
-          await useNextCallback(next => middleware.onBefore?.(event, next));
-        }
-
-        if (event.defaultPrevented) return this.app.driver.toReturn(event.payload, context);
+        const event = await this.onInitialize(new ActionInitializeEvent(context));
+        if (event.defaultPrevented) return this.application.driver.toReturn(event.payload, context);
       }
 
-      let parameters: unknown[] = [];
+      let args: unknown[] = [];
 
       await Promise.all(
-        this.handler.parameters.map(async ([parameterIndex, getter]) => {
-          this.debug.at(`${this.tag} HandlerExecuteParameterEvent emitting.`);
-
-          const value = await getter(context);
-
-          const event = new HandlerExecuteParameterEvent(value, parameterIndex, context);
-
-          for (const middleware of this.middlewares) {
-            if (event.stopedPropagation) break;
-
-            await useNextCallback(next => middleware.onParameter?.(event, next));
-          }
-
-          parameters[parameterIndex] = event.value;
+        this.action.arguments.map(async ([parameterIndex, getter]) => {
+          const event = await this.onArgument(new ActionArgumentEvent(await getter(context), parameterIndex, context));
+          args[parameterIndex] = event.value;
         }),
       );
 
       {
-        this.debug.at(`${this.tag} HandlerExecuteParametersEvent emitting.`);
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        using _ = this.debug.track.time(time => `${this.tag} HandlerExecuteParametersEvent emitted in ${time}ms.`);
-
-        const event = new HandlerExecuteParametersEvent(parameters, context);
-
-        for (const middleware of this.middlewares) {
-          if (event.stopedPropagation) break;
-
-          await useNextCallback(next => middleware.onParameters?.(event, next));
-        }
-
-        parameters = event.parameters;
+        const event = await this.onArguments(new ActionArgumentsEvent(args, context));
+        args = event.args;
       }
 
-      let payload: unknown;
+      const payload = await this.call(context, ...args);
 
       {
-        this.debug.at(`${this.tag} Handler executing.`);
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        using _ = this.debug.track.time(time => `${this.tag} Handler executed in ${time}ms.`);
-
-        payload = await this.fn(context, ...parameters);
-      }
-
-      {
-        this.debug.at(`${this.tag} AfterHandlerExecuteEvent emitting.`);
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        using _ = this.debug.track.time(time => `${this.tag} AfterHandlerExecuteEvent emitted in ${time}ms.`);
-
-        const event = new AfterHandlerExecuteEvent(payload, context);
-
-        for (const middleware of this.middlewares.reverse()) {
-          if (event.stopedPropagation) break;
-
-          await useNextCallback(next => middleware.onAfter?.(event, next));
-        }
-
-        return await this.app.driver.toReturn(event.payload, context);
+        const event = await this.onThen(new ActionThenEvent(payload, context));
+        return await this.application.driver.toReturn(event.payload, context);
       }
     } catch (error) {
-      {
-        this.debug.at(`${this.tag} HandlerExecuteErrorEvent emitting.`);
+      const event = await this.onCatch(new ActionErrorEvent(error, context));
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        using _ = this.debug.track.time(time => `${this.tag} HandlerExecuteErrorEvent emitted in ${time}ms.`);
-
-        const event = new HandlerExecuteErrorEvent(error, context);
-
-        for (const middleware of this.middlewares.reverse()) {
-          if (event.stopedPropagation) break;
-
-          await useNextCallback(next => middleware.onError?.(event, next));
-        }
-
-        if (event.defaultPrevented) return this.app.driver.toReturn(event.payload, context);
-      }
-
-      if (this.app.driver.handleError) return this.app.driver.handleError(error, context);
+      if (event.defaultPrevented) return this.application.driver.toReturn(event.payload, context);
 
       throw error;
     } finally {
-      this.debug.at(`${this.tag} HandlerExecuteFinishEvent emitting.`);
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      using _ = this.debug.track.time(time => `${this.tag} HandlerExecuteFinishEvent emitted in ${time}ms.`);
-
-      const event = new HandlerExecuteFinishEvent(context);
-
-      for (const middleware of this.middlewares.reverse()) {
-        if (event.stopedPropagation) break;
-
-        await useNextCallback(next => middleware.onFinish?.(event, next));
-      }
+      await this.onFinally(new ActionFinallyEvent(context));
     }
   }
 
