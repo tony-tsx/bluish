@@ -6,7 +6,7 @@ export class DataSourceMiddleware extends Middleware {
     super();
   }
 
-  public async onInitialize(): Promise<void> {
+  public async onBootstrap(): Promise<void> {
     await this.dataSource.initialize();
   }
 }

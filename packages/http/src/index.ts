@@ -16,8 +16,6 @@ export * from './events/HttpParamEvent.js';
 export * from './events/HttpQueryEvent.js';
 
 export * from './metadata-args/HttpInheritMetadataArgs.js';
-export * from './metadata-args/HttpParamMetadataArgs.js';
-export * from './metadata-args/HttpPathMetadataArgs.js';
 
 export * from './middlewares/Json.js';
 export * from './middlewares/UrlEncoded.js';

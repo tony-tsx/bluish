@@ -1,8 +1,8 @@
 import { ControllerMetadataArgs as _ControllerMetadataArgs } from '../metadata-args/ControllerMetadataArgs.js';
-import { HandlerMetadataArgs as _HandlerMetadataArgs } from '../metadata-args/HandlerMetadataArgs.js';
+import { ActionMetadataArgs as _ActionMetadataArgs } from '../metadata-args/ActionMetadataArgs.js';
 import { IsolatedMetadataArgs as _IsolatedMetadataArgs } from '../metadata-args/IsolatedMetadataArgs.js';
 import { MiddlewareMetadataArgs as _MiddlewareMetadataArgs } from '../metadata-args/MiddlewareMetadataArgs.js';
-import { ParameterMetadataArgs as _ParameterMetadataArgs } from '../metadata-args/ParameterMetadataArgs.js';
+import { ArgumentMetadataArgs as _ArgumentMetadataArgs } from '../metadata-args/ArgumentMetadataArgs.js';
 import { WrapperMetadataArgs as _WrapperMetadataArgs } from '../metadata-args/WrapperMetadataArgs.js';
 
 export class MetadataArgsStorage {
@@ -35,8 +35,8 @@ declare global {
     interface MetadataArgsStorage {
       readonly controllers: readonly _ControllerMetadataArgs[];
       readonly middlewares: readonly _MiddlewareMetadataArgs[];
-      readonly parameters: readonly _ParameterMetadataArgs[];
-      readonly handlers: readonly _HandlerMetadataArgs[];
+      readonly arguments: readonly _ArgumentMetadataArgs[];
+      readonly actions: readonly _ActionMetadataArgs[];
       readonly isolateds: readonly _IsolatedMetadataArgs[];
       readonly wrappers: readonly _WrapperMetadataArgs[];
     }

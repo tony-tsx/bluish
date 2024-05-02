@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-import { type Issue, UnionValidationError, ValidationError } from 'omac';
+import { type Issue, UnionValidationError, ValidationError } from 'ornate-guard';
 
 export const ERRORS: PropertyKey = '_errors';
 

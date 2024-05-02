@@ -1,17 +1,17 @@
 import { Context } from './models/Context.js';
 import { Runner } from './models/Runner.js';
-import { App } from './models/App.js';
+import { Application } from './models/Application.js';
 import { Driver } from './models/Driver.js';
-import { init } from './tools/init.js';
+import { bootstrap } from './tools/bootstrap.js';
 
-let defaultTestingApp: App | undefined = undefined;
+let defaultTestingApp: Application | undefined = undefined;
 
 export function beforeEach() {
-  init.storage.clear();
+  bootstrap.storage.clear();
 }
 
 export interface TestingSetupOptions {
-  app?: App;
+  app?: Application;
 }
 
 export function setup({ app }: TestingSetupOptions) {
@@ -29,7 +29,7 @@ export class TestingDriver extends Driver {
 }
 
 export async function execute<T extends object, K extends keyof T>(
-  app: App,
+  app: Application,
   controller: new () => T,
   propertyKey: K,
   context: Context,
@@ -40,17 +40,17 @@ export async function execute<T extends object, K extends keyof T>(
   context: Context,
 ): Promise<any>;
 export async function execute<T extends object, K extends keyof T>(
-  appOrController: App | (new () => T),
+  appOrController: Application | (new () => T),
   controllerOrMethod: (new () => T) | K,
   propertyKeyOrContext: K | Context,
   maybeContext?: Context,
 ): Promise<any> {
-  let app: App | undefined;
+  let app: Application | undefined;
   let controller: new () => T;
   let propertyKey: K;
   let context: Context;
 
-  if (appOrController instanceof App) {
+  if (appOrController instanceof Application) {
     app = appOrController;
     controller = controllerOrMethod as new () => T;
     propertyKey = propertyKeyOrContext as K;
@@ -63,22 +63,22 @@ export async function execute<T extends object, K extends keyof T>(
   }
 
   if (app)
-    app = new App({
+    app = new Application({
       ...app.options,
       controllers: [controller],
       driver: new TestingDriver(),
     });
   else
-    app = new App({
+    app = new Application({
       controllers: [controller],
       driver: new TestingDriver(),
     });
 
-  await app.initialize();
+  await app.bootstrap();
 
   const handler = app.controllers
     .find(_controller => _controller.target === controller)!
-    .handlers.find(handler => handler.propertyKey === propertyKey)!;
+    .actions.find(handler => handler.propertyKey === propertyKey)!;
 
   const runner = new Runner(handler);
 

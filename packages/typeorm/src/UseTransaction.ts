@@ -1,4 +1,4 @@
-import { Use, Parameter } from '@bluish/core';
+import { Use, Argument } from '@bluish/core';
 import { DataSource, EntityManager } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel.js';
 
@@ -11,6 +11,6 @@ export function UseTransaction(dataSource: DataSource, isolationLevel?: Isolatio
   return (target: Object, propertyKey: string | symbol, parameterIndex: number) => {
     Use(new TransactionMiddleware(dataSource, isolationLevel))(target, propertyKey);
 
-    Parameter(context => context[QUERY_RUNNER].manager)(target, propertyKey, parameterIndex);
+    Argument(context => context[QUERY_RUNNER].manager)(target, propertyKey, parameterIndex);
   };
 }

@@ -1,4 +1,4 @@
-import { BeforeHandlerExecuteEvent, Middleware, HandlerExecuteFinishEvent } from '@bluish/core';
+import { ActionInitializeEvent, Middleware, ActionFinallyEvent } from '@bluish/core';
 import { DataSource, ReplicationMode } from 'typeorm';
 import { QueryRunner } from 'typeorm/browser';
 
@@ -12,7 +12,7 @@ export class QueryRunnerMiddleware extends Middleware {
     super();
   }
 
-  public async onBefore(event: BeforeHandlerExecuteEvent): Promise<void> {
+  public async onInitialize(event: ActionInitializeEvent): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner(this.mode);
 
     await queryRunner.connect();
@@ -25,7 +25,7 @@ export class QueryRunnerMiddleware extends Middleware {
     });
   }
 
-  public async onFinish(event: HandlerExecuteFinishEvent): Promise<void> {
+  public async onFinally(event: ActionFinallyEvent): Promise<void> {
     if (!event.context[QUERY_RUNNER]) return;
 
     await event.context[QUERY_RUNNER].release();

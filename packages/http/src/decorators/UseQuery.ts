@@ -1,10 +1,10 @@
-import { Parameter } from '@bluish/core';
+import { Argument } from '@bluish/core';
 
 import { Request } from '../models/Request.js';
 import { HttpQueryEvent } from '../events/HttpQueryEvent.js';
 
 export function UseQuery(target: Object | Function, propertyKey: string | symbol, parameterIndex: number) {
-  return Parameter(async context => {
+  return Argument(async context => {
     if (!(context instanceof Request)) return null;
 
     const event = new HttpQueryEvent(context, parameterIndex, context.query);

@@ -1,7 +1,7 @@
-import { IsSchema } from '@bluish/omac';
-import { IsInteger } from 'omac';
+import { IsGuard } from '@bluish/ornate-guard';
+import { IsInteger } from 'ornate-guard';
 
-@IsSchema()
+@IsGuard()
 export class PaginationQuery {
   @IsInteger({ coerce: true, positive: true })
   public page: number = 1;

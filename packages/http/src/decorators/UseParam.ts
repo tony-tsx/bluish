@@ -1,14 +1,14 @@
-import { Parameter } from '@bluish/core';
+import { Argument } from '@bluish/core';
 
 import { Request } from '../models/Request.js';
 import { HttpParamEvent } from '../events/HttpParamEvent.js';
 
 export function UseParam(paramName: string) {
   return (target: Object, propertyName: string, parameterIndex: number) => {
-    Parameter(async context => {
+    Argument(async context => {
       if (!(context instanceof Request)) return null;
 
-      const definitions = context.runner.handler['@http:params:definitions'];
+      const definitions = context.runner.action['@http:params:definitions'];
 
       let value = context.params[paramName];
 

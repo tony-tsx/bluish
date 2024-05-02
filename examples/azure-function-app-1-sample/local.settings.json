@@ -3,7 +3,8 @@
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "FUNCTIONS_EXTENSION_VERSION": "~2",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true"
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "SERVICE_BUS_CONNECTION_STRING": "Endpoint=sb://dev-forceflow-sbus.servicebus.windows.net/;SharedAccessKeyName=Application;SharedAccessKey=USHHPEPnXC4USrrzEXIHm6Dua2tfzW8AiMm78YurBDM="
   },
   "Host": {
     "Cors": "*"

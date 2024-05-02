@@ -1,5 +1,4 @@
-import { MetadataArgs } from './MetadataArgs.js';
-
-export interface IsolatedMetadataArgs extends MetadataArgs {
+export interface IsolatedMetadataArgs {
+  target: Function | object;
   propertyKey?: string | symbol;
 }

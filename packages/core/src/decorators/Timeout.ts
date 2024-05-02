@@ -1,14 +1,14 @@
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable no-constant-condition */
 /* eslint-disable promise/valid-params */
-import { isAnyGenerator as isAnyGenerator } from '../tools/isGenerator.js';
-import { Parameter } from './Parameter.js';
-import { Wrapper } from './Wrapper.js';
+import { isAnyGenerator } from '../tools/is.js';
+import { Argument } from './Argument.js';
+import { Wrap } from './Wrapper.js';
 
 export class TimeoutError extends Error {}
 
 export function Timeout(duration: number) {
-  return Wrapper((fn, context) => {
+  return Wrap((fn, context) => {
     const abortController = new AbortController();
 
     context[Symbol.for('timeout.signal')] = abortController.signal;
@@ -86,6 +86,6 @@ async function run(generator: Generator | AsyncGenerator, config?: RunConfigurat
 
 export namespace Timeout {
   export function Signal() {
-    return Parameter(context => context[Symbol.for('timeout.signal')]);
+    return Argument(context => context[Symbol.for('timeout.signal')]);
   }
 }

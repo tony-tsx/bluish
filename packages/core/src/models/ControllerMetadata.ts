@@ -1,43 +1,55 @@
-import { HandlerMetadata } from './HandlerMetadata.js';
-import { App } from './App.js';
+import { ControllerMetadataArgs } from '../metadata-args/ControllerMetadataArgs.js';
+import { getMetadataArgsStorage } from '../tools/getMetadataArgsStorage.js';
+import { isMetadataArgumentFor } from '../tools/is.js';
+import { ActionMetadata } from './ActionMetadata.js';
+import { Application } from './Application.js';
+import { Context } from './Context.js';
 import { Middleware } from './Middleware.js';
-import { ControllerMetadataArgs } from '../index.js';
-
-const factoryReducer = (controllerMetadata: ControllerMetadata) => (controller: object, middleware: Middleware) =>
-  middleware.onControllerConstruct?.(controller, controllerMetadata) ?? controller;
 
 export class ControllerMetadata {
   private _instance: any;
 
-  public readonly app!: App;
-
-  public readonly args!: ControllerMetadataArgs;
-
-  public readonly isIsolated!: boolean;
+  public readonly isIsolated: boolean;
 
   public readonly isSingleton: boolean = true;
 
-  public readonly target!: Function;
+  public readonly target: Function;
 
-  public readonly middlewares: Middleware[] = [];
+  public readonly middlewares: Middleware[];
 
-  public readonly handlers: HandlerMetadata[] = [];
+  public readonly actions: ActionMetadata[] = [];
+
+  public readonly wrappers: ((fn: () => unknown, context: Context) => unknown)[];
+
+  constructor(
+    public readonly app: Application,
+    public readonly args: ControllerMetadataArgs,
+  ) {
+    this.target = args.target;
+
+    this.isIsolated = getMetadataArgsStorage()
+      .args('isolateds')
+      .some(args => isMetadataArgumentFor(args, this.target));
+
+    this.middlewares = getMetadataArgsStorage()
+      .args('middlewares')
+      .filter(args => isMetadataArgumentFor(args, this.target))
+      .map(args => args.middleware);
+
+    this.wrappers = getMetadataArgsStorage()
+      .args('wrappers')
+      .filter(args => isMetadataArgumentFor(args, this.target))
+      .map(args => args.wrapper);
+
+    this.actions = getMetadataArgsStorage()
+      .args('actions')
+      .filter(args => isMetadataArgumentFor({ target: args.target }, this.target))
+      .map(args => new ActionMetadata(this, args));
+  }
 
   private _instantiate() {
     // @ts-expect-error: TODO
-    let self = new this.target();
-
-    const reducer = factoryReducer(this);
-
-    self = this.app.middlewares.reduce(reducer, self);
-
-    self = this.middlewares.reduce(reducer, self);
-
-    this.handlers.forEach(handler => {
-      self = handler.middlewares.reduce(reducer, self);
-    });
-
-    return self;
+    return new this.target();
   }
 
   public instantiate() {

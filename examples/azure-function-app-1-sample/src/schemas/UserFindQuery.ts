@@ -1,6 +1,6 @@
-import { IsSchema } from '@bluish/omac';
+import { IsGuard } from '@bluish/ornate-guard';
 
 import { PaginationQuery } from './PaginationQuery.js';
 
-@IsSchema()
+@IsGuard()
 export class UserFindQuery extends PaginationQuery {}

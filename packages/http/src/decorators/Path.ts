@@ -1,4 +1,4 @@
-import { Middleware, Use, HandlerMetadata } from '@bluish/core';
+import { ActionMetadata, Middleware, Use } from '@bluish/core';
 
 export function Path(path: string | string[]): (target: Function | Object, propertyKey?: string | symbol) => void;
 export function Path(path: string | string[], controller: new () => object): (target: Function) => void;
@@ -8,9 +8,9 @@ export function Path(path: string | string[]) {
   return (target: Function | Object, propertyKey?: string | symbol) => {
     if (propertyKey)
       Use(
-        Middleware.onHandler(metadata => {
-          Object.defineProperty(metadata, '@http:path', {
-            get(this: HandlerMetadata) {
+        Middleware.onAction(action => {
+          Object.defineProperty(action, '@http:path', {
+            get(this: ActionMetadata) {
               this.controller['@http:paths'] ??= [];
 
               const value = ['', ...this.controller['@http:paths'], ...paths!].join('/');
@@ -24,18 +24,13 @@ export function Path(path: string | string[]) {
           });
         }),
       )(target, propertyKey);
-    else
-      Use(
-        Middleware.onController(controller => {
-          controller['@http:paths'] = paths;
-        }),
-      )(target, propertyKey);
+    else Use(Middleware.onController(controller => void (controller['@http:paths'] = paths)))(target);
   };
 }
 
 declare global {
   namespace Bluish {
-    interface HandlerMetadata {
+    interface ActionMetadata {
       readonly '@http:path'?: string;
     }
 
