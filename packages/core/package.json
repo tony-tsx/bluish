@@ -1,0 +1,43 @@
+{
+  "name": "@bluish/core",
+  "version": "0.0.0",
+  "type": "module",
+  "author": "Tony <tony.js@zoho.eu>",
+  "license": "MIT",
+  "main": "./dist/cjs/core.js",
+  "module": "./dist/esm/core.js",
+  "types": "./dist/esm/core.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/core.d.ts",
+      "require": "./dist/cjs/core.js",
+      "import": "./dist/esm/core.js"
+    },
+    "./testing": {
+      "types": "./dist/esm/core-testing.d.ts",
+      "require": "./dist/cjs/core-testing.js",
+      "import": "./dist/esm/core-testing.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:esm:package.json": "node -e \"require('fs').writeFileSync('./dist/esm/package.json', '{\\\"type\\\": \\\"module\\\"}')\"",
+    "build:cjs:package.json": "node -e \"require('fs').writeFileSync('./dist/cjs/package.json', '{\\\"type\\\": \\\"commonjs\\\"}')\"",
+    "build:esm:tsc": "npx tsc -p tsconfig.build.json --module nodenext --outDir ./dist/esm --declaration",
+    "build:cjs:tsc": "npx tsc -p tsconfig.build.json --module commonjs --outDir ./dist/cjs",
+    "build:esm": "yarn build:esm:tsc && yarn build:esm:package.json",
+    "build:cjs": "yarn build:cjs:tsc && yarn build:cjs:package.json",
+    "build": "yarn run build:esm && yarn run build:cjs",
+    "prepublish": "yarn run build"
+  },
+  "dependencies": {
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "reflect-metadata": "^0.2.2",
+    "vitest": "^2.0.3"
+  },
+  "packageManager": "yarn@4.3.1"
+}
