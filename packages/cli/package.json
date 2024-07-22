@@ -1,27 +1,20 @@
 {
-  "name": "@bluish/http",
+  "name": "@bluish/cli",
   "version": "0.0.0-experimental-d33dc0e",
   "type": "module",
   "author": "Tony <tony.js@zoho.eu>",
-  "main": "./dist/cjs/http.js",
-  "module": "./dist/esm/http.js",
-  "types": "./dist/esm/http.d.ts",
+  "license": "MIT",
+  "private": true,
+  "main": "./dist/cjs/cli.js",
+  "module": "./dist/esm/cli.js",
+  "types": "./dist/esm/cli.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/esm/http.d.ts",
-      "require": "./dist/cjs/http.js",
-      "import": "./dist/esm/http.js"
-    },
-    "./testing": {
-      "types": "./dist/esm/http-testing.d.ts",
-      "require": "./dist/cjs/http-testing.js",
-      "import": "./dist/esm/http-testing.js"
+      "types": "./dist/esm/cli.d.ts",
+      "require": "./dist/cjs/cli.js",
+      "import": "./dist/esm/cli.js"
     }
   },
-  "license": "MIT",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build:esm:package.json": "node -e \"require('fs').writeFileSync('./dist/esm/package.json', '{\\\"type\\\": \\\"module\\\"}')\"",
     "build:cjs:package.json": "node -e \"require('fs').writeFileSync('./dist/cjs/package.json', '{\\\"type\\\": \\\"commonjs\\\"}')\"",
@@ -32,26 +25,11 @@
     "build": "yarn run build:esm && yarn run build:cjs",
     "prepublish": "yarn run build"
   },
-  "dependencies": {
-    "bytes": "^3.1.2",
-    "content-type": "^1.0.5",
-    "qs": "^6.11.2",
-    "type-is": "^1.6.18"
-  },
   "peerDependencies": {
     "@bluish/core": "^0.0.0"
   },
   "devDependencies": {
-    "@bluish/core": "workspace:^",
-    "@types/busboy": "^1",
-    "@types/bytes": "^3",
-    "@types/content-type": "^1",
-    "@types/qs": "^6.9.8",
-    "@types/supertest": "^6.0.2",
-    "@types/type-is": "^1",
-    "path-to-regexp": "^7.0.0",
-    "supertest": "^7.0.0",
-    "vitest": "^2.0.3"
+    "@bluish/core": "workspace:^"
   },
   "packageManager": "yarn@4.3.1"
 }

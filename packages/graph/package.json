@@ -1,0 +1,16 @@
+{
+  "name": "@bluish/graph",
+  "version": "0.0.0-experimental-d33dc0e",
+  "main": "index.js",
+  "type": "module",
+  "author": "Tony <tony.js@zoho.eu>",
+  "license": "MIT",
+  "private": true,
+  "peerDependencies": {
+    "@bluish/core": "^0.0.0"
+  },
+  "devDependencies": {
+    "@bluish/core": "workspace:^"
+  },
+  "packageManager": "yarn@4.3.1"
+}
