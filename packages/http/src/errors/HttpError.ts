@@ -1,0 +1,62 @@
+import { STATUS_CODES } from 'http'
+
+export class HttpError extends Error {
+  constructor(
+    public readonly status: number,
+    message = STATUS_CODES[status],
+    options?: ErrorOptions,
+  ) {
+    super(message, options)
+  }
+}
+
+function factory(status: number, name: string) {
+  class AnonymousHttpError extends HttpError {
+    constructor(message?: string, options?: ErrorOptions) {
+      super(status, message, options)
+    }
+  }
+
+  Object.defineProperty(AnonymousHttpError, 'name', { value: name })
+
+  return AnonymousHttpError
+}
+
+export const BadRequest = factory(400, 'BadRequest')
+export const Unauthorized = factory(401, 'Unauthorized')
+export const PaymentRequired = factory(402, 'PaymentRequired')
+export const Forbidden = factory(403, 'Forbidden')
+export const NotFound = factory(404, 'NotFound')
+export const MethodNotAllowed = factory(405, 'MethodNotAllowed')
+export const NotAcceptable = factory(406, 'NotAcceptable')
+export const ProxyAuthenticationRequired = factory(
+  407,
+  'ProxyAuthenticationRequired',
+)
+export const RequestTimeout = factory(408, 'RequestTimeout')
+export const Conflict = factory(409, 'Conflict')
+export const Gone = factory(410, 'Gone')
+export const LengthRequired = factory(411, 'LengthRequired')
+export const PreconditionFailed = factory(412, 'PreconditionFailed')
+export const PayloadTooLarge = factory(413, 'PayloadTooLarge')
+export const URITooLong = factory(414, 'URITooLong')
+export const UnsupportedMediaType = factory(415, 'UnsupportedMediaType')
+export const RangeNotSatisfiable = factory(416, 'RangeNotSatisfiable')
+export const ExpectationFailed = factory(417, 'ExpectationFailed')
+export const ImATeapot = factory(418, 'ImATeapot')
+export const MisdirectedRequest = factory(421, 'MisdirectedRequest')
+export const UnprocessableContent = factory(422, 'UnprocessableContent')
+export const Locked = factory(423, 'Locked')
+export const FailedDependency = factory(424, 'FailedDependency')
+export const TooEarly = factory(425, 'TooEarly')
+export const UpgradeRequired = factory(426, 'UpgradeRequired')
+export const PreconditionRequired = factory(428, 'PreconditionRequired')
+export const TooManyRequests = factory(429, 'TooManyRequests')
+export const RequestHeaderFieldsTooLarge = factory(
+  431,
+  'RequestHeaderFieldsTooLarge',
+)
+export const UnavailableForLegalReasons = factory(
+  451,
+  'UnavailableForLegalReasons',
+)
