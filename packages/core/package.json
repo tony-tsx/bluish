@@ -1,6 +1,6 @@
 {
   "name": "@bluish/core",
-  "version": "0.0.0",
+  "version": "0.0.0-experimental-18b7694",
   "type": "module",
   "author": "Tony <tony.js@zoho.eu>",
   "license": "MIT",
