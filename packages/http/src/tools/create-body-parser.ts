@@ -192,7 +192,7 @@ export function createBodyParser<TOptions>({
         function onEnd() {
           const buffer = Buffer.concat(buffers)
 
-          if (buffer.byteLength) return resolve(next())
+          if (!buffer.byteLength) return resolve(next())
 
           const text = buffer.toString()
 
