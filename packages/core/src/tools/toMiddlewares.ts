@@ -2,7 +2,12 @@ import { Action, Controller, Middleware } from '../core.js'
 
 export function toMiddlewares(action: Action) {
   if (action.isIsolated)
-    return [...Middleware.middlewares, ...action.middlewares]
+    return [
+      ...Middleware.layers.application,
+      ...Middleware.layers.controller,
+      ...Middleware.layers.action,
+      ...action.middlewares,
+    ]
 
   const middlewares = Controller.each(
     action.controller,
@@ -12,12 +17,20 @@ export function toMiddlewares(action: Action) {
     .flat(1)
 
   if (action.controller.isIsolated)
-    return [...Middleware.middlewares, ...middlewares, ...action.middlewares]
+    return [
+      ...Middleware.layers.application,
+      ...Middleware.layers.controller,
+      ...middlewares,
+      ...Middleware.layers.action,
+      ...action.middlewares,
+    ]
 
   return [
+    ...Middleware.layers.application,
     ...action.controller.application.middlewares,
-    ...Middleware.middlewares,
+    ...Middleware.layers.controller,
     ...middlewares,
+    ...Middleware.layers.action,
     ...action.middlewares,
   ]
 }

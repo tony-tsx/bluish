@@ -11,9 +11,19 @@ export type AnyMiddleware<TContext extends Context = Context> =
   | Middleware<TContext>
   | FunctionMiddleware<TContext>
 
-const middlewares: Middleware[] = []
+export enum MiddlewareRegistryLayer {
+  Application = 'application',
+  Controller = 'controller',
+  Action = 'action',
+}
 
 export abstract class Middleware<TContext extends Context = Context> {
+  public static layers: Record<MiddlewareRegistryLayer, Middleware[]> = {
+    [MiddlewareRegistryLayer.Application]: [],
+    [MiddlewareRegistryLayer.Controller]: [],
+    [MiddlewareRegistryLayer.Action]: [],
+  }
+
   public static from<TContext extends Context>(
     context: Class<TContext> | Class<TContext>[],
     handle: FunctionMiddleware<TContext>,
@@ -56,18 +66,19 @@ export abstract class Middleware<TContext extends Context = Context> {
     return Middleware.from([Context], contextOrMiddleware as FunctionMiddleware)
   }
 
-  public static get middlewares() {
-    return middlewares
-  }
-
   public static register<TContext extends Context>(
+    layer: MiddlewareRegistryLayer | MiddlewareRegistryLayer[],
     contextOrMiddleware:
       | Class<TContext>
       | Class<TContext>[]
       | AnyMiddleware<Context>,
     maybeHandle?: FunctionMiddleware<TContext>,
   ) {
-    middlewares.push(Middleware.from(contextOrMiddleware, maybeHandle))
+    const layers = Array.isArray(layer) ? layer : [layer]
+
+    layers.forEach(layer => {
+      this.layers[layer].push(Middleware.from(contextOrMiddleware, maybeHandle))
+    })
   }
 
   public abstract context: Class<TContext>[]
