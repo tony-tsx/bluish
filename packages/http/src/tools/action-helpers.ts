@@ -42,6 +42,15 @@ export const toVersion = withCache(function toVersion(action: Action) {
   ).find(version => !!version)
 })
 
+export const toContentTypes = withCache(function toContentType(action: Action) {
+  return [
+    action.metadata['@http:content-type'],
+    action.controller.metadata['@http:content-type'],
+  ]
+    .filter(contentType => contentType !== undefined)
+    .flat(1)
+})
+
 export const toAccept = withCache(function toAccept(
   action: Action,
 ): ToAcceptReturn {

@@ -1,4 +1,5 @@
 export { Accept } from './decorators/Accept.js'
+export { ContentType } from './decorators/ContentType.js'
 export { Controller } from './decorators/Controller.js'
 export { Header } from './decorators/Header.js'
 export { Param } from './decorators/Param.js'

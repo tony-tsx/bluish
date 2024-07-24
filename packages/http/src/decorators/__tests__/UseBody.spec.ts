@@ -7,6 +7,7 @@ import { Application } from '@bluish/core'
 import { UseParam } from '../UseParam.js'
 import { UseBody } from '../UseBody.js'
 import { json } from '../../middlewares/body-parsers.js'
+import { Json } from '../Json.js'
 
 describe('GET', () => {
   it('send /users request', async () => {
@@ -59,6 +60,7 @@ describe('POST', () => {
     @Controller('/users')
     class Users {
       @POST
+      @Json
       public static insert(@UseBody body: any) {
         return { ...body, id: 1 }
       }

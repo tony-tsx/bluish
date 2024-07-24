@@ -2,6 +2,9 @@ import { Action, Class, Metadata } from '@bluish/core'
 import { HttpContext } from '../models/HttpContext.js'
 import { Path } from './Path.js'
 import { Accept } from './Accept.js'
+import { is } from 'type-is'
+import { ContentType } from './ContentType.js'
+import { toContentTypes } from '../tools/action-helpers.js'
 
 export type HttpMethod =
   | 'GET'
@@ -25,14 +28,33 @@ export function Route(
     Action(HttpContext, {
       middlewares: [
         async (context, next) => {
-          const result = await next()
-          const body = JSON.stringify(result)
+          const payload = await next()
 
-          context.response.status = 200
-          ;(context.response.headers['Content-Type'] = 'application/json'),
-            (context.response.headers['Content-Length'] =
-              body.length.toString()),
-            (context.response.body = JSON.stringify(result))
+          if (!context.response.status) context.response.status = 200
+
+          if (context.response.body) return payload
+
+          const contentTypes = toContentTypes(context.runner.action)
+
+          if (!contentTypes.length) return payload
+
+          let contentType: ContentType | undefined
+
+          if (contentTypes.length > 1) {
+            const accept = context.request.headers.accept
+
+            if (!accept) throw new Error('TODO')
+
+            contentType = contentTypes.find(({ type }) => is(type, accept))
+          } else contentType = contentTypes[0]
+
+          if (!contentType) throw new Error('TODO')
+
+          context.response.headers['Content-Type'] = contentType.type
+
+          context.response.body = contentType.to(payload, context)
+
+          return payload
         },
       ],
     })(target, propertyKey)
