@@ -4,6 +4,7 @@ import { Middleware } from '../models/Middleware.js'
 import { Class } from '../typings/Class.js'
 import { InjectableReference } from '../typings/InjectableReference.js'
 import { Action } from './Action.js'
+import { Pipe } from './Pipe.js'
 
 export interface ControllerOptions {
   inherit?: () => Class
@@ -52,6 +53,7 @@ export interface Controller {
   middlewares: Middleware[]
   isIsolated: boolean
   application: Application
+  pipes: Pipe[]
   metadata: Partial<Bluish.Controller.Metadata>
   injections: {
     static: Map<string | symbol, InjectableReference>

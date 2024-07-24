@@ -2,9 +2,10 @@ import { Class } from '../typings/Class.js'
 import { Context } from '../models/Context.js'
 import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
 import { AnyMiddleware, Middleware } from '../models/Middleware.js'
-import { Selector } from './Selector.js'
+import { Argument } from './Argument.js'
 import { Controller } from './Controller.js'
 import { InjectableReference } from '../typings/InjectableReference.js'
+import { Pipe } from './Pipe.js'
 
 export function Action<
   TContext extends Context,
@@ -47,7 +48,8 @@ export interface Action {
   target: Class | object
   propertyKey: string | symbol
   middlewares: Middleware[]
-  selectors: Selector[][]
+  arguments: Map<number, Argument>
+  pipes: Pipe[]
   isIsolated: boolean
   controller: Controller
   metadata: Partial<Bluish.Action.Metadata>

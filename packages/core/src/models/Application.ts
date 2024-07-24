@@ -8,10 +8,23 @@ import { Context } from './Context.js'
 import { getMetadataArgsStorage } from './MetadataArgsStorage.js'
 import { AnyMiddleware, FunctionMiddleware, Middleware } from './Middleware.js'
 import { Runner } from './Runner.js'
-import { isSameController } from '../tools/isSameController.js'
-import { isSameAction } from '../tools/isSameAction.js'
 import { Injectable } from '../decorators/Injectable.js'
 import { InjectableReference } from '../typings/InjectableReference.js'
+import { Pipe } from '../decorators/Pipe.js'
+import { buildControllerMetadata } from '../builds/build-controller-metadata.js'
+import { buildControllerInjection } from '../builds/build-controller-injections.js'
+import { buildControllerMiddlewares } from '../builds/build-controller-middlewares.js'
+import { buildControllerActions } from '../builds/build-controller-actions.js'
+import { buildControllerStatic } from '../builds/build-controlller-static.js'
+import { buildControllerActionMetadata } from '../builds/build-controller-action-metadata.js'
+import { buildControllerActionMiddlewares } from '../builds/build-controller-action-middlewares.js'
+import { buildControllerActionInjections } from '../builds/build-controller-action-injections.js'
+import { buildControllerActionArguments } from '../builds/build-controller-action-arguments.js'
+import { buildControllerActionArgumentMetadata } from '../builds/build-controller-action-argument-metadata.js'
+import { buildControllerActionIsolated } from '../builds/build-controller-action-isolated.js'
+import { buildControllerIsolated } from '../builds/build-controller-isolated.js'
+import { buildControllerPipes } from '../builds/build-controller-pipes.js'
+import { buildControllerActionPipes } from '../builds/build-controller-action-pipes.js'
 
 export class Application {
   private _registers: (string | Class)[] = []
@@ -22,6 +35,7 @@ export class Application {
     static _controller: Controller = {
       actions: [],
       heirs: [],
+      pipes: [],
       application: null!,
       injections: {
         parameters: new Map(),
@@ -38,6 +52,8 @@ export class Application {
   private _isInitialized: boolean = false
 
   public middlewares: Middleware[] = []
+
+  public pipes: Pipe[] = []
 
   public get injectables(): readonly Injectable[] {
     if (!this.___injectables) throw new Error('Bluish is not initialized')
@@ -129,6 +145,12 @@ export class Application {
     return this
   }
 
+  public pipe(pipe: Pipe) {
+    this.pipes.push(pipe)
+
+    return this
+  }
+
   public register(register: Class | Class[] | string | string[]) {
     if (Array.isArray(register)) this._registers.push(...register)
     else this._registers.push(register)
@@ -166,217 +188,27 @@ export class Application {
       isIsolated: false,
       middlewares: [],
       propertyKey,
-      selectors: [],
+      arguments: new Map(),
+      pipes: [],
       metadata: {},
       injections: {
         parameters: new Map(),
       },
     }
 
-    action.selectors.push([
-      {
-        target: action.target,
-        context,
-        action,
-        parameterIndex: 0,
-        propertyKey: action.propertyKey,
-        selector: context => context,
-      },
-    ])
+    action.arguments.set(0, {
+      target: action.target,
+      action,
+      parameterIndex: 0,
+      propertyKey: action.propertyKey,
+      metadata: {},
+      selectors: [{ context, selector: context => context }],
+      type: context,
+    })
 
     this._virtual._controller.actions.push(action)
 
     return toRunner(action)
-  }
-
-  protected onController(controller: Controller) {
-    this._controllers!.push(controller)
-
-    const args = getMetadataArgsStorage()
-
-    if (
-      'getMetadata' in Reflect &&
-      typeof (Reflect as any).getMetadata === 'function'
-    ) {
-      const designParamTypes = (Reflect as any).getMetadata(
-        'design:paramtypes',
-        controller.target,
-      )
-
-      if (Array.isArray(designParamTypes))
-        designParamTypes.forEach((target, parameterIndex) => {
-          if (!target) return
-
-          controller.injections.parameters.set(parameterIndex, () => target)
-        })
-    }
-
-    for (const inject of args.injects) {
-      if (!isSameController(controller, inject.target)) continue
-
-      if (inject.propertyKey) {
-        if (inject.parameterIndex !== undefined) continue
-
-        if (typeof inject.target === 'function') {
-          controller.injections.static.set(
-            inject.propertyKey,
-            inject.injectable,
-          )
-
-          continue
-        }
-
-        controller.injections.properties.set(
-          inject.propertyKey,
-          inject.injectable,
-        )
-
-        continue
-      }
-
-      if (inject.parameterIndex === undefined) continue
-
-      controller.injections.parameters.set(
-        inject.parameterIndex,
-        inject.injectable,
-      )
-    }
-
-    for (const metadata of args.metadatas) {
-      if (!isSameController(controller, metadata.target)) continue
-
-      if (metadata.propertyKey) continue
-
-      Object.assign(controller.metadata, {
-        [metadata.key]:
-          typeof controller.metadata[metadata.key] !== 'undefined'
-            ? metadata.reducer(
-                metadata.value,
-                controller.metadata[metadata.key],
-              )
-            : metadata.value,
-      })
-    }
-
-    for (const middleware of args.middlewares) {
-      if (!isSameController(controller, middleware.target)) continue
-
-      if (middleware.propertyKey !== undefined) continue
-
-      controller.middlewares.push(middleware.middleware)
-    }
-
-    for (const isolated of args.isolated) {
-      if (isolated.propertyKey) continue
-
-      if (!isSameController(controller, isolated.target)) continue
-
-      controller.isIsolated = true
-    }
-
-    for (const action of args.actions) {
-      if (!isSameController(controller, action.target)) continue
-
-      this.onAction({
-        context: action.context,
-        target: action.target,
-        propertyKey: action.propertyKey,
-        middlewares: action.middlewares ?? [],
-        selectors: [],
-        isIsolated: false,
-        controller,
-        metadata: {},
-        injections: {
-          parameters: new Map(),
-        },
-      })
-    }
-
-    for (const [
-      propertyKey,
-      injectableReference,
-    ] of controller.injections.static.entries()) {
-      const injectable = this._findInjectable(injectableReference)
-
-      if (!injectable) throw new Error('Injectable not found')
-
-      if (injectable.scope !== 'singleton')
-        throw new Error(
-          'Injectable non singleton not supported in static injection',
-        )
-
-      Object.defineProperty(controller.target, propertyKey, {
-        value: this._castInjectable(injectable),
-        configurable: false,
-        enumerable: true,
-        writable: false,
-      })
-    }
-
-    return controller
-  }
-
-  protected onAction(action: Action) {
-    action.controller.actions.push(action)
-
-    const args = getMetadataArgsStorage()
-
-    for (const metadata of args.metadatas) {
-      if (!metadata.propertyKey) continue
-
-      if (!isSameAction(action, metadata.target, metadata.propertyKey)) continue
-
-      Object.assign(action.metadata, {
-        [metadata.key]:
-          typeof action.metadata[metadata.key] !== 'undefined'
-            ? metadata.reducer(metadata.value, action.metadata[metadata.key])
-            : metadata.value,
-      })
-    }
-
-    for (const middleware of args.middlewares) {
-      if (!middleware.propertyKey) continue
-
-      if (!isSameAction(action, middleware.target, middleware.propertyKey))
-        continue
-
-      action.middlewares.push(middleware.middleware)
-    }
-
-    for (const inject of args.injects) {
-      if (!inject.propertyKey) continue
-
-      if (inject.parameterIndex === undefined) continue
-
-      if (!isSameAction(action, inject.target, inject.propertyKey)) continue
-
-      action.injections.parameters.set(inject.parameterIndex, inject.injectable)
-    }
-
-    for (const selector of args.selectors) {
-      if (!isSameAction(action, selector.target, selector.propertyKey)) continue
-
-      action.selectors[selector.parameterIndex] ??= []
-
-      action.selectors[selector.parameterIndex].push({
-        context: selector.context,
-        target: selector.target,
-        propertyKey: selector.propertyKey,
-        parameterIndex: selector.parameterIndex,
-        action,
-        selector: selector.selector,
-      })
-    }
-
-    for (const isolated of args.isolated) {
-      if (!isolated.propertyKey) continue
-
-      if (!isSameAction(action, isolated.target, isolated.propertyKey)) continue
-
-      action.isIsolated = true
-    }
-
-    return action
   }
 
   protected onInjectable(injectable: Injectable) {
@@ -485,27 +317,56 @@ export class Application {
 
     args.controllers
       .filter(controller => targets.includes(controller.target))
-      .map(
-        args =>
-          [
-            this.onController({
-              target: args.target,
-              isIsolated: args.isIsolated,
-              actions: [],
-              middlewares: [],
-              heirs: [],
-              application: this,
-              metadata: {},
-              injections: {
-                static: new Map(),
-                parameters: new Map(),
-                properties: new Map(),
-              },
-              inherit: null,
-            }),
-            args,
-          ] as const,
-      )
+      .map(args => {
+        const controller: Controller = {
+          target: args.target,
+          isIsolated: args.isIsolated,
+          actions: [],
+          middlewares: [],
+          heirs: [],
+          application: this,
+          metadata: {},
+          pipes: [],
+          injections: {
+            static: new Map(),
+            parameters: new Map(),
+            properties: new Map(),
+          },
+          inherit: null,
+        }
+
+        this._controllers!.push(controller)
+
+        buildControllerInjection(controller)
+
+        buildControllerMetadata(controller)
+
+        buildControllerMiddlewares(controller)
+
+        buildControllerIsolated(controller)
+
+        buildControllerPipes(controller)
+
+        buildControllerActions(controller, action => {
+          buildControllerActionMetadata(action)
+
+          buildControllerActionMiddlewares(action)
+
+          buildControllerActionInjections(action)
+
+          buildControllerActionArguments(action, argument => {
+            buildControllerActionArgumentMetadata(argument)
+          })
+
+          buildControllerActionIsolated(action)
+
+          buildControllerActionPipes(action)
+        })
+
+        buildControllerStatic(controller)
+
+        return [controller, args] as const
+      })
       .forEach(([controller, args]) => {
         if (!args.inherit) return
 
@@ -518,6 +379,7 @@ export class Application {
         if (!inherit) throw new TypeError('Inherit controller not found')
 
         inherit.heirs.push(controller)
+
         controller.inherit = inherit
       })
 

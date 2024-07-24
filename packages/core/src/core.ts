@@ -3,7 +3,8 @@ export { Controller } from './decorators/Controller.js'
 export { Inject } from './decorators/Inject.js'
 export { Injectable } from './decorators/Injectable.js'
 export { Metadata } from './decorators/Metadata.js'
-export { Selector } from './decorators/Selector.js'
+export { Argument as Selector } from './decorators/Argument.js'
+export { Pipe } from './decorators/Pipe.js'
 export { Use } from './decorators/Use.js'
 
 export { Application } from './models/Application.js'
@@ -15,7 +16,7 @@ export {
   IsolatedArg,
   MetadataArgsStorage,
   MiddlewareArg,
-  SelectorArg,
+  ArgumentSelectorArg as SelectorArg,
   getMetadataArgsStorage,
 } from './models/MetadataArgsStorage.js'
 export {

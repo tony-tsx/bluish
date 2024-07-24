@@ -1,3 +1,4 @@
+import { Argument } from '../decorators/Argument.js'
 import { Class } from '../typings/Class.js'
 import { InjectableReference } from '../typings/InjectableReference.js'
 import { Context } from './Context.js'
@@ -27,6 +28,7 @@ export interface MetadataArg<
 > {
   target: Class | object
   propertyKey?: string | symbol
+  parameterIndex?: number
   key: TKey
   value: Bluish.Action.Metadata[TKey]
   reducer: (
@@ -46,7 +48,7 @@ export interface IsolatedArg {
   propertyKey?: string | symbol
 }
 
-export interface SelectorArg {
+export interface ArgumentSelectorArg {
   context: Class<Context>
   target: Class | object
   propertyKey: string | symbol
@@ -68,6 +70,12 @@ export interface InjectableArg {
   resolve?: (context: Context) => unknown
 }
 
+export interface PipeArg {
+  target: Class | object
+  propertyKey?: string | symbol
+  pipe: (value: unknown, argument: Argument) => unknown
+}
+
 export class MetadataArgsStorage {
   readonly actions: ActionArg[] = []
 
@@ -75,7 +83,9 @@ export class MetadataArgsStorage {
 
   readonly isolated: IsolatedArg[] = []
 
-  readonly selectors: SelectorArg[] = []
+  readonly selectors: ArgumentSelectorArg[] = []
+
+  readonly pipes: PipeArg[] = []
 
   readonly injects: InjectArg[] = []
 

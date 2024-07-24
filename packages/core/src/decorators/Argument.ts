@@ -3,14 +3,14 @@ import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
 import { Class } from '../typings/Class.js'
 import { Action } from './Action.js'
 
-export function Selector(
+export function Argument(
   selector: (context: Context) => unknown,
 ): (
   target: Class | object,
   propertyKey: string | symbol,
   parameterIndex: number,
 ) => void
-export function Selector<TContext extends Context>(
+export function Argument<TContext extends Context>(
   context: Class<TContext>,
   selector: (context: TContext) => unknown,
 ): (
@@ -18,7 +18,7 @@ export function Selector<TContext extends Context>(
   propertyKey: string | symbol,
   parameterIndex: number,
 ) => void
-export function Selector<TContext extends Context>(
+export function Argument<TContext extends Context>(
   contextOrSelector: Class<TContext> | ((context: TContext) => unknown),
   maybeSelector?: (context: Context) => unknown,
 ) {
@@ -44,11 +44,25 @@ export function Selector<TContext extends Context>(
   }
 }
 
-export interface Selector {
+export interface ArgumentSelector {
   context: Class<Context>
+  selector: (context: Context) => unknown
+}
+
+export interface Argument {
   target: Class | object
   propertyKey: string | symbol
   parameterIndex: number
   action: Action
-  selector: (context: Context) => unknown
+  selectors: ArgumentSelector[]
+  metadata: Partial<Bluish.Argument.Metadata>
+  type: any
+}
+
+declare global {
+  namespace Bluish {
+    namespace Argument {
+      interface Metadata {}
+    }
+  }
 }

@@ -2,62 +2,81 @@ import { Constructable } from 'vitest'
 import { Action } from '../decorators/Action.js'
 import { Next } from '../typings/Next.js'
 import { Context } from './Context.js'
-import { Middleware } from './Middleware.js'
 import { compose } from '../tools/compose.js'
 import { Controller } from '../core.js'
+import { Argument } from '../decorators/Argument.js'
+import { Pipe } from '../decorators/Pipe.js'
+import { toMiddlewares } from '../tools/toMiddlewares.js'
 
 export class Runner {
   readonly #middlewares: (context: Context, next: Next) => Promise<unknown>
-  readonly #fn: (context: Context) => unknown
+  readonly #action: (context: Context) => unknown
+  readonly #pipe: (
+    value: unknown,
+    argument: Argument,
+    context: Context,
+  ) => unknown
+  readonly #arguments = async (context: Context) => {
+    const args: unknown[] = []
+
+    await Promise.all(
+      Array.from(context.runner.action.arguments.entries()).map(
+        async ([parameterIndex, argument]) => {
+          const selector = argument.selectors.find(selector => {
+            return context instanceof selector.context
+          })
+
+          if (!selector) return
+
+          args[parameterIndex] = await this.#pipe(
+            await selector.selector(context),
+            argument,
+            context,
+          )
+        },
+      ),
+    )
+
+    for (const [
+      parameterIndex,
+      injectable,
+    ] of context.runner.action.injections.parameters.entries())
+      args[parameterIndex] = context.module.resolve(injectable)
+
+    return args
+  }
 
   constructor(public readonly action: Action) {
-    const middlewares = (() => {
-      if (action.isIsolated)
-        return [...Middleware.middlewares, ...this.action.middlewares]
+    this.#middlewares = compose(toMiddlewares(action))
 
-      const middlewares = Controller.each(
-        action.controller,
-        controller => controller.middlewares,
-      )
-        .reverse()
-        .flat(1)
+    this.#pipe = (() => {
+      const pipes: Pipe[] = (() => {
+        if (action.isIsolated) return action.pipes.slice()
 
-      if (action.controller.isIsolated)
+        const pipes = Controller.each(
+          action.controller,
+          controller => controller.pipes,
+        )
+          .reverse()
+          .flat(1)
+
+        if (action.controller.isIsolated) return [...pipes, ...action.pipes]
+
         return [
-          ...Middleware.middlewares,
-          ...middlewares,
-          ...action.middlewares,
+          ...action.controller.application.pipes,
+          ...pipes,
+          ...action.pipes,
         ]
+      })()
 
-      return [
-        ...action.controller.application.middlewares,
-        ...Middleware.middlewares,
-        ...middlewares,
-        ...action.middlewares,
-      ]
+      return async (value: unknown, argument: Argument, context: Context) => {
+        for (const pipe of pipes) value = await pipe(value, argument, context)
+
+        return value
+      }
     })()
 
-    this.#middlewares = compose(middlewares)
-
-    this.#fn = async context => {
-      const args: unknown[] = []
-
-      for (const [index, selectors] of this.action.selectors.entries()) {
-        const argument = selectors.find(selector => {
-          return context instanceof selector.context
-        })
-
-        if (!argument) continue
-
-        args[index] = await argument.selector(context)
-      }
-
-      for (const [
-        parameterIndex,
-        injectable,
-      ] of this.action.injections.parameters.entries())
-        args[parameterIndex] = context.module.resolve(injectable)
-
+    this.#action = async context => {
       if (typeof this.action.target === 'object') {
         const contructorArgs: unknown[] = []
 
@@ -84,6 +103,8 @@ export class Runner {
         ] of this.action.controller.injections.properties.entries())
           controller[propertyKey] = context.module.resolve(injectable)
 
+        const args = await this.#arguments(context)
+
         // @ts-expect-error: TODO
         return (context.return = await controller[this.action.propertyKey](
           ...args,
@@ -96,6 +117,8 @@ export class Runner {
         enumerable: false,
         configurable: false,
       })
+
+      const args = await this.#arguments(context)
 
       // @ts-expect-error: TODO
       return (context.return = await this.action.controller.target[
@@ -115,6 +138,6 @@ export class Runner {
       configurable: false,
     })
 
-    return this.#middlewares(context, () => this.#fn(context))
+    return this.#middlewares(context, async () => this.#action(context))
   }
 }

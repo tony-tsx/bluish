@@ -86,9 +86,8 @@ class AnonymousMiddleware<
   ) {
     super()
 
-    this.context =
-      Array.isArray(context) ?
-        (context as Class<TContext>[])
+    this.context = Array.isArray(context)
+      ? (context as Class<TContext>[])
       : [context as Class<TContext>]
   }
 }

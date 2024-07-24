@@ -1,1 +1,1 @@
-export type Next = () => unknown | Promise<unknown>
+export type Next = () => Promise<unknown>
