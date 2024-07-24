@@ -24,6 +24,7 @@ export {
   AnyMiddleware,
   FunctionMiddleware,
   Middleware,
+  MiddlewareRegistryLayer,
 } from './models/Middleware.js'
 export { MiddlewareCompose } from './models/MiddlewareCompose.js'
 export { Runner } from './models/Runner.js'

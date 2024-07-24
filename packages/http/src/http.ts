@@ -42,7 +42,12 @@ export {
   ToAcceptReturn,
 } from './tools/action-helpers.js'
 
-import { Injectable, Middleware, Setup } from '@bluish/core'
+import {
+  Injectable,
+  MiddlewareRegistryLayer,
+  Middleware,
+  Setup,
+} from '@bluish/core'
 import { HttpContext } from './models/HttpContext.js'
 import {
   BadRequest,
@@ -53,7 +58,6 @@ import {
 import { Request } from './models/Request.js'
 import { toAccept, toContentTypes } from './tools/action-helpers.js'
 import { is } from 'type-is'
-import { MiddlewareRegistryLayer } from '../../core/dist/esm/models/Middleware.js'
 import { json } from './middlewares/body-parsers.js'
 
 Injectable(Request, {
