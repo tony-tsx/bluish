@@ -25,6 +25,7 @@ import { buildControllerActionIsolated } from '../builds/build-controller-action
 import { buildControllerIsolated } from '../builds/build-controller-isolated.js'
 import { buildControllerPipes } from '../builds/build-controller-pipes.js'
 import { buildControllerActionPipes } from '../builds/build-controller-action-pipes.js'
+import { Setup } from './Setup.js'
 
 export class Application {
   private _registers: (string | Class)[] = []
@@ -50,6 +51,7 @@ export class Application {
     }
   }
   private _isInitialized: boolean = false
+  private _setups?: Setup[] = []
 
   public middlewares: Middleware[] = []
 
@@ -141,6 +143,17 @@ export class Application {
     maybeMiddleware?: FunctionMiddleware<TContext>,
   ): this {
     this.middlewares.push(Middleware.from(contextOrMiddleware, maybeMiddleware))
+
+    return this
+  }
+
+  public setup(setup: Setup) {
+    if (this._isInitialized)
+      throw new Error(
+        'Application is already initialized, adding setup is not allowed and would have no effect.',
+      )
+
+    this._setups!.push(setup)
 
     return this
   }
@@ -382,6 +395,21 @@ export class Application {
 
         controller.inherit = inherit
       })
+
+    for (const controller of this._controllers) {
+      for (const manipulator of this._setups!)
+        manipulator.onController(controller)
+
+      for (const action of controller.actions) {
+        for (const manipulator of this._setups!) manipulator.onAction(action)
+
+        for (const argument of action.arguments.values())
+          for (const manipulator of this._setups!)
+            manipulator.onArgument(argument)
+      }
+    }
+
+    delete this._setups
 
     return this
   }

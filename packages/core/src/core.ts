@@ -9,6 +9,7 @@ export { Use } from './decorators/Use.js'
 
 export { Application } from './models/Application.js'
 export { Context } from './models/Context.js'
+export { Setup, SetupHandlers } from './models/Setup.js'
 export {
   ActionArg,
   InjectArg,
