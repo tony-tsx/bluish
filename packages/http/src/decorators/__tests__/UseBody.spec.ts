@@ -12,6 +12,7 @@ import { Json } from '../Json.js'
 describe('GET', () => {
   it('send /users request', async () => {
     @Controller('/users')
+    @Json
     class Users {
       @GET
       public static find() {
@@ -34,6 +35,7 @@ describe('GET', () => {
 
   it('send /users/:user request', async () => {
     @Controller('/users')
+    @Json
     class Users {
       @GET('/:user')
       public static findById(@UseParam('user') id: string) {
@@ -56,11 +58,11 @@ describe('GET', () => {
 })
 
 describe('POST', () => {
-  it.only('send /users request', async () => {
+  it('send /users request', async () => {
     @Controller('/users')
+    @Json
     class Users {
       @POST
-      @Json
       public static insert(@UseBody body: any) {
         return { ...body, id: 1 }
       }
@@ -84,6 +86,7 @@ describe('POST', () => {
 describe('PUT', () => {
   it('send /users/:user request', async () => {
     @Controller('/users')
+    @Json
     class Users {
       @PUT('/:user')
       public static update(@UseParam('user') id: string, @UseBody body: any) {
@@ -109,6 +112,7 @@ describe('PUT', () => {
 describe('DELETE', () => {
   it('send /users/:user request', async () => {
     @Controller('/users')
+    @Json
     class Users {
       @DELETE('/:user')
       public static update(@UseParam('user') id: string) {
