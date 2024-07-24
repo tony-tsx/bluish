@@ -111,6 +111,31 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@bluish/ornate-guard@workspace:packages/ornate-guard":
+  version: 0.0.0-use.local
+  resolution: "@bluish/ornate-guard@workspace:packages/ornate-guard"
+  dependencies:
+    "@bluish/core": "workspace:^"
+    "@types/busboy": "npm:^1"
+    "@types/bytes": "npm:^3"
+    "@types/content-type": "npm:^1"
+    "@types/qs": "npm:^6.9.8"
+    "@types/supertest": "npm:^6.0.2"
+    "@types/type-is": "npm:^1"
+    bytes: "npm:^3.1.2"
+    content-type: "npm:^1.0.5"
+    ornate-guard: "npm:0.0.0-experimental-0d58063"
+    path-to-regexp: "npm:^7.0.0"
+    qs: "npm:^6.11.2"
+    supertest: "npm:^7.0.0"
+    type-is: "npm:^1.6.18"
+    vitest: "npm:^2.0.3"
+  peerDependencies:
+    "@bluish/core": ^0.0.0
+    ornate-guard: "*"
+  languageName: unknown
+  linkType: soft
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -5688,6 +5713,13 @@ __metadata:
     strip-ansi: "npm:^6.0.0"
     wcwidth: "npm:^1.0.1"
   checksum: 10c0/10ff14aace236d0e2f044193362b22edce4784add08b779eccc8f8ef97195cae1248db8ec1ec5f5ff076f91acbe573f5f42a98c19b78dba8c54eefff983cae85
+  languageName: node
+  linkType: hard
+
+"ornate-guard@npm:0.0.0-experimental-0d58063":
+  version: 0.0.0-experimental-0d58063
+  resolution: "ornate-guard@npm:0.0.0-experimental-0d58063"
+  checksum: 10c0/0c59ce79ade4ba577d0e6ceaa7a74167635a97612c420cfd5cd109c30573db96693e02ee16e9a62d6588ff75057c05c1388faaefa48545eba2aab28bfc69f6fa
   languageName: node
   linkType: hard
 
