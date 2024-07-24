@@ -5,7 +5,7 @@ import {
   Application,
   Context,
   Controller,
-  Selector,
+  Argument,
   toRunner,
 } from '../../core.js'
 
@@ -17,11 +17,11 @@ it('use pipe with reflect metadata', async () => {
   class Test {
     @Action(Context)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public static number(@Selector(context => context.value) value: number) {}
+    public static number(@Argument(context => context.value) value: number) {}
 
     @Action(Context)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public static string(@Selector(context => context.value) value: string) {}
+    public static string(@Argument(context => context.value) value: string) {}
   }
 
   vi.spyOn(Test, 'number')

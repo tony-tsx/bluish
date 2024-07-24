@@ -3,7 +3,7 @@ export { Controller } from './decorators/Controller.js'
 export { Inject } from './decorators/Inject.js'
 export { Injectable } from './decorators/Injectable.js'
 export { Metadata } from './decorators/Metadata.js'
-export { Argument as Selector } from './decorators/Argument.js'
+export { Argument } from './decorators/Argument.js'
 export { Pipe } from './decorators/Pipe.js'
 export { Use } from './decorators/Use.js'
 

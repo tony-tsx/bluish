@@ -1,7 +1,7 @@
 import {
   Application,
   Class,
-  Selector,
+  Argument,
   toRunner,
   Controller,
   Action,
@@ -20,16 +20,16 @@ namespace CoreTesting {
 
   export async function runSelector<TContext extends Context>(
     application: Application,
-    selectorDecorator: ReturnType<typeof Selector>,
+    selectorDecorator: ReturnType<typeof Argument>,
     context: TContext,
   ): Promise<unknown>
   export async function runSelector<TContext extends Context>(
-    selectorDecorator: ReturnType<typeof Selector>,
+    selectorDecorator: ReturnType<typeof Argument>,
     context: TContext,
   ): Promise<unknown>
   export async function runSelector<TContext extends Context>(
-    applicationOrSelectorDecorator: Application | ReturnType<typeof Selector>,
-    selectorDecoratorOrContext: ReturnType<typeof Selector> | TContext,
+    applicationOrSelectorDecorator: Application | ReturnType<typeof Argument>,
+    selectorDecoratorOrContext: ReturnType<typeof Argument> | TContext,
     maybeContext?: TContext,
   ): Promise<unknown> {
     const application = maybeContext
@@ -37,7 +37,7 @@ namespace CoreTesting {
       : new Application()
     const selectorDecorator = (
       maybeContext ? selectorDecoratorOrContext : applicationOrSelectorDecorator
-    ) as ReturnType<typeof Selector>
+    ) as ReturnType<typeof Argument>
     const context = (maybeContext ?? selectorDecoratorOrContext) as TContext
 
     let value = undefined

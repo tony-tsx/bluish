@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest'
 
 import CoreTesting from '../../core-testing.js'
-import { Action, Context, Controller, Selector } from '../../core.js'
+import { Action, Context, Controller, Argument } from '../../core.js'
 
 it('run static action', async () => {
   @Controller
@@ -22,7 +22,7 @@ it('run static action with selector', async () => {
   class Test {
     @Action(Context)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public static act(@Selector(() => '12345') value: string) {}
+    public static act(@Argument(() => '12345') value: string) {}
   }
 
   vi.spyOn(Test, 'act')

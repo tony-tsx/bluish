@@ -1,4 +1,4 @@
-import { Selector } from '@bluish/core'
+import { Argument } from '@bluish/core'
 import { HttpContext } from '../models/HttpContext.js'
 
 export function UseQuery(
@@ -6,7 +6,7 @@ export function UseQuery(
   propertyKey: string | symbol,
   parameterIndex: number,
 ) {
-  Selector(HttpContext, context => context.request.query)(
+  Argument(HttpContext, context => context.request.query)(
     target,
     propertyKey,
     parameterIndex,

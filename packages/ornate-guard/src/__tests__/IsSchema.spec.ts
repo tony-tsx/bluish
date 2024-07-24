@@ -2,7 +2,7 @@ import {
   Controller,
   Action,
   Context,
-  Selector,
+  Argument,
   Application,
   toRunner,
 } from '@bluish/core'
@@ -26,7 +26,7 @@ it('automatic validate using reflect metadata', async () => {
   @Controller
   class Test {
     @Action(Context)
-    public static act(@Selector(context => context.user) user: User) {
+    public static act(@Argument(context => context.user) user: User) {
       expect(user).toBeInstanceOf(User)
     }
   }

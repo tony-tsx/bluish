@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import CoreTesting from '../core-testing.js'
-import { Action, Context, Controller, Selector } from '../core.js'
+import { Action, Context, Controller, Argument } from '../core.js'
 
 describe('.run', () => {
   it('static action', async () => {
@@ -40,7 +40,7 @@ describe('.runSelector', () => {
     context.value = 'test'
 
     const value = await CoreTesting.runSelector(
-      Selector(context => context.value),
+      Argument(context => context.value),
       context,
     )
 

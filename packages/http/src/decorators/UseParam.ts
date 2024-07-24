@@ -1,4 +1,4 @@
-import { Selector } from '@bluish/core'
+import { Argument } from '@bluish/core'
 import { HttpContext } from '../models/HttpContext.js'
 
 export function UseParam(key: string) {
@@ -7,7 +7,7 @@ export function UseParam(key: string) {
     propertyKey: string | symbol,
     parameterIndex: number,
   ) => {
-    Selector(HttpContext, context => {
+    Argument(HttpContext, context => {
       return context.request.params[key]
     })(target, propertyKey, parameterIndex)
   }

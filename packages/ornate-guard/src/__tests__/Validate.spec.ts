@@ -3,7 +3,7 @@ import {
   Application,
   Context,
   Controller,
-  Selector,
+  Argument,
   toRunner,
 } from '@bluish/core'
 import { IsEmail, IsString, ValidationError } from 'ornate-guard'
@@ -24,7 +24,7 @@ it('adds schema validation', async () => {
   class Test {
     @Action(Context)
     public static act(
-      @Validate(() => User) @Selector(context => context.user) user: User,
+      @Validate(() => User) @Argument(context => context.user) user: User,
     ) {
       expect(user).toBeInstanceOf(User)
     }
@@ -62,7 +62,7 @@ it('throw validation error', async () => {
   class Test {
     @Action(Context)
     public static act(
-      @Validate(() => User) @Selector(context => context.user) user: User,
+      @Validate(() => User) @Argument(context => context.user) user: User,
     ) {
       expect(user).toBeInstanceOf(User)
     }

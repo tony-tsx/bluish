@@ -1,4 +1,4 @@
-import { Selector } from '@bluish/core'
+import { Argument } from '@bluish/core'
 import { HttpContext } from '../models/HttpContext.js'
 
 export function UseHeaders(
@@ -6,7 +6,7 @@ export function UseHeaders(
   propertyKey: string | symbol,
   parameterIndex: number,
 ) {
-  Selector(HttpContext, context => context.request.headers)(
+  Argument(HttpContext, context => context.request.headers)(
     target,
     propertyKey,
     parameterIndex,

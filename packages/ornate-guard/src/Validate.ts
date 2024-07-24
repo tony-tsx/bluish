@@ -1,5 +1,4 @@
-import { Class, Metadata } from '@bluish/core'
-import { Argument } from '../../core/dist/esm/decorators/Argument.js'
+import { Class, Metadata, Argument } from '@bluish/core'
 
 export function Validate(
   schema: () => Class,

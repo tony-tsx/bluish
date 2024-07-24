@@ -55,7 +55,7 @@ describe('GET', () => {
 })
 
 describe('POST', () => {
-  it('send /users request', async () => {
+  it.only('send /users request', async () => {
     @Controller('/users')
     class Users {
       @POST

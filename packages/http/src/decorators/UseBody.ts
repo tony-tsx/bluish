@@ -1,4 +1,4 @@
-import { Class, Selector } from '@bluish/core'
+import { Class, Argument } from '@bluish/core'
 import { HttpContext } from '../models/HttpContext.js'
 import { is } from 'type-is'
 import { Accept } from './Accept.js'
@@ -33,7 +33,7 @@ export function UseBody(
       propertyKey: string | symbol,
       parameterIndex: number,
     ) => {
-      Selector(HttpContext, context => {
+      Argument(HttpContext, context => {
         if (!context.request.headers['content-type']) return null
 
         if (!is(context.request.headers['content-type'], accepts)) return null
@@ -51,7 +51,7 @@ export function UseBody(
   if (maybeParameterIndex === undefined)
     throw new TypeError('Parameter index is required')
 
-  Selector(HttpContext, context => context.request.body)(
+  Argument(HttpContext, context => context.request.body)(
     targetOrContentType,
     maybePropertyKey,
     maybeParameterIndex,
