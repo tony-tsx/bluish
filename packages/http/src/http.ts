@@ -29,6 +29,16 @@ export * from './errors/HttpError.js'
 
 export { json, text, urlencoded } from './middlewares/body-parsers.js'
 
+export {
+  cookie,
+  UseCookie,
+  Cookie,
+  CookieItem,
+  CookieItemOptions,
+  CookieItemSameSite,
+  CookieOptions,
+} from './middlewares/cookie.js'
+
 export { cors } from './middlewares/cors.js'
 
 export { HttpContext } from './models/HttpContext.js'
