@@ -41,6 +41,13 @@ export {
 
 export { cors } from './middlewares/cors.js'
 
+export {
+  session,
+  UseSession,
+  SessionStore,
+  SessionOptions,
+} from './middlewares/session.js'
+
 export { HttpContext } from './models/HttpContext.js'
 export { Request } from './models/Request.js'
 export { Response } from './models/Response.js'
