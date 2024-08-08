@@ -406,16 +406,14 @@ export class Application {
       })
 
     for (const controller of this._controllers) {
-      for (const manipulator of this._setups!)
-        manipulator.onController(controller)
-
       for (const action of controller.actions) {
-        for (const manipulator of this._setups!) manipulator.onAction(action)
-
         for (const argument of action.arguments.values())
-          for (const manipulator of this._setups!)
-            manipulator.onArgument(argument)
+          for (const setup of this._setups!) setup.onArgument(argument)
+
+        for (const setup of this._setups!) setup.onAction(action)
       }
+
+      for (const setup of this._setups!) setup.onController(controller)
     }
 
     delete this._setups
