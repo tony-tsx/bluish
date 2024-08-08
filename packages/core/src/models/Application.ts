@@ -416,6 +416,8 @@ export class Application {
       for (const setup of this._setups!) setup.onController(controller)
     }
 
+    for (const setup of this._setups!) setup.onApplication(this)
+
     delete this._setups
 
     return this
