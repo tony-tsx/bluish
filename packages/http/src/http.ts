@@ -22,6 +22,7 @@ export { UseHeader } from './decorators/UseHeader.js'
 export { UseHeaders } from './decorators/UseHeaders.js'
 export { UseParam } from './decorators/UseParam.js'
 export { UseQuery } from './decorators/UseQuery.js'
+export { UseResponse } from './decorators/UseResponse.js'
 export { Version } from './decorators/Version.js'
 
 export * from './errors/HttpError.js'
