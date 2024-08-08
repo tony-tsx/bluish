@@ -1,10 +1,9 @@
-import { Class, Context, Middleware, Next } from '@bluish/core'
+import { Class, Context, Middleware } from '@bluish/core'
 import { ValidationError } from 'ornate-guard'
 
 export type HandleValidationError<TContext extends Context> = (
   error: ValidationError,
   context: TContext,
-  next: Next,
 ) => void
 
 export function onValidationError(
@@ -31,7 +30,7 @@ export function onValidationError<TContext extends Context>(
     } catch (error) {
       if (!(error instanceof ValidationError)) throw error
 
-      return handle(error, context, next)
+      return handle(error, context)
     }
   })
 }
