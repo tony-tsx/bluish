@@ -10,3 +10,11 @@ export class HttpContext extends Context {
     super()
   }
 }
+
+export interface HttpContext extends Bluish.HttpContext {}
+
+declare global {
+  namespace Bluish {
+    interface HttpContext {}
+  }
+}
