@@ -27,6 +27,11 @@ import { buildControllerPipes } from '../builds/build-controller-pipes.js'
 import { buildControllerActionPipes } from '../builds/build-controller-action-pipes.js'
 import { Setup } from './Setup.js'
 
+export interface ApplicationOptions {
+  middlewares?: AnyMiddleware[]
+  controllers?: Class[]
+}
+
 export class Application {
   private _registers: (string | Class)[] = []
   private _controllers: Controller[] | null = null
@@ -129,8 +134,12 @@ export class Application {
     return this.injectables.find(injectable => injectable.id === ref)
   }
 
-  constructor() {
+  constructor({ middlewares = [], controllers = [] }: ApplicationOptions = {}) {
     this._virtual._controller.application = this
+
+    for (const middleware of middlewares) this.use(middleware)
+
+    for (const controller of controllers) this.register(controller)
   }
 
   public use(middleware: AnyMiddleware): this
