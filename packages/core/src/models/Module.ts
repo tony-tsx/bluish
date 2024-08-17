@@ -1,63 +1,72 @@
-import { Construtable } from '../typings/Class.js'
-import { Injectable } from '../decorators/Injectable.js'
-import { InjectableReference } from '../typings/InjectableReference.js'
 import { Context } from './Context.js'
+import { getMetadataArgsStorage } from './MetadataArgsStorage.js'
+import { ApplicationInjectable } from './ApplicationInjectable.js'
+import { Application } from './Application.js'
+import { InjectableNotFoundError } from '../errors/InjectableNotFoundError.js'
+
+const storage = new Map<unknown, unknown>()
+
+const refs = new Map<unknown, ApplicationInjectable>()
 
 export class Module {
-  private _injectables = new Map<unknown, unknown>()
+  #store = new Map<unknown, unknown>()
 
-  private get _application() {
-    return this.context.runner.action.controller.application
+  public readonly context!: Context
+  public readonly application!: Application
+
+  public get pipes() {
+    if (this.context) return this.context.action.pipes
+
+    return this.application.pipes
   }
 
-  constructor(public readonly context: Context) {}
-
-  protected _cast(injectable: Injectable) {
-    const args: unknown[] = []
-
-    if (injectable.resolve) return injectable.resolve(this.context)
-
-    for (const [
-      parameterIndex,
-      injectableReference,
-    ] of injectable.injects.parameters.entries())
-      args[parameterIndex] = this.resolve(injectableReference)
-
-    const instance = new (injectable.target as Construtable<unknown>)(...args)
-
-    for (const [
-      propertyKey,
-      injectableReference,
-    ] of injectable.injects.properties.entries())
-      Object.defineProperty(instance, propertyKey, {
-        value: this.resolve(injectableReference),
-        writable: false,
-        enumerable: false,
-        configurable: false,
-      })
-
-    return instance
+  constructor(public readonly scope: Application | Context) {
+    if (scope instanceof Application) this.application = scope
+    else if (scope instanceof Context) this.context = scope
+    else throw new Error('TODO')
   }
 
-  public resolve(ref: InjectableReference) {
-    const injectable = this._application['_findInjectable'](ref)
+  public find(ref: unknown) {
+    if (!refs.has(ref)) {
+      const _injectable = getMetadataArgsStorage().injectables.find(
+        injectable => injectable.ref === ref,
+      )
 
-    if (!injectable) throw new Error('Injectable not found')
+      if (!_injectable) throw new InjectableNotFoundError('TODO')
 
-    if (injectable.scope === 'singleton') {
-      if (!this._application['_injectables'].has(injectable))
-        throw new Error('Injectable not found')
-
-      return this._application['_injectables'].get(injectable)
+      refs.set(ref, new ApplicationInjectable(_injectable))
     }
 
-    if (injectable.scope === 'request') {
-      if (!this._injectables.has(injectable))
-        this._injectables.set(injectable, this._cast(injectable))
+    return refs.get(ref)!
+  }
 
-      return this._injectables.get(injectable)
+  public has(ref: unknown) {
+    return getMetadataArgsStorage().injectables.some(
+      injectable => injectable.ref === ref,
+    )
+  }
+
+  public resolve(ref: unknown) {
+    if (!this.has(ref)) throw new Error('TODO')
+
+    if (storage.has(ref)) return storage.get(ref)
+
+    if (this.#store.has(ref)) return this.#store.get(ref)
+
+    const injectable = this.find(ref)
+
+    const value = injectable.toInstance(this)
+
+    if (injectable.scope === 'transient') return value
+
+    if (injectable.scope === 'context') {
+      this.#store.set(ref, value)
+
+      value.then(value => this.#store.set(ref, value))
+
+      return value
     }
 
-    return this._cast(injectable)
+    return value
   }
 }

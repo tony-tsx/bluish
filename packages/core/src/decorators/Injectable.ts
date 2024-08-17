@@ -1,78 +1,74 @@
 import { Context } from '../models/Context.js'
 import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
-import { Class } from '../typings/Class.js'
-import { InjectableReference } from '../typings/InjectableReference.js'
+import { Constructable } from '../typings/Class.js'
 
-export interface SingletonInjectableOptions {
-  scope?: 'singleton'
+const scopes: unknown[] = ['singleton', 'transient', 'context']
+
+export interface InjectableOption {
+  scope: 'singleton' | 'transient' | 'context'
 }
 
-//  | 'transient' | 'request'
-
-export interface TransientInjectableOptions {
-  scope: 'transient'
-  resolve?: (context: Context) => unknown
-}
-
-export interface RequestInjectableOptions {
-  scope: 'request'
-  resolve?: (context: Context) => unknown
-}
-
-export type InjectableOptions =
-  | SingletonInjectableOptions
-  | TransientInjectableOptions
-  | RequestInjectableOptions
-
-export function Injectable(target: Class): void
-export function Injectable(target: Class, options?: InjectableOptions): void
-export function Injectable(options: InjectableOptions): (target: Class) => void
-export function Injectable(id: string | symbol): (target: Class) => void
+export function Injectable(target: Constructable): void
 export function Injectable(
-  id: string | symbol,
-  options: InjectableOptions,
-): (target: Class) => void
+  scope: 'singleton' | 'transient' | 'context',
+): (target: Constructable) => void
+export function Injectable(ref: unknown): (target: Constructable) => void
 export function Injectable(
-  targetOrOptionsOrId: Class | InjectableOptions | string | symbol,
-  maybeOptions?: InjectableOptions,
+  targetOrScopeOrRef:
+    | Constructable
+    | 'singleton'
+    | 'transient'
+    | 'context'
+    | unknown,
 ) {
-  if (typeof targetOrOptionsOrId === 'function') {
+  if (typeof targetOrScopeOrRef === 'function') {
     getMetadataArgsStorage().injectables.push({
-      target: targetOrOptionsOrId,
+      target: targetOrScopeOrRef as Constructable,
+      ref: targetOrScopeOrRef,
       scope: 'singleton',
-      ...maybeOptions,
     })
 
     return
   }
 
-  if (typeof targetOrOptionsOrId === 'object')
-    return (target: Class) => {
+  if (scopes.includes(targetOrScopeOrRef))
+    return (target: Constructable) => {
       getMetadataArgsStorage().injectables.push({
         target,
-        scope: 'singleton',
-        ...targetOrOptionsOrId,
+        ref: target,
+        scope: targetOrScopeOrRef as 'singleton' | 'transient' | 'context',
       })
     }
 
-  return (target: Class) => {
+  return (target: Constructable) => {
     getMetadataArgsStorage().injectables.push({
       target,
-      id: targetOrOptionsOrId,
+      ref: targetOrScopeOrRef,
       scope: 'singleton',
-      ...maybeOptions,
     })
   }
 }
 
-export interface Injectable {
-  id: undefined | string | symbol
-  target: Class | undefined
-  scope: 'singleton' | 'transient' | 'request'
-  resolve: undefined | ((context: Context) => unknown)
-  injects: {
-    static: Map<string | symbol, InjectableReference>
-    parameters: Map<number, InjectableReference>
-    properties: Map<string | symbol, InjectableReference>
-  }
+function register(
+  ref: unknown,
+  scope: 'singleton',
+  virtualizer: () => unknown,
+): void
+function register(
+  ref: unknown,
+  scope: 'transient' | 'context',
+  virtualizer: (context: Context) => unknown,
+): void
+function register(
+  ref: unknown,
+  scope: 'singleton' | 'transient' | 'context',
+  virtualizer: (() => unknown) | ((context: Context) => unknown),
+) {
+  getMetadataArgsStorage().injectables.push({
+    ref,
+    scope,
+    virtualizer,
+  })
 }
+
+Injectable.register = register

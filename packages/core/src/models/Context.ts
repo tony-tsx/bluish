@@ -1,20 +1,20 @@
+import { ApplicationControllerAction } from './ApplicationControllerAction.js'
 import { Module } from './Module.js'
-import { Runner } from './Runner.js'
 
 export class Context {
+  public readonly action!: ApplicationControllerAction
+
   public readonly module: Module = new Module(this)
 
-  public readonly target!: Record<string | symbol, unknown>
-
-  public readonly runner!: Runner
+  public readonly target!: any
 
   public readonly return!: any
 }
 
 export interface Context extends Bluish.Context {
-  [key: string]: unknown
-  [key: number]: unknown
-  [key: symbol]: unknown
+  [key: string]: any
+  [key: number]: any
+  [key: symbol]: any
 }
 
 declare global {

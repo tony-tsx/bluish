@@ -1,59 +1,32 @@
 import { Class } from '../typings/Class.js'
 import { Context } from '../models/Context.js'
 import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
-import { AnyMiddleware, Middleware } from '../models/Middleware.js'
-import { Argument } from './Argument.js'
-import { Controller } from './Controller.js'
-import { InjectableReference } from '../typings/InjectableReference.js'
-import { Pipe } from './Pipe.js'
 
-export function Action<
-  TContext extends Context,
-  TType extends keyof Bluish.Action.Types = keyof Bluish.Action.Types,
->(
+export function Action(
+  target: Class | object,
+  propertyKey: symbol | string,
+): void
+export function Action<TContext extends Context>(
   context: Class<TContext>,
-  {
-    middlewares: middlewareOrMiddlewares,
-    ...configuration
-  }: (Bluish.Action.Types[TType] extends never
-    ? {}
-    : Bluish.Action.Types[TType]) & {
-    middlewares?: AnyMiddleware<TContext> | AnyMiddleware<TContext>[]
-  } = {} as any,
+): (target: Class | object, propertyKey: symbol | string) => void
+export function Action<TContext extends Context>(
+  targetOrContext: Class<TContext> | Class | object,
+  maybePropertyKey?: symbol | string,
 ) {
-  const middlewares = Array.isArray(middlewareOrMiddlewares)
-    ? middlewareOrMiddlewares
-    : middlewareOrMiddlewares
-      ? [middlewareOrMiddlewares]
-      : []
+  if (maybePropertyKey !== undefined) {
+    getMetadataArgsStorage().actions.push({
+      target: targetOrContext,
+      propertyKey: maybePropertyKey,
+    })
+
+    return
+  }
 
   return (target: Class | object, propertyKey: symbol | string) => {
     getMetadataArgsStorage().actions.push({
-      context,
+      context: targetOrContext as Class<Context>,
       target,
       propertyKey,
-      middlewares: middlewares.map(middleware => {
-        if (typeof middleware === 'function')
-          return Middleware.from(context, middleware)
-
-        return middleware
-      }),
-      configuration,
     })
-  }
-}
-
-export interface Action {
-  context: Class<Context>
-  target: Class | object
-  propertyKey: string | symbol
-  middlewares: Middleware[]
-  arguments: Map<number, Argument>
-  pipes: Pipe[]
-  isIsolated: boolean
-  controller: Controller
-  metadata: Partial<Bluish.Action.Metadata>
-  injections: {
-    parameters: Map<number, InjectableReference>
   }
 }

@@ -1,44 +1,27 @@
 import { expect, it } from 'vitest'
 import { Controller } from '../Controller.js'
-import { Application } from '../../models/Application.js'
-import { Metadata } from '../Metadata.js'
+import { getMetadataArgsStorage } from '../../models/MetadataArgsStorage.js'
 
-it('adds controller to application', async () => {
+it('adds controller in metadata args storage', () => {
   @Controller
-  class Test {}
+  class TestController {}
 
-  const app = await new Application().register(Test).initialize()
-
-  expect(app.controllers[0].target).toBe(Test)
+  expect(getMetadataArgsStorage().controllers).toEqual([
+    { target: TestController },
+  ])
 })
 
-it('dont adds non registered controller to application', async () => {
-  class Test {}
-
-  const app = await new Application().register(Test).initialize()
-
-  expect(app.controllers).toHaveLength(0)
-})
-
-it('adds metadata to controller', async () => {
+it('adds controller in metadataa args storage with inherit', () => {
   @Controller
-  @Metadata('isTest', true)
-  class Test {}
+  class TestInherit {}
 
-  const app = await new Application().register(Test).initialize()
+  @Controller({ inherit: () => TestInherit })
+  class TestController {}
 
-  expect(app.controllers[0].metadata.isTest).toBe(true)
-})
-
-it('overwrite metadata in controller', async () => {
-  @Controller
-  @Metadata('isTest', false)
-  @Metadata('isTest', true)
-  class Test {
-    test() {}
-  }
-
-  const app = await new Application().register(Test).initialize()
-
-  expect(app.controllers[0].metadata.isTest).toBe(true)
+  expect(getMetadataArgsStorage().controllers).toContainEqual(
+    expect.objectContaining({
+      target: TestController,
+      inherit: expect.any(Function),
+    }),
+  )
 })

@@ -19,7 +19,7 @@ export function Use<TContext extends Context>(
   maybeHandle?: FunctionMiddleware<TContext>,
 ) {
   return (target: Class | object, propertyKey?: string | symbol) => {
-    getMetadataArgsStorage().middlewares.push({
+    getMetadataArgsStorage().middlewares.unshift({
       target,
       propertyKey,
       middleware: Middleware.from(contextOrMiddleware, maybeHandle),

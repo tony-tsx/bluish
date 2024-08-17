@@ -18,19 +18,13 @@ export enum MiddlewareRegistryLayer {
 }
 
 export abstract class Middleware<TContext extends Context = Context> {
-  public static layers: Record<MiddlewareRegistryLayer, Middleware[]> = {
-    [MiddlewareRegistryLayer.Application]: [],
-    [MiddlewareRegistryLayer.Controller]: [],
-    [MiddlewareRegistryLayer.Action]: [],
-  }
-
   public static from<TContext extends Context>(
     context: Class<TContext> | Class<TContext>[],
     handle: FunctionMiddleware<TContext>,
   ): AnonymousMiddleware<TContext>
-  public static from(
-    handle: AnyMiddleware<Context>,
-  ): AnonymousMiddleware<Context>
+  public static from<TContext extends Context>(
+    handle: AnyMiddleware<TContext>,
+  ): AnonymousMiddleware<TContext>
   public static from<TContext extends Context>(
     context: Class<TContext> | Class<TContext>[] | AnyMiddleware<Context>,
     maybeHandle?: FunctionMiddleware<TContext>,
@@ -66,24 +60,9 @@ export abstract class Middleware<TContext extends Context = Context> {
     return Middleware.from([Context], contextOrMiddleware as FunctionMiddleware)
   }
 
-  public static register<TContext extends Context>(
-    layer: MiddlewareRegistryLayer | MiddlewareRegistryLayer[],
-    contextOrMiddleware:
-      | Class<TContext>
-      | Class<TContext>[]
-      | AnyMiddleware<Context>,
-    maybeHandle?: FunctionMiddleware<TContext>,
-  ) {
-    const layers = Array.isArray(layer) ? layer : [layer]
-
-    layers.forEach(layer => {
-      this.layers[layer].push(Middleware.from(contextOrMiddleware, maybeHandle))
-    })
-  }
-
   public abstract context: Class<TContext>[]
 
-  public abstract handle(context: TContext, next: Next): unknown
+  public abstract run(context: TContext, next: Next): unknown
 }
 
 class AnonymousMiddleware<
@@ -93,7 +72,7 @@ class AnonymousMiddleware<
 
   constructor(
     context: Class<TContext> | Class<TContext>[],
-    public readonly handle: FunctionMiddleware<TContext>,
+    public readonly run: FunctionMiddleware<TContext>,
   ) {
     super()
 
@@ -111,7 +90,7 @@ function toNamedMiddleware<TContext extends Context>(
   class NamedMiddleware extends Middleware<TContext> {
     public context = Array.isArray(context) ? context : [context]
 
-    public handle = handle
+    public run = handle
   }
 
   Object.defineProperty(NamedMiddleware, 'name', {

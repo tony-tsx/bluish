@@ -1,113 +1,106 @@
-import { Argument } from '../decorators/Argument.js'
-import { Class } from '../typings/Class.js'
-import { InjectableReference } from '../typings/InjectableReference.js'
+import { Pipe } from '../decorators/Pipe.js'
+import { SelectorFunction } from '../decorators/Selector.js'
+import { Class, Constructable } from '../typings/Class.js'
 import { Context } from './Context.js'
-import { Middleware } from './Middleware.js'
+import { AnyMiddleware } from './Middleware.js'
 
-export interface ControllerArg {
-  target: Class
-  middlewares: Middleware[]
-  isIsolated: boolean
+export interface MetadataControllerArg {
+  target: Constructable
   inherit?: () => Class
+  middlewares?: AnyMiddleware[]
 }
 
-export interface ActionArg<
-  TType extends keyof Bluish.Action.Types = keyof Bluish.Action.Types,
-> {
+export interface MetadataActionArg {
+  context?: Class<Context>
+  target: Class | object
+  virtualizer?: (context: Context) => unknown
+  propertyKey?: string | symbol
+  middlewares?: AnyMiddleware[]
+}
+
+export interface MetadataArg {
+  target: Class | object
+  propertyKey: undefined | string | symbol
+  parameterIndex: undefined | number
+  key: string | symbol
+  value: unknown | (() => unknown)
+  reducer?: (value: any, previous: any) => any
+}
+
+export interface MetadataMiddlewareArg {
+  target: Class | object
+  propertyKey?: string | symbol
+  middleware: AnyMiddleware
+}
+
+export interface MetadataIsolatedArg {
+  target: Class | object
+  propertyKey?: string | symbol
+}
+
+export interface MetadataInjectArg {
+  target: Class | object
+  propertyKey?: undefined | string | symbol
+  parameterIndex?: undefined | number
+  ref?: any
+}
+
+export interface MetadataSelectorArg {
+  target: Class | object
+  propertyKey?: undefined | string | symbol
+  parameterIndex?: undefined | number
   context: Class<Context>
+  selector: SelectorFunction
+}
+
+export interface MetadataInjectableArg {
+  ref: any
+  scope: 'singleton' | 'context' | 'transient'
+  target?: Constructable
+  virtualizer?: (() => unknown) | ((context: Context) => unknown)
+}
+
+export interface MetadataInjectableHoistingArg {
   target: Class | object
   propertyKey: string | symbol
-  middlewares: Middleware[]
-  configuration: Bluish.Action.Types[TType] extends never
-    ? {}
-    : Bluish.Action.Types[TType]
 }
 
-export interface MetadataArg<
-  TKey extends keyof Bluish.Action.Metadata = keyof Bluish.Action.Metadata,
-> {
+export interface MetadataPipeArg {
   target: Class | object
   propertyKey?: string | symbol
-  parameterIndex?: number
-  key: TKey
-  value: Bluish.Action.Metadata[TKey]
-  reducer: (
-    value: Bluish.Action.Metadata[TKey],
-    previous: Bluish.Action.Metadata[TKey],
-  ) => Bluish.Action.Metadata[TKey]
-}
-
-export interface MiddlewareArg {
-  target: Class | object
-  propertyKey?: string | symbol
-  middleware: Middleware
-}
-
-export interface IsolatedArg {
-  target: Class | object
-  propertyKey?: string | symbol
-}
-
-export interface ArgumentSelectorArg {
-  context: Class<Context>
-  target: Class | object
-  propertyKey: string | symbol
-  parameterIndex: number
-  selector: (context: Context) => unknown
-}
-
-export interface InjectArg {
-  target: Class | object
-  propertyKey: string | symbol | undefined
-  parameterIndex: number | undefined
-  injectable: InjectableReference
-}
-
-export interface InjectableArg {
-  id?: string | symbol
-  target?: Class
-  scope: 'singleton' | 'request' | 'transient'
-  resolve?: (context: Context) => unknown
-}
-
-export interface PipeArg {
-  target: Class | object
-  propertyKey?: string | symbol
-  pipe: (value: unknown, argument: Argument) => unknown
+  parameterIndex?: undefined | number
+  description?: TypedPropertyDescriptor<any>
+  pipe: Pipe
 }
 
 export class MetadataArgsStorage {
-  readonly actions: ActionArg[] = []
+  public readonly actions: MetadataActionArg[] = []
 
-  readonly middlewares: MiddlewareArg[] = []
+  public readonly middlewares: MetadataMiddlewareArg[] = []
 
-  readonly isolated: IsolatedArg[] = []
+  public readonly isolated: MetadataIsolatedArg[] = []
 
-  readonly selectors: ArgumentSelectorArg[] = []
+  public readonly injects: MetadataInjectArg[] = []
 
-  readonly pipes: PipeArg[] = []
+  public readonly selectors: MetadataSelectorArg[] = []
 
-  readonly injects: InjectArg[] = []
+  public readonly pipes: MetadataPipeArg[] = []
 
-  readonly injectables: InjectableArg[] = []
+  public readonly injectables: MetadataInjectableArg[] = []
 
-  readonly controllers: ControllerArg[] = []
+  public readonly injectableHoistings: MetadataInjectableHoistingArg[] = []
 
-  readonly metadatas: MetadataArg[] = []
+  public readonly controllers: MetadataControllerArg[] = []
+
+  public readonly metadatas: MetadataArg[] = []
 }
 
-export function getMetadataArgsStorage() {
-  if (!(globalThis as any).__bluishMetadataArgsStorage) {
-    ;(globalThis as any).__bluishMetadataArgsStorage = new MetadataArgsStorage()
-  }
+export const BLUISH_METADATA_ARGS_STORAGE = '__BLUISH_METADATA_ARGS_STORAGE__'
 
-  return (globalThis as any).__bluishMetadataArgsStorage as MetadataArgsStorage
-}
+export function getMetadataArgsStorage(): MetadataArgsStorage {
+  const _global = globalThis as any
 
-declare global {
-  namespace Bluish {
-    interface ExtraMetadataArgs {
-      [key: string]: {}
-    }
-  }
+  _global[BLUISH_METADATA_ARGS_STORAGE] ??= new MetadataArgsStorage()
+
+  return _global[BLUISH_METADATA_ARGS_STORAGE]
 }

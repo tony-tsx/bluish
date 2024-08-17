@@ -1,4 +1,4 @@
-import { Middleware } from './Middleware.js'
+import { AnyMiddleware, Middleware } from './Middleware.js'
 import { Next } from '../typings/Next.js'
 import { Context } from './Context.js'
 import { Class } from '../typings/Class.js'
@@ -9,15 +9,23 @@ export class MiddlewareCompose<
 > extends Middleware<TContext> {
   public context: Class<TContext>[]
 
-  public handle: (context: TContext, next: Next) => unknown
+  public run: (context: TContext, next: Next) => unknown
 
-  public constructor(public readonly middlewares: Middleware<TContext>[]) {
+  public readonly middlewares: Middleware<TContext>[]
+
+  public constructor(middlewares: AnyMiddleware<TContext>[]) {
     super()
 
-    this.context = Array.from(
-      new Set(middlewares.flatMap(middleware => middleware.context)),
+    this.middlewares = middlewares.map(middleware =>
+      Middleware.from<TContext>(middleware),
     )
 
-    this.handle = compose(middlewares)
+    this.context = Array.from(
+      new Set(this.middlewares.flatMap(middleware => middleware.context)),
+    )
+
+    const fn = compose(this.middlewares)
+
+    this.run = (context, next) => fn(next, context)
   }
 }

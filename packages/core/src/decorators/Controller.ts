@@ -1,35 +1,29 @@
-import { Application } from '../models/Application.js'
 import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
-import { Middleware } from '../models/Middleware.js'
-import { Class } from '../typings/Class.js'
-import { InjectableReference } from '../typings/InjectableReference.js'
-import { Action } from './Action.js'
-import { Pipe } from './Pipe.js'
+import { Class, Constructable } from '../typings/Class.js'
 
 export interface ControllerOptions {
   inherit?: () => Class
 }
 
-export function Controller(target: Class): void
-export function Controller(options: ControllerOptions): (target: Class) => void
-export function Controller(targetOrOptions: ControllerOptions | Class) {
+export function Controller(target: Constructable): void
+export function Controller(
+  options: ControllerOptions,
+): (target: Constructable) => void
+export function Controller(targetOrOptions: ControllerOptions | Constructable) {
   if (typeof targetOrOptions === 'object')
-    return (target: Class) => {
+    return (target: Constructable) => {
       getMetadataArgsStorage().controllers.push({
         target,
-        isIsolated: false,
-        middlewares: [],
         inherit: targetOrOptions.inherit,
       })
     }
 
   getMetadataArgsStorage().controllers.push({
     target: targetOrOptions,
-    isIsolated: false,
-    middlewares: [],
   })
 }
 
+/*
 Controller.each = function each<T>(
   _controller: Controller,
   fn: (controller: Controller) => T,
@@ -45,20 +39,4 @@ Controller.each = function each<T>(
 
   return map
 }
-
-export interface Controller {
-  target: Class
-  actions: Action[]
-  heirs: Controller[]
-  middlewares: Middleware[]
-  isIsolated: boolean
-  application: Application
-  pipes: Pipe[]
-  metadata: Partial<Bluish.Controller.Metadata>
-  injections: {
-    static: Map<string | symbol, InjectableReference>
-    parameters: Map<number, InjectableReference>
-    properties: Map<string | symbol, InjectableReference>
-  }
-  inherit: Controller | null
-}
+*/

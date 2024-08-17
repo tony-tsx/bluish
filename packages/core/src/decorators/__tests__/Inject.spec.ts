@@ -1,218 +1,124 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { expect, it } from 'vitest'
-import { Controller } from '../Controller.js'
-import { Injectable } from '../Injectable.js'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { getMetadataArgsStorage } from '../../models/MetadataArgsStorage.js'
 import { Inject } from '../Inject.js'
-import { Action } from '../Action.js'
-import { Context } from '../../models/Context.js'
-import { Application } from '../../models/Application.js'
-import { toRunner } from '../../tools/toRunner.js'
+import BluishCoreTesting from '../../core-testing.js'
 
-it('adds injectable in app', async () => {
-  @Injectable
-  class Service {}
-
-  const app = await new Application().initialize()
-
-  expect(app.injectables).toHaveLength(1)
+beforeEach(() => {
+  BluishCoreTesting.resetMetadataArgsStorage()
 })
 
-it('adds injectable to controller witch static reference', async () => {
-  @Injectable
-  class Service {}
-
-  @Controller
-  class TestController {
-    @Inject(() => Service)
-    public static readonly service: Service
-
-    @Action(Context)
-    public static act() {}
+it('adds static inject property in metadata args storage', async () => {
+  const ref = () => String
+  class Root {
+    @Inject(ref)
+    public static readonly inject: string
   }
 
-  const app = await new Application().register(TestController).initialize()
-
-  expect(app.controllers[0].injections.static).toHaveLength(1)
+  expect(getMetadataArgsStorage().injects).toEqual([
+    { target: Root, propertyKey: 'inject', ref },
+  ])
 })
 
-it('access injectable instance in controller static property', async () => {
-  @Injectable
-  class Service {}
-
-  @Controller
-  class TestController {
-    @Inject(() => Service)
-    public static readonly service: Service
-
-    @Action(Context)
-    public static act() {}
+it('adds inject property in metadata args storage', async () => {
+  const ref = () => String
+  class Root {
+    @Inject(ref)
+    public readonly inject!: string
   }
 
-  const app = await new Application().register(TestController).initialize()
-
-  expect(app.controllers[0].target).toEqual(
-    expect.objectContaining({
-      service: expect.any(Service),
-    }),
-  )
+  expect(getMetadataArgsStorage().injects).toEqual([
+    { target: Root.prototype, propertyKey: 'inject', ref },
+  ])
 })
 
-it('adds injectable in controller property', async () => {
-  @Injectable
-  class Service {}
+it('adds multiple inject properties in metadata args storage', async () => {
+  const ref1 = () => String
+  const ref2 = () => Number
+  class Root {
+    @Inject(ref1)
+    public static readonly inject1: string
 
-  @Controller
-  class TestController {
-    @Inject(() => Service)
-    public readonly service!: Service
-
-    @Action(Context)
-    public act() {}
+    @Inject(ref2)
+    public readonly inject2!: number
   }
 
-  const app = await new Application().register(TestController).initialize()
-
-  expect(app.controllers[0].injections.properties).toHaveLength(1)
+  expect(getMetadataArgsStorage().injects).toEqual([
+    { target: Root, propertyKey: 'inject1', ref: ref1 },
+    { target: Root.prototype, propertyKey: 'inject2', ref: ref2 },
+  ])
 })
 
-it('access injectable instance in controller property', async () => {
-  @Injectable
-  class Service {}
-
-  @Controller
-  class TestController {
-    @Inject(() => Service)
-    public readonly service!: Service
-
-    @Action(Context)
-    public act() {
-      expect(this.service).toBeInstanceOf(Service)
-    }
+it('adds inject property with parameter index in metadata args storage', async () => {
+  const ref = () => String
+  class Root {
+    constructor(@Inject(ref) public readonly inject: string) {}
   }
 
-  const app = await new Application().register(TestController).initialize()
-
-  await toRunner(app.controllers[0].actions[0]).run(new Context())
+  expect(getMetadataArgsStorage().injects).toEqual([
+    { target: Root, parameterIndex: 0, ref },
+  ])
 })
 
-it('adds injectable in controller constructor', async () => {
-  @Injectable
-  class Service {}
-
-  @Controller
-  class TestController {
-    constructor(@Inject(() => Service) service: Service) {}
-
-    @Action(Context)
-    public act() {}
-  }
-
-  const app = await new Application().register(TestController).initialize()
-
-  expect(app.controllers[0].injections.constructor).toHaveLength(1)
-})
-
-it('access injectable instance in controller constructor', async () => {
-  @Injectable
-  class Service {}
-
-  @Controller
-  class TestController {
-    constructor(@Inject(() => Service) service: Service) {
-      expect(service).toBeInstanceOf(Service)
-    }
-
-    @Action(Context)
-    public act() {}
-  }
-
-  const app = await new Application().register(TestController).initialize()
-
-  await toRunner(app.controllers[0].actions[0]).run(new Context())
-})
-
-it('access injectable instance in controller constructor by reflect-metadata', async () => {
+describe('reflect metadata', async () => {
   await import('reflect-metadata')
 
-  @Injectable
-  class Service {}
-
-  @Controller
-  class TestController {
-    constructor(service: Service) {
-      expect(service).toBeInstanceOf(Service)
+  it('adds property type ref in static inject property', async () => {
+    class Root {
+      @Inject
+      public static readonly inject: string
     }
 
-    @Action(Context)
-    public act() {}
-  }
+    expect(getMetadataArgsStorage().injects).toEqual([
+      { target: Root, propertyKey: 'inject', ref: expect.any(Function) },
+    ])
+    expect(getMetadataArgsStorage().injects[0].ref()).toBe(String)
+  })
 
-  Reflect.defineMetadata('design:paramtypes', [Service], TestController)
-
-  const app = await new Application().register(TestController).initialize()
-
-  await toRunner(app.controllers[0].actions[0]).run(new Context())
-})
-
-it('nested inject', async () => {
-  @Injectable
-  class Service1 {}
-
-  @Injectable
-  class Service2 {
-    constructor(@Inject(() => Service1) public readonly service: Service1) {}
-  }
-
-  @Controller
-  class TestController {
-    constructor(@Inject(() => Service2) public readonly service: Service2) {
-      expect(service).toBeInstanceOf(Service2)
-      expect(service.service).toBeInstanceOf(Service1)
+  it('adds property type ref in inject property', async () => {
+    class Root {
+      @Inject
+      public readonly inject!: string
     }
 
-    @Action(Context)
-    public act() {}
-  }
+    expect(getMetadataArgsStorage().injects).toEqual([
+      {
+        target: Root.prototype,
+        propertyKey: 'inject',
+        ref: expect.any(Function),
+      },
+    ])
+    expect(getMetadataArgsStorage().injects[0].ref()).toBe(String)
+  })
 
-  const app = await new Application().register(TestController).initialize()
-
-  await toRunner(app.controllers[0].actions[0]).run(new Context())
-})
-
-it('share inject in two services', async () => {
-  @Injectable
-  class SharedService {}
-
-  @Injectable
-  class Service1 {
-    constructor(
-      @Inject(() => SharedService) public readonly service: SharedService,
-    ) {}
-  }
-
-  @Injectable
-  class Service2 {
-    constructor(
-      @Inject(() => SharedService) public readonly service: SharedService,
-    ) {}
-  }
-
-  @Controller
-  class TestController {
-    constructor(
-      @Inject(() => Service1) public readonly service1: Service1,
-      @Inject(() => Service2) public readonly service2: Service2,
-    ) {
-      expect(service1.service).toBeInstanceOf(SharedService)
-      expect(service2.service).toBeInstanceOf(SharedService)
-      expect(service1.service).toBe(service2.service)
+  it('adds property type ref in inject constructor arguments', async () => {
+    class Root {
+      constructor(@Inject public readonly inject: string) {}
     }
 
-    @Action(Context)
-    public act() {}
-  }
+    expect(getMetadataArgsStorage().injects).toEqual([
+      {
+        target: Root,
+        parameterIndex: 0,
+        ref: expect.any(Function),
+      },
+    ])
+    expect(getMetadataArgsStorage().injects[0].ref()).toBe(String)
+  })
 
-  const app = await new Application().register(TestController).initialize()
+  it('adds property type ref in inject action arguments', async () => {
+    class Root {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      action(@Inject inject: string) {}
+    }
 
-  await toRunner(app.controllers[0].actions[0]).run(new Context())
+    expect(getMetadataArgsStorage().injects).toEqual([
+      {
+        target: Root.prototype,
+        propertyKey: 'action',
+        parameterIndex: 0,
+        ref: expect.any(Function),
+      },
+    ])
+    expect(getMetadataArgsStorage().injects[0].ref()).toBe(String)
+  })
 })

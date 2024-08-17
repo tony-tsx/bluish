@@ -5,9 +5,9 @@ export default defineConfig({
   test: {
     mockReset: true,
     coverage: {
-      reporter: ['lcov', ['text', { skipFull: true }]],
-      include: ['packages/*/src/**/*.ts'],
+      include: ['**/src/**/*.ts'],
     },
+    include: ['**/*.spec.ts'],
   },
   plugins: [swc.vite()],
 })
