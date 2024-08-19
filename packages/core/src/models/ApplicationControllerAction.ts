@@ -63,7 +63,7 @@ export class ApplicationControllerAction {
 
     if (this.propertyKey === undefined) return this
 
-    const paramtypes = getReflectMetadata(
+    const paramtypes = getReflectMetadata<unknown[]>(
       'design:paramtypes',
       this.target,
       this.propertyKey,
@@ -75,7 +75,17 @@ export class ApplicationControllerAction {
       this.propertyKey,
     )
 
-    if (paramtypes) this.metadata.set('design:paramtypes', paramtypes)
+    if (paramtypes) {
+      for (const [parameterIndex, type] of paramtypes.entries())
+        this.arguments.injects.add({
+          target: this.target,
+          parameterIndex,
+          propertyKey: this.propertyKey,
+          ref: () => type,
+        })
+
+      this.metadata.set('design:paramtypes', paramtypes)
+    }
 
     if (returntype) this.metadata.set('design:returntype', returntype)
 

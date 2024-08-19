@@ -150,3 +150,25 @@ describe('.run', () => {
     expect(Root.action).toHaveBeenCalled()
   })
 })
+
+describe('reflect-metadata', async () => {
+  await import('reflect-metadata')
+
+  it('adds injectable ref in static action', async () => {
+    @Controller
+    class Test {
+      @Action
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      public static action(arg: string) {}
+    }
+
+    const application = await new Application().controller(Test).initialize()
+
+    expect(
+      application.controllers
+        .findByConstructable(Test)!
+        .actions.findByStaticPropertyKey('action')!
+        .arguments.injects.get(0)!.ref,
+    ).toBe(String)
+  })
+})
