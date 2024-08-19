@@ -136,7 +136,7 @@ namespace BluishCoreTesting {
 
       const action =
         typeof target === 'function'
-          ? controller.actions.findStaticByPropertyKey(propertyKey)
+          ? controller.actions.findByStaticPropertyKey(propertyKey)
           : controller.actions.findByPropertyKey(propertyKey)
 
       await action!.run(context)

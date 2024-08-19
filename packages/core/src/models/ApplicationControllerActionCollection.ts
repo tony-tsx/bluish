@@ -7,7 +7,7 @@ export class ApplicationControllerActionCollection extends Set<ApplicationContro
     super()
   }
 
-  public findStaticByPropertyKey(propertyKey: string | symbol) {
+  public findByStaticPropertyKey(propertyKey: string | symbol) {
     for (const action of this) {
       if (!action.isStatic) continue
 

@@ -25,7 +25,7 @@ it('resolve injectable', async () => {
 
   await application.controllers
     .findByConstructable(Root)!
-    .actions.findStaticByPropertyKey('action')!
+    .actions.findByStaticPropertyKey('action')!
     .run(new Context())
 
   expect(Root.action).toHaveBeenCalledWith(expect.any(Service))
@@ -51,7 +51,7 @@ it('resolve injectable hoisting', async () => {
 
   await application.controllers
     .findByConstructable(Root)!
-    .actions.findStaticByPropertyKey('action')!
+    .actions.findByStaticPropertyKey('action')!
     .run(new Context())
 
   expect(Root.action).toHaveBeenCalledWith('hoisting')
@@ -102,7 +102,7 @@ it('use injectable hoisting to create custom injectable', async () => {
 
   await application.controllers
     .findByConstructable(Root)!
-    .actions.findStaticByPropertyKey('action')!
+    .actions.findByStaticPropertyKey('action')!
     .run(new Context())
 
   expect(Root.action).toHaveBeenCalledWith(expect.any(Repository))

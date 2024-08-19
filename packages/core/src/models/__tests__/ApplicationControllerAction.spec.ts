@@ -19,7 +19,7 @@ describe('.run', () => {
 
     await application.controllers
       .findByConstructable(Root)!
-      .actions.findStaticByPropertyKey('action')!
+      .actions.findByStaticPropertyKey('action')!
       .run(new Context())
   })
 
@@ -56,7 +56,7 @@ describe('.run', () => {
 
     await application.controllers
       .findByConstructable(Root)!
-      .actions.findStaticByPropertyKey('action')!
+      .actions.findByStaticPropertyKey('action')!
       .run(new Context())
 
     expect(middleware).toHaveBeenCalledWith(
@@ -83,7 +83,7 @@ describe('.run', () => {
 
     await application.controllers
       .findByConstructable(Root)!
-      .actions.findStaticByPropertyKey('action')!
+      .actions.findByStaticPropertyKey('action')!
       .run(new TestContext())
 
     expect(middleware).toHaveBeenCalledWith(
@@ -110,7 +110,7 @@ describe('.run', () => {
 
     await application.controllers
       .findByConstructable(Root)!
-      .actions.findStaticByPropertyKey('action')!
+      .actions.findByStaticPropertyKey('action')!
       .run(new Context())
 
     expect(middleware).not.toHaveBeenCalled()
@@ -134,7 +134,7 @@ describe('.run', () => {
 
     await application.controllers
       .findByConstructable(Root)!
-      .actions.findStaticByPropertyKey('action')!
+      .actions.findByStaticPropertyKey('action')!
       .run(new Context())
 
     expect(middleware1).toHaveBeenCalledWith(
