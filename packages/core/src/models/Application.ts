@@ -16,6 +16,7 @@ import { Module } from './Module.js'
 export interface ApplicationOptions {
   middlewares?: AnyMiddleware[]
   controllers?: (Class | string)[]
+  pipes?: Pipe[]
 }
 
 export class Application {
@@ -35,10 +36,16 @@ export class Application {
     return this.#isInitialized
   }
 
-  constructor({ middlewares = [], controllers = [] }: ApplicationOptions = {}) {
+  constructor({
+    middlewares = [],
+    controllers = [],
+    pipes = [],
+  }: ApplicationOptions = {}) {
     for (const middleware of middlewares) this.use(middleware)
 
     for (const controller of controllers) this.controller(controller)
+
+    for (const pipe of pipes) this.pipe(pipe)
 
     this.pipe(injectable)
   }
