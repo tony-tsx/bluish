@@ -2,7 +2,7 @@ import { MetadataInjectArg } from './MetadataArgsStorage.js'
 import { Module } from './Module.js'
 
 export class ApplicationSourceInject {
-  public readonly ref: unknown
+  public readonly ref: any
 
   constructor(public readonly _inject: MetadataInjectArg) {
     this.ref =
