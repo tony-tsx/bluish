@@ -62,7 +62,8 @@
     "bytes": "^3.1.2",
     "content-type": "^1.0.5",
     "qs": "^6.11.2",
-    "type-is": "^1.6.18"
+    "type-is": "^1.6.18",
+    "path-to-regexp": "^7.0.0"
   },
   "peerDependencies": {
     "@bluish/core": "^0.0.0"
