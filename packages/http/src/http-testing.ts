@@ -1,7 +1,7 @@
 import { HttpMethod } from './decorators/Route.js'
 import { HttpContext } from './models/HttpContext.js'
-import { Request } from './models/Request.js'
-import { Response } from './models/Response.js'
+import { HttpRequest } from './models/HttpRequest.js'
+import { HttpResponse } from './models/HttpResponse.js'
 
 namespace HttpTesting {
   export interface ToContextInput {
@@ -19,8 +19,8 @@ namespace HttpTesting {
   }: ToContextInput = {}): HttpContext {
     const url = new URL(_url, `http://${process.env.HOST ?? '0.0.0.0'}`)
 
-    const request = new Request()
-    const response = new Response()
+    const request = new HttpRequest()
+    const response = new HttpResponse()
 
     Object.assign(request, {
       method: method.toUpperCase(),

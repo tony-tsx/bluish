@@ -1,21 +1,64 @@
-import { ApplicationSourcePropertiesInjectCollection } from './ApplicationSourcePropertiesInjectCollection.js'
-import { ApplicationSourcePropertiesSelectorCollection } from './ApplicationSourcePropertiesSelectorCollection.js'
+import { Class } from '../typings/Class.js'
+import { ApplicationSourcePipeCollection } from './ApplicationSourcePipeCollection.js'
+import { ApplicationSourceProperty } from './ApplicationSourceProperty.js'
+import {
+  MetadataArg,
+  MetadataInjectArg,
+  MetadataInputArg,
+  MetadataPipeArg,
+  MetadataUsableArg,
+} from './MetadataArgsStorage.js'
 import { Module } from './Module.js'
 
 export class ApplicationSourceProperties {
-  public readonly selectors: ApplicationSourcePropertiesSelectorCollection
+  #properties = new Map<string | symbol, ApplicationSourceProperty>()
 
-  public readonly injects: ApplicationSourcePropertiesInjectCollection
-
-  constructor() {
-    this.selectors = new ApplicationSourcePropertiesSelectorCollection()
-
-    this.injects = new ApplicationSourcePropertiesInjectCollection()
+  public get length() {
+    return this.#properties.size
   }
 
-  public async toProperties(module: Module) {
-    const properties = await this.selectors.toProperties(module)
+  constructor(
+    public readonly target: Class | object,
+    public readonly parent: ApplicationSourcePipeCollection | null,
+  ) {}
 
-    return await this.injects.toProperties(module, properties)
+  public get(propertyKey: string | symbol) {
+    return this.#properties.get(propertyKey)
+  }
+
+  #get(propertyKey: string | symbol) {
+    if (!this.#properties.has(propertyKey))
+      this.#properties.set(
+        propertyKey,
+        new ApplicationSourceProperty(this.target, propertyKey, this.parent),
+      )
+
+    return this.#properties.get(propertyKey)!
+  }
+
+  public add(
+    _arg:
+      | MetadataInputArg
+      | MetadataPipeArg
+      | MetadataInjectArg
+      | MetadataArg
+      | MetadataUsableArg,
+  ) {
+    if (_arg.propertyKey === undefined)
+      throw new TypeError(`Metadata arg must have a property key`)
+
+    this.#get(_arg.propertyKey).add(_arg)
+  }
+
+  public async to(module: Module) {
+    const properties: Record<string | symbol, unknown> = {}
+
+    return Promise.all(
+      Array.from(this.#properties).map(async ([propertyKey, property]) => {
+        const value = await property.to(module)
+
+        properties[propertyKey] = value
+      }),
+    ).then(() => properties)
   }
 }

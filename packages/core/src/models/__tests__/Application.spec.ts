@@ -3,7 +3,8 @@ import { Application } from '../Application.js'
 import BluishCoreTesting from '../../core-testing.js'
 import { Controller } from '../../decorators/Controller.js'
 import { Context } from '../Context.js'
-import { ApplicationControllerAction } from '../ApplicationControllerAction.js'
+import { ApplicationSourceAction } from '../ApplicationSourceAction.js'
+import { Middleware } from '../Middleware.js'
 
 beforeEach(() => {
   BluishCoreTesting.resetMetadataArgsStorage()
@@ -18,7 +19,7 @@ it('isInitialized return false is not initialized', () => {
 })
 
 it('isInitialized return true is initialized', async () => {
-  const app = await new Application().initialize()
+  const app = await new Application().bootstrap()
 
   expect(app.isInitialized).toBe(true)
 })
@@ -27,9 +28,9 @@ it('adds controller to application', async () => {
   @Controller
   class Test {}
 
-  const app = await new Application().controller(Test).initialize()
+  const app = await new Application().useController(Test).bootstrap()
 
-  expect(app.controllers).toHaveLength(1)
+  expect(app.controllers).toHaveLength(1 + 1)
 })
 
 it('adds multiple controllers to application', async () => {
@@ -40,32 +41,32 @@ it('adds multiple controllers to application', async () => {
   class Test2 {}
 
   const app = await new Application()
-    .controller(Test)
-    .controller(Test2)
-    .initialize()
+    .useController(Test)
+    .useController(Test2)
+    .bootstrap()
 
-  expect(app.controllers).toHaveLength(2)
+  expect(app.controllers).toHaveLength(2 + 1)
 })
 
 it('dont adds non registered controller to application', async () => {
   class Test {}
 
-  const app = await new Application().controller(Test).initialize()
+  const app = await new Application().useController(Test).bootstrap()
 
-  expect(app.controllers).toHaveLength(0)
+  expect(app.controllers).toHaveLength(0 + 1)
 })
 
 it('adds middleware to application', async () => {
-  const app = await new Application().use(() => {}).initialize()
+  const app = await new Application().useMiddleware(() => {}).bootstrap()
 
   expect(app.middlewares).toHaveLength(1)
 })
 
 it('adds multiple middlewares to application', async () => {
   const app = await new Application()
-    .use(() => {})
-    .use(() => {})
-    .initialize()
+    .useMiddleware(() => {})
+    .useMiddleware(() => {})
+    .bootstrap()
 
   expect(app.middlewares).toHaveLength(2)
 })
@@ -75,7 +76,9 @@ it('adds middleware with specific context to application', async () => {
     // Custom context implementation
   }
 
-  const app = await new Application().use(CustomContext, () => {}).initialize()
+  const app = await new Application()
+    .useMiddleware(new Middleware(CustomContext, () => {}))
+    .bootstrap()
 
   expect(app.middlewares).toHaveLength(1)
 })
@@ -90,24 +93,24 @@ it('adds middleware with multiple contexts to application', async () => {
   }
 
   const app = await new Application()
-    .use(CustomContext1, () => {})
-    .use(CustomContext2, () => {})
-    .initialize()
+    .useMiddleware(CustomContext1, () => {})
+    .useMiddleware(CustomContext2, () => {})
+    .bootstrap()
 
   expect(app.middlewares).toHaveLength(2)
 })
 
 it('adds pipe to application', () => {
-  const app = new Application().pipe(() => {})
+  const app = new Application().usePipe(() => {})
 
   expect(app.pipes).toHaveLength(2)
 })
 
 it('adds multiple pipes to application', async () => {
   const app = await new Application()
-    .pipe(() => {})
-    .pipe(() => {})
-    .initialize()
+    .usePipe(() => {})
+    .usePipe(() => {})
+    .bootstrap()
 
   expect(app.pipes).toHaveLength(3)
 })
@@ -115,9 +118,9 @@ it('adds multiple pipes to application', async () => {
 it('adds virtual action to application', async () => {
   const app = new Application()
 
-  expect(app.action(() => {})).toBeInstanceOf(ApplicationControllerAction)
+  expect(app.useAction(() => {})).toBeInstanceOf(ApplicationSourceAction)
 
-  await app.initialize()
+  await app.bootstrap()
 
   expect(app.controllers).toHaveLength(1)
 })
@@ -129,11 +132,11 @@ it('adds virtual action with specific context to application', async () => {
 
   const app = new Application()
 
-  expect(app.action(CustomContext, () => {})).toBeInstanceOf(
-    ApplicationControllerAction,
+  expect(app.useAction(CustomContext, () => {})).toBeInstanceOf(
+    ApplicationSourceAction,
   )
 
-  await app.initialize()
+  await app.bootstrap()
 
   expect(app.controllers).toHaveLength(1)
 })
@@ -151,10 +154,10 @@ it('adds controllers from glob path', async () => {
   })
 
   const app = await new Application()
-    .controller('/home/controllers/**/*.js')
-    .initialize()
+    .useController('/home/controllers/**/*.js')
+    .bootstrap()
 
-  expect(app.controllers).toHaveLength(1)
+  expect(app.controllers).toHaveLength(1 + 1)
 })
 
 it('adds multiple controllers from glob path', async () => {
@@ -188,10 +191,10 @@ it('adds multiple controllers from glob path', async () => {
   })
 
   const app = await new Application()
-    .controller('/home/controllers/**/*.js')
-    .initialize()
+    .useController('/home/controllers/**/*.js')
+    .bootstrap()
 
-  expect(app.controllers).toHaveLength(3)
+  expect(app.controllers).toHaveLength(3 + 1)
 })
 
 it('adds middlewares directly in application configuration argument', async () => {
@@ -200,7 +203,7 @@ it('adds middlewares directly in application configuration argument', async () =
 
   const app = await new Application({
     middlewares: [middleware1, middleware2],
-  }).initialize()
+  }).bootstrap()
 
   expect(app.middlewares).toHaveLength(2)
 })
@@ -214,9 +217,9 @@ it('adds controllers directly in application configuration argument', async () =
 
   const app = await new Application({
     controllers: [Test1, Test2],
-  }).initialize()
+  }).bootstrap()
 
-  expect(app.controllers).toHaveLength(2)
+  expect(app.controllers).toHaveLength(2 + 1)
 })
 
 it('adds controllers with mixed types in application configuration argument', async () => {
@@ -240,9 +243,9 @@ it('adds controllers with mixed types in application configuration argument', as
 
   const app = await new Application({
     controllers: [Test1, Test2, '/home/controllers/test-3-1.js'],
-  }).initialize()
+  }).bootstrap()
 
-  expect(app.controllers).toHaveLength(2)
+  expect(app.controllers).toHaveLength(2 + 1)
 })
 
 it('does not add controller decorated but not registered', async () => {
@@ -250,7 +253,7 @@ it('does not add controller decorated but not registered', async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   class Test {}
 
-  const app = await new Application().initialize()
+  const app = await new Application().bootstrap()
 
-  expect(app.controllers).toHaveLength(0)
+  expect(app.controllers).toHaveLength(0 + 1)
 })

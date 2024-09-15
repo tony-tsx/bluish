@@ -44,6 +44,7 @@ export function Inject(
     else throw new Error(`Invalid inject decorator usage`)
 
     getMetadataArgsStorage().injects.push({
+      type: 'inject',
       target,
       propertyKey,
       parameterIndex,
@@ -59,6 +60,7 @@ export function Inject(
     parameterIndex: undefined | number,
   ) => {
     getMetadataArgsStorage().injects.push({
+      type: 'inject',
       target,
       propertyKey,
       parameterIndex,

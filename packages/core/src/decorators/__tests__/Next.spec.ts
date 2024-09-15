@@ -15,11 +15,11 @@ it('inject next', async () => {
 
   vi.spyOn(Root, 'action')
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   await app.controllers
     .findByConstructable(Root)!
-    .actions.findStaticByPropertyKey('action')!
+    .actions.findByStaticPropertyKey('action')!
     .run(new Context())
 
   expect(Root.action).toHaveBeenCalledWith(expect.any(Function))

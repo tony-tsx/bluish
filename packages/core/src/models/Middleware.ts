@@ -1,101 +1,111 @@
-import { Class } from '../typings/Class.js'
-import { Next } from '../typings/Next.js'
+import type { Next } from '../decorators/Next.js'
+import type { IUsable } from '../decorators/Use.js'
+import type { Class } from '../typings/Class.js'
+import { Application } from './Application.js'
+import { ApplicationSource } from './ApplicationSource.js'
+import { ApplicationSourceAction } from './ApplicationSourceAction.js'
+import { ApplicationSourceArgument } from './ApplicationSourceArgument.js'
+import { ApplicationSourceProperty } from './ApplicationSourceProperty.js'
 import { Context } from './Context.js'
 
-export type FunctionMiddleware<TContext extends Context = Context> = (
-  context: TContext,
-  next: Next,
-) => unknown | Promise<unknown>
+export type FunctionMiddleware<
+  TContext extends Context = Context,
+  TThis extends Middleware<TContext> = Middleware<TContext>,
+> = (this: TThis, context: TContext, next: Next) => unknown | Promise<unknown>
 
-export type AnyMiddleware<TContext extends Context = Context> =
+export type AnyMiddleware<TContext extends Context = any> =
   | Middleware<TContext>
   | FunctionMiddleware<TContext>
 
-export enum MiddlewareRegistryLayer {
-  Application = 'application',
-  Controller = 'controller',
-  Action = 'action',
-}
+export class Middleware<TContext extends Context = Context> implements IUsable {
+  public readonly context: Class<TContext>[]
 
-export abstract class Middleware<TContext extends Context = Context> {
+  public run: (context: TContext, next: Next) => unknown
+
   public static from<TContext extends Context>(
     context: Class<TContext> | Class<TContext>[],
-    handle: FunctionMiddleware<TContext>,
-  ): AnonymousMiddleware<TContext>
+    run: FunctionMiddleware<TContext>,
+  ): Middleware<TContext>
   public static from<TContext extends Context>(
-    handle: AnyMiddleware<TContext>,
-  ): AnonymousMiddleware<TContext>
+    run: FunctionMiddleware<TContext>,
+  ): Middleware<TContext>
   public static from<TContext extends Context>(
-    context: Class<TContext> | Class<TContext>[] | AnyMiddleware<Context>,
-    maybeHandle?: FunctionMiddleware<TContext>,
-  ): AnonymousMiddleware<Context> | AnonymousMiddleware<TContext>
-  public static from<TContext extends Context>(
-    contextOrMiddleware:
+    contextOrAnyMiddleware:
       | Class<TContext>
       | Class<TContext>[]
-      | AnyMiddleware<Context>,
-    maybeHandle?: FunctionMiddleware<TContext>,
-  ) {
-    if (Array.isArray(contextOrMiddleware)) {
-      if (!maybeHandle) throw new Error('Middleware handle is required')
-
-      if (!maybeHandle.name)
-        return new AnonymousMiddleware(contextOrMiddleware, maybeHandle)
-
-      return toNamedMiddleware(
-        maybeHandle.name,
-        contextOrMiddleware,
-        maybeHandle,
-      )
-    }
-
-    if (typeof contextOrMiddleware === 'object') return contextOrMiddleware
-
-    if (maybeHandle)
-      return Middleware.from(
-        [contextOrMiddleware as Class<TContext>],
-        maybeHandle,
+      | AnyMiddleware<TContext>,
+    maybeFunctionMiddleware?: FunctionMiddleware<TContext>,
+  ): Middleware<TContext>
+  public static from<TContext extends Context>(
+    contextOrAnyMiddleware:
+      | Class<TContext>
+      | Class<TContext>[]
+      | AnyMiddleware<TContext>,
+    maybeFunctionMiddleware?: FunctionMiddleware<TContext>,
+  ): Middleware<TContext> {
+    if (typeof maybeFunctionMiddleware === 'function')
+      return new Middleware(
+        contextOrAnyMiddleware as Class<TContext> | Class<TContext>[],
+        maybeFunctionMiddleware,
       )
 
-    return Middleware.from([Context], contextOrMiddleware as FunctionMiddleware)
+    if (typeof contextOrAnyMiddleware === 'function')
+      return new Middleware(
+        contextOrAnyMiddleware as FunctionMiddleware<TContext>,
+      )
+
+    return contextOrAnyMiddleware as Middleware<TContext>
   }
 
-  public abstract context: Class<TContext>[]
-
-  public abstract run(context: TContext, next: Next): unknown
-}
-
-class AnonymousMiddleware<
-  TContext extends Context = Context,
-> extends Middleware<TContext> {
-  public context: Class<TContext>[]
-
+  constructor(run: FunctionMiddleware<TContext>)
   constructor(
     context: Class<TContext> | Class<TContext>[],
-    public readonly run: FunctionMiddleware<TContext>,
+    run: FunctionMiddleware<TContext>,
+  )
+  constructor(
+    runOrContext:
+      | FunctionMiddleware<TContext>
+      | Class<TContext>
+      | Class<TContext>[],
+    maybeRun?: FunctionMiddleware<TContext>,
+  )
+  constructor(
+    runOrContext:
+      | FunctionMiddleware<TContext>
+      | Class<TContext>
+      | Class<TContext>[],
+    maybeRun?: FunctionMiddleware<TContext>,
   ) {
-    super()
+    if (typeof maybeRun === 'function') {
+      this.context = Array.isArray(runOrContext)
+        ? (runOrContext as Class<TContext>[])
+        : [runOrContext as Class<TContext>]
+      this.run = maybeRun
 
-    this.context = Array.isArray(context)
-      ? (context as Class<TContext>[])
-      : [context as Class<TContext>]
-  }
-}
+      return this
+    }
 
-function toNamedMiddleware<TContext extends Context>(
-  name: string,
-  context: Class<TContext> | Class<TContext>[],
-  handle: FunctionMiddleware<TContext>,
-) {
-  class NamedMiddleware extends Middleware<TContext> {
-    public context = Array.isArray(context) ? context : [context]
-
-    public run = handle
+    this.context = [Context as unknown as Class<TContext>]
+    this.run = runOrContext as FunctionMiddleware<TContext>
   }
 
-  Object.defineProperty(NamedMiddleware, 'name', {
-    value: `${name[0].toUpperCase()}${name.slice(1)}Middleware`,
-  })
+  public use(
+    target:
+      | Application
+      | ApplicationSource
+      | ApplicationSourceAction
+      | ApplicationSourceArgument
+      | ApplicationSourceProperty,
+  ) {
+    if (target instanceof Application)
+      return void target.middlewares.add(this as unknown as Middleware<Context>)
 
-  return new NamedMiddleware()
+    if (target instanceof ApplicationSource)
+      return void target.middlewares.add(this as unknown as Middleware<Context>)
+
+    if (target instanceof ApplicationSourceAction)
+      return void target.middlewares.add(this as unknown as Middleware<Context>)
+
+    throw new TypeError()
+  }
 }

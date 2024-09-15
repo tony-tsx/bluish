@@ -5,7 +5,7 @@ export function getReflectMetadata<T = unknown>(
 export function getReflectMetadata<T = unknown>(
   metadataKey: any,
   target: Object,
-  propertyKey: string | symbol,
+  propertyKey: undefined | string | symbol,
 ): undefined | T
 export function getReflectMetadata(
   metadataKey: any,

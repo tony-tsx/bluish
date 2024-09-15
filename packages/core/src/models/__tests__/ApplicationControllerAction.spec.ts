@@ -3,7 +3,8 @@ import { Application } from '../Application.js'
 import { Controller } from '../../decorators/Controller.js'
 import { Action } from '../../decorators/Action.js'
 import { Context } from '../Context.js'
-import { Use } from '../../decorators/Use.js'
+import { UseMiddleware } from '../../decorators/UseMiddleware.js'
+import { Metadata } from '../../core.js'
 
 describe('.run', () => {
   it('run static action', async () => {
@@ -15,7 +16,7 @@ describe('.run', () => {
 
     vi.spyOn(Root, 'action')
 
-    const application = await new Application().controller(Root).initialize()
+    const application = await new Application().useController(Root).bootstrap()
 
     await application.controllers
       .findByConstructable(Root)!
@@ -32,11 +33,11 @@ describe('.run', () => {
 
     vi.spyOn(Root.prototype, 'action')
 
-    const application = await new Application().controller(Root).initialize()
+    const application = await new Application().useController(Root).bootstrap()
 
     await application.controllers
       .findByConstructable(Root)!
-      .actions.findByPropertyKey('action')!
+      .actions.findByInstancePropertyKey('action')!
       .run(new Context())
   })
 
@@ -46,13 +47,13 @@ describe('.run', () => {
     @Controller
     class Root {
       @Action
-      @Use(middleware)
+      @UseMiddleware(middleware)
       public static action() {}
     }
 
     vi.spyOn(Root, 'action')
 
-    const application = await new Application().controller(Root).initialize()
+    const application = await new Application().useController(Root).bootstrap()
 
     await application.controllers
       .findByConstructable(Root)!
@@ -73,13 +74,13 @@ describe('.run', () => {
     @Controller
     class Root {
       @Action
-      @Use(middleware)
+      @UseMiddleware(middleware)
       public static action() {}
     }
 
     vi.spyOn(Root, 'action')
 
-    const application = await new Application().controller(Root).initialize()
+    const application = await new Application().useController(Root).bootstrap()
 
     await application.controllers
       .findByConstructable(Root)!
@@ -100,13 +101,13 @@ describe('.run', () => {
     @Controller
     class Root {
       @Action
-      @Use(TestContext, middleware)
+      @UseMiddleware(TestContext, middleware)
       public static action() {}
     }
 
     vi.spyOn(Root, 'action')
 
-    const application = await new Application().controller(Root).initialize()
+    const application = await new Application().useController(Root).bootstrap()
 
     await application.controllers
       .findByConstructable(Root)!
@@ -123,14 +124,14 @@ describe('.run', () => {
     @Controller
     class Root {
       @Action
-      @Use(middleware1)
-      @Use(middleware2)
+      @UseMiddleware(middleware1)
+      @UseMiddleware(middleware2)
       public static action() {}
     }
 
     vi.spyOn(Root, 'action')
 
-    const application = await new Application().controller(Root).initialize()
+    const application = await new Application().useController(Root).bootstrap()
 
     await application.controllers
       .findByConstructable(Root)!
@@ -162,13 +163,31 @@ describe('reflect-metadata', async () => {
       public static action(arg: string) {}
     }
 
-    const application = await new Application().controller(Test).initialize()
+    const application = await new Application().useController(Test).bootstrap()
 
     expect(
       application.controllers
         .findByConstructable(Test)!
         .actions.findByStaticPropertyKey('action')!
-        .arguments.injects.get(0)!.ref,
+        .arguments.get(0)!.inject!.ref,
     ).toBe(String)
   })
+})
+
+it('adds action metadata', async () => {
+  @Controller
+  class Test {
+    @Action
+    @Metadata('isTest', true)
+    public action() {}
+  }
+
+  const application = await new Application().useController(Test).bootstrap()
+
+  expect(
+    application.controllers
+      .findByConstructable(Test)!
+      .actions.findByInstancePropertyKey('action')!
+      .metadata.get('isTest'),
+  ).toBe(true)
 })

@@ -1,8 +1,8 @@
-import { ApplicationControllerAction } from './ApplicationControllerAction.js'
+import { ApplicationSourceAction } from './ApplicationSourceAction.js'
 import { Module } from './Module.js'
 
 export class Context {
-  public readonly action!: ApplicationControllerAction
+  public readonly action!: ApplicationSourceAction
 
   public readonly module: Module = new Module(this)
 

@@ -14,6 +14,9 @@ it('adds injectable hoisting in metadata args storage', () => {
   }
 
   expect(getMetadataArgsStorage().injectableHoistings).toEqual([
-    { target: Service.prototype, propertyKey: 'hosting' },
+    expect.objectContaining({
+      target: Service.prototype,
+      propertyKey: 'hosting',
+    }),
   ])
 })

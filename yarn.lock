@@ -88,7 +88,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@bluish/http@workspace:packages/http":
+"@bluish/http-router@workspace:^, @bluish/http-router@workspace:packages/http-router":
+  version: 0.0.0-use.local
+  resolution: "@bluish/http-router@workspace:packages/http-router"
+  dependencies:
+    "@bluish/core": "workspace:^"
+    "@bluish/http": "workspace:^"
+  peerDependencies:
+    "@bluish/core": ^0.0.0
+    "@bluish/http": ^0.0.0
+  languageName: unknown
+  linkType: soft
+
+"@bluish/http@workspace:^, @bluish/http@workspace:packages/http":
   version: 0.0.0-use.local
   resolution: "@bluish/http@workspace:packages/http"
   dependencies:
@@ -111,6 +123,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@bluish/node-http-server@workspace:packages/node-http-server":
+  version: 0.0.0-use.local
+  resolution: "@bluish/node-http-server@workspace:packages/node-http-server"
+  dependencies:
+    "@bluish/core": "workspace:^"
+    "@bluish/http": "workspace:^"
+    "@bluish/http-router": "workspace:^"
+  peerDependencies:
+    "@bluish/core": ^0.0.0
+    "@bluish/http": ^0.0.0
+    "@bluish/http-router": ^0.0.0
+  languageName: unknown
+  linkType: soft
+
 "@bluish/ornate-guard@workspace:packages/ornate-guard":
   version: 0.0.0-use.local
   resolution: "@bluish/ornate-guard@workspace:packages/ornate-guard"
@@ -124,7 +150,7 @@ __metadata:
     "@types/type-is": "npm:^1"
     bytes: "npm:^3.1.2"
     content-type: "npm:^1.0.5"
-    ornate-guard: "npm:0.0.0-experimental-8532427"
+    ornate-guard: "npm:0.0.0-experimental-9f67356"
     path-to-regexp: "npm:^7.0.0"
     qs: "npm:^6.11.2"
     supertest: "npm:^7.0.0"
@@ -5776,10 +5802,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ornate-guard@npm:0.0.0-experimental-8532427":
-  version: 0.0.0-experimental-8532427
-  resolution: "ornate-guard@npm:0.0.0-experimental-8532427"
-  checksum: 10c0/6307d032ebbf1da7eeef9d1edb78e479fc4d978db0292ee98108796423822566d1acdf87504711ffef312dec336b991846cfe17ebe307f0218cb3d5ef3aa76d3
+"ornate-guard@npm:0.0.0-experimental-9f67356":
+  version: 0.0.0-experimental-9f67356
+  resolution: "ornate-guard@npm:0.0.0-experimental-9f67356"
+  checksum: 10c0/41e689292633c804a4e37d5ee7a5215cffc67751bea6e96829b435d564d659e1b323eeba5c910919a576c8251cf8a920c79cf1aedc5325f05b7157aa6fc3c107
   languageName: node
   linkType: hard
 

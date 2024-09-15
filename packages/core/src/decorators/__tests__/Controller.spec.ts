@@ -7,21 +7,6 @@ it('adds controller in metadata args storage', () => {
   class TestController {}
 
   expect(getMetadataArgsStorage().controllers).toEqual([
-    { target: TestController },
+    expect.objectContaining({ target: TestController }),
   ])
-})
-
-it('adds controller in metadataa args storage with inherit', () => {
-  @Controller
-  class TestInherit {}
-
-  @Controller({ inherit: () => TestInherit })
-  class TestController {}
-
-  expect(getMetadataArgsStorage().controllers).toContainEqual(
-    expect.objectContaining({
-      target: TestController,
-      inherit: expect.any(Function),
-    }),
-  )
 })

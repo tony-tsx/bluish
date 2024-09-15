@@ -9,28 +9,6 @@ describe('.from', async () => {
     expect(middleware).toBeInstanceOf(Middleware)
   })
 
-  it('set anonymous middleware with arrow function', () => {
-    const middleware = Middleware.from((context, next) => next())
-
-    expect(middleware.constructor.name).toBe('AnonymousMiddleware')
-  })
-
-  it('set anonymous middleware with function', () => {
-    const middleware = Middleware.from(function (context, next) {
-      return next()
-    })
-
-    expect(middleware.constructor.name).toBe('AnonymousMiddleware')
-  })
-
-  it('set named middleware with function', () => {
-    const middleware = Middleware.from(function test(context, next) {
-      return next()
-    })
-
-    expect(middleware.constructor.name).toBe('TestMiddleware')
-  })
-
   it('with specific context', () => {
     class TestContext extends Context {}
 

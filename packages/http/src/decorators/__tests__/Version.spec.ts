@@ -1,53 +1,17 @@
-import { expect, it, vi } from 'vitest'
-import { Controller } from '../Controller.js'
+import { expect, it } from 'vitest'
 import { Version } from '../Version.js'
-import { Application } from '@bluish/core'
-import { GET } from '../Route.js'
-import supertest from 'supertest'
-import { toHttpServer } from '../../../.test/toHttpServer.js'
+import { getMetadataArgsStorage } from '@bluish/core'
+import { HTTP_VERSION } from '../../constants/constants.js'
 
-it('TODO', async () => {
-  @Controller('/users')
-  @Version(1)
-  class UsersV1 {
-    @GET
-    public static list() {
-      return []
-    }
-  }
+it('adds version in metadata', () => {
+  @Version('1.0')
+  class Root {}
 
-  @Controller('/users')
-  @Version(2)
-  class UsersV2 {
-    @GET
-    public static list() {
-      return []
-    }
-  }
-
-  vi.spyOn(UsersV1, 'list')
-  vi.spyOn(UsersV2, 'list')
-
-  const application = await new Application()
-    .register(UsersV1)
-    .register(UsersV2)
-    .initialize()
-
-  await supertest(toHttpServer(application)).get('/v1/users').send().expect(200)
-
-  expect(UsersV1.list).toHaveBeenCalledWith()
-
-  expect(UsersV2.list).not.toHaveBeenCalled()
-
-  await supertest(toHttpServer(application)).get('/v2/users').send().expect(200)
-
-  expect(UsersV2.list).toHaveBeenCalledWith()
-
-  expect(UsersV1.list).toHaveBeenCalledTimes(1)
-
-  await supertest(toHttpServer(application)).get('/users').send().expect(200)
-
-  expect(UsersV1.list).toHaveBeenCalledTimes(1)
-
-  expect(UsersV2.list).toHaveBeenCalledTimes(2)
+  expect(getMetadataArgsStorage().metadatas).toEqual([
+    expect.objectContaining({
+      target: Root,
+      key: HTTP_VERSION,
+      value: ['1.0'],
+    }),
+  ])
 })

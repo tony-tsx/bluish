@@ -15,7 +15,7 @@ it('adds static inject property in metadata args storage', async () => {
   }
 
   expect(getMetadataArgsStorage().injects).toEqual([
-    { target: Root, propertyKey: 'inject', ref },
+    expect.objectContaining({ target: Root, propertyKey: 'inject', ref }),
   ])
 })
 
@@ -27,7 +27,11 @@ it('adds inject property in metadata args storage', async () => {
   }
 
   expect(getMetadataArgsStorage().injects).toEqual([
-    { target: Root.prototype, propertyKey: 'inject', ref },
+    expect.objectContaining({
+      target: Root.prototype,
+      propertyKey: 'inject',
+      ref,
+    }),
   ])
 })
 
@@ -43,8 +47,16 @@ it('adds multiple inject properties in metadata args storage', async () => {
   }
 
   expect(getMetadataArgsStorage().injects).toEqual([
-    { target: Root, propertyKey: 'inject1', ref: ref1 },
-    { target: Root.prototype, propertyKey: 'inject2', ref: ref2 },
+    expect.objectContaining({
+      target: Root,
+      propertyKey: 'inject1',
+      ref: ref1,
+    }),
+    expect.objectContaining({
+      target: Root.prototype,
+      propertyKey: 'inject2',
+      ref: ref2,
+    }),
   ])
 })
 
@@ -55,7 +67,7 @@ it('adds inject property with parameter index in metadata args storage', async (
   }
 
   expect(getMetadataArgsStorage().injects).toEqual([
-    { target: Root, parameterIndex: 0, ref },
+    expect.objectContaining({ target: Root, parameterIndex: 0, ref }),
   ])
 })
 
@@ -69,7 +81,11 @@ describe('reflect metadata', async () => {
     }
 
     expect(getMetadataArgsStorage().injects).toEqual([
-      { target: Root, propertyKey: 'inject', ref: expect.any(Function) },
+      expect.objectContaining({
+        target: Root,
+        propertyKey: 'inject',
+        ref: expect.any(Function),
+      }),
     ])
     expect(getMetadataArgsStorage().injects[0].ref()).toBe(String)
   })
@@ -81,11 +97,11 @@ describe('reflect metadata', async () => {
     }
 
     expect(getMetadataArgsStorage().injects).toEqual([
-      {
+      expect.objectContaining({
         target: Root.prototype,
         propertyKey: 'inject',
         ref: expect.any(Function),
-      },
+      }),
     ])
     expect(getMetadataArgsStorage().injects[0].ref()).toBe(String)
   })
@@ -96,11 +112,11 @@ describe('reflect metadata', async () => {
     }
 
     expect(getMetadataArgsStorage().injects).toEqual([
-      {
+      expect.objectContaining({
         target: Root,
         parameterIndex: 0,
         ref: expect.any(Function),
-      },
+      }),
     ])
     expect(getMetadataArgsStorage().injects[0].ref()).toBe(String)
   })
@@ -112,12 +128,12 @@ describe('reflect metadata', async () => {
     }
 
     expect(getMetadataArgsStorage().injects).toEqual([
-      {
+      expect.objectContaining({
         target: Root.prototype,
         propertyKey: 'action',
         parameterIndex: 0,
         ref: expect.any(Function),
-      },
+      }),
     ])
     expect(getMetadataArgsStorage().injects[0].ref()).toBe(String)
   })

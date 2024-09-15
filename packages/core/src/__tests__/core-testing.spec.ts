@@ -3,7 +3,7 @@ import BluishCoreTesting from '../core-testing.js'
 import { Action } from '../decorators/Action.js'
 import { Controller } from '../decorators/Controller.js'
 import { Context } from '../models/Context.js'
-import { Selector } from '../decorators/Selector.js'
+import { Input } from '../decorators/Input.js'
 import { Inject } from '../decorators/Inject.js'
 import { Injectable } from '../decorators/Injectable.js'
 
@@ -54,7 +54,7 @@ describe('.runSelector', () => {
     const context = new Context()
 
     const value = await BluishCoreTesting.runSelector(
-      Selector(() => 'test'),
+      Input(() => 'test'),
       context,
     )
 

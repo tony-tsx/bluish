@@ -12,7 +12,7 @@ it('adds controller metadata in metadata args storage', () => {
   class Root {}
 
   expect(getMetadataArgsStorage().metadatas).toEqual([
-    { target: Root, key: 'isTest', value: true },
+    expect.objectContaining({ target: Root, key: 'isTest', value: true }),
   ])
 })
 
@@ -23,6 +23,11 @@ it('adds controller action metadata in metadata args storage', () => {
   }
 
   expect(getMetadataArgsStorage().metadatas).toEqual([
-    { target: Root, propertyKey: 'action', key: 'isTest', value: true },
+    expect.objectContaining({
+      target: Root,
+      propertyKey: 'action',
+      key: 'isTest',
+      value: true,
+    }),
   ])
 })

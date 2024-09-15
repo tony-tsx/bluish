@@ -1,23 +1,10 @@
 import { Class, Metadata } from '@bluish/core'
+import { HTTP_VERSION } from '../constants/constants.js'
 
-export function Version(verison: number) {
+export function Version(version: unknown) {
   return (target: Class | object, propertyKey?: string | symbol) => {
-    Metadata('@http:version', verison)(target, propertyKey)
-  }
-}
-
-declare global {
-  namespace Bluish {
-    namespace Controller {
-      interface Metadata {
-        '@http:version': number
-      }
-    }
-
-    namespace Action {
-      interface Metadata {
-        '@http:version': number
-      }
-    }
+    Metadata(HTTP_VERSION, [version], (value, previous) =>
+      previous.concat(value),
+    )(target, propertyKey)
   }
 }

@@ -1,4 +1,3 @@
-import { Context } from '../models/Context.js'
 import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
 import { Constructable } from '../typings/Class.js'
 
@@ -23,6 +22,7 @@ export function Injectable(
 ) {
   if (typeof targetOrScopeOrRef === 'function') {
     getMetadataArgsStorage().injectables.push({
+      type: 'injectable',
       target: targetOrScopeOrRef as Constructable,
       ref: targetOrScopeOrRef,
       scope: 'singleton',
@@ -34,6 +34,7 @@ export function Injectable(
   if (scopes.includes(targetOrScopeOrRef))
     return (target: Constructable) => {
       getMetadataArgsStorage().injectables.push({
+        type: 'injectable',
         target,
         ref: target,
         scope: targetOrScopeOrRef as 'singleton' | 'transient' | 'context',
@@ -42,6 +43,7 @@ export function Injectable(
 
   return (target: Constructable) => {
     getMetadataArgsStorage().injectables.push({
+      type: 'injectable',
       target,
       ref: targetOrScopeOrRef,
       scope: 'singleton',
@@ -51,23 +53,15 @@ export function Injectable(
 
 function register(
   ref: unknown,
-  scope: 'singleton',
-  virtualizer: () => unknown,
-): void
-function register(
-  ref: unknown,
-  scope: 'transient' | 'context',
-  virtualizer: (context: Context) => unknown,
-): void
-function register(
-  ref: unknown,
   scope: 'singleton' | 'transient' | 'context',
-  virtualizer: (() => unknown) | ((context: Context) => unknown),
+  handle: (...args: any[]) => unknown,
+  ...refs: any[]
 ) {
   getMetadataArgsStorage().injectables.push({
+    type: 'injectable',
     ref,
     scope,
-    virtualizer,
+    virtualizer: { handle, refs },
   })
 }
 

@@ -1,5 +1,4 @@
 import { MetadataInjectArg } from './MetadataArgsStorage.js'
-import { Module } from './Module.js'
 
 export class ApplicationSourceInject {
   public readonly ref: any
@@ -9,13 +8,5 @@ export class ApplicationSourceInject {
       typeof this._inject.ref === 'function'
         ? this._inject.ref()
         : this._inject.ref
-  }
-
-  public async resolve(module: Module) {
-    const injectable = module.find(this._inject.ref)
-
-    const value = await injectable.toInstance(module)
-
-    return value
   }
 }

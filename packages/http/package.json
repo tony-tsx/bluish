@@ -16,6 +16,31 @@
       "types": "./dist/esm/http-testing.d.ts",
       "require": "./dist/cjs/http-testing.js",
       "import": "./dist/esm/http-testing.js"
+    },
+    "./json": {
+      "types": "./dist/esm/modules/json.d.ts",
+      "require": "./dist/cjs/modules/json.js",
+      "import": "./dist/esm/modules/json.js"
+    },
+    "./url-encoded": {
+      "types": "./dist/esm/modules/url-encoded.d.ts",
+      "require": "./dist/cjs/modules/url-encoded.js",
+      "import": "./dist/esm/modules/url-encoded.js"
+    },
+    "./cookie": {
+      "types": "./dist/esm/modules/cookie.d.ts",
+      "require": "./dist/cjs/modules/cookie.js",
+      "import": "./dist/esm/modules/cookie.js"
+    },
+    "./session": {
+      "types": "./dist/esm/modules/session.d.ts",
+      "require": "./dist/cjs/modules/session.js",
+      "import": "./dist/esm/modules/session.js"
+    },
+    "./cors": {
+      "types": "./dist/esm/modules/cors.d.ts",
+      "require": "./dist/cjs/modules/cors.js",
+      "import": "./dist/esm/modules/cors.js"
     }
   },
   "license": "MIT",
@@ -30,7 +55,8 @@
     "build:esm": "yarn build:esm:tsc && yarn build:esm:package.json",
     "build:cjs": "yarn build:cjs:tsc && yarn build:cjs:package.json",
     "build": "yarn run build:esm && yarn run build:cjs",
-    "prepublish": "yarn run build"
+    "test": "vitest --run",
+    "prepublish": "yarn run test && yarn run build"
   },
   "dependencies": {
     "bytes": "^3.1.2",

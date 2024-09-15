@@ -21,7 +21,7 @@ it('resolve injectable', async () => {
 
   vi.spyOn(Root, 'action')
 
-  const application = await new Application().controller(Root).initialize()
+  const application = await new Application().useController(Root).bootstrap()
 
   await application.controllers
     .findByConstructable(Root)!
@@ -47,7 +47,7 @@ it('resolve injectable hoisting', async () => {
 
   vi.spyOn(Root, 'action')
 
-  const application = await new Application().controller(Root).initialize()
+  const application = await new Application().useController(Root).bootstrap()
 
   await application.controllers
     .findByConstructable(Root)!
@@ -98,7 +98,7 @@ it('use injectable hoisting to create custom injectable', async () => {
 
   vi.spyOn(Root, 'action')
 
-  const application = await new Application().controller(Root).initialize()
+  const application = await new Application().useController(Root).bootstrap()
 
   await application.controllers
     .findByConstructable(Root)!
@@ -111,4 +111,50 @@ it('use injectable hoisting to create custom injectable', async () => {
       entity: User,
     }),
   )
+})
+
+it('', async () => {
+  @Controller
+  class Root {
+    @Action
+    public static action(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      @Inject(() => Context) context: Context,
+    ) {}
+  }
+
+  vi.spyOn(Root, 'action')
+
+  const application = await new Application().useController(Root).bootstrap()
+
+  await application.controllers
+    .findByConstructable(Root)!
+    .actions.findByStaticPropertyKey('action')!
+    .run(new Context())
+
+  expect(Root.action).toHaveBeenCalledWith(expect.any(Context))
+})
+
+it('', async () => {
+  Injectable.register('t', 'context', c => c, Context)
+
+  @Controller
+  class Root {
+    @Action
+    public static action(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      @Inject('t') context: Context,
+    ) {}
+  }
+
+  vi.spyOn(Root, 'action')
+
+  const application = await new Application().useController(Root).bootstrap()
+
+  await application.controllers
+    .findByConstructable(Root)!
+    .actions.findByStaticPropertyKey('action')!
+    .run(new Context())
+
+  expect(Root.action).toHaveBeenCalledWith(expect.any(Context))
 })

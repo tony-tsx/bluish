@@ -1,28 +1,44 @@
-import { Context } from '../models/Context.js'
+import { Application } from '../models/Application.js'
+import { ApplicationSource } from '../models/ApplicationSource.js'
+import { ApplicationSourceAction } from '../models/ApplicationSourceAction.js'
+import { ApplicationSourceArgument } from '../models/ApplicationSourceArgument.js'
+import { ApplicationSourceProperty } from '../models/ApplicationSourceProperty.js'
 import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
-import {
-  AnyMiddleware,
-  FunctionMiddleware,
-  Middleware,
-} from '../models/Middleware.js'
 import { Class } from '../typings/Class.js'
 
-export function Use(
-  middleware: AnyMiddleware,
-): (target: Class | object, propertyKey?: string | symbol) => void
-export function Use<TContext extends Context>(
-  context: Class<TContext>,
-  middleware: FunctionMiddleware<TContext>,
-): (target: Class | object, propertyKey?: string | symbol) => void
-export function Use<TContext extends Context>(
-  contextOrMiddleware: Class<TContext> | AnyMiddleware,
-  maybeHandle?: FunctionMiddleware<TContext>,
-) {
-  return (target: Class | object, propertyKey?: string | symbol) => {
-    getMetadataArgsStorage().middlewares.unshift({
+export interface IUsable {
+  use(
+    target:
+      | Application
+      | ApplicationSource
+      | ApplicationSourceAction
+      | ApplicationSourceArgument
+      | ApplicationSourceProperty,
+  ): void
+}
+
+export function Use(usable: IUsable) {
+  return (
+    target: Class | object,
+    propertyKey?: undefined | string | symbol,
+    parameterIndexOrPropertyDecorator?:
+      | undefined
+      | number
+      | TypedPropertyDescriptor<any>,
+  ) => {
+    getMetadataArgsStorage().usables.unshift({
+      type: 'usable',
       target,
-      propertyKey,
-      middleware: Middleware.from(contextOrMiddleware, maybeHandle),
+      propertyKey: propertyKey,
+      parameterIndex:
+        typeof parameterIndexOrPropertyDecorator === 'number'
+          ? parameterIndexOrPropertyDecorator
+          : undefined,
+      propertyDescriptor:
+        typeof parameterIndexOrPropertyDecorator === 'object'
+          ? parameterIndexOrPropertyDecorator
+          : undefined,
+      usable,
     })
   }
 }

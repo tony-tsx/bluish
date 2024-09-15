@@ -1,27 +1,8 @@
-import { Class, Metadata } from '@bluish/core'
+import { Use } from '@bluish/core'
+import { ApplicationHttpSourceAccept } from '../models/ApplicationHttpSourceAccept.js'
 
-export function Accept(accept: string | string[]) {
-  const accepts = Array.isArray(accept) ? accept : [accept]
-
-  return (target: Class | Object, propertyKey: string | symbol) => {
-    Metadata('http:accept', accepts, (value, previous) =>
-      previous.concat(value),
-    )(target, propertyKey)
-  }
+export function Accept(accept: ApplicationHttpSourceAccept) {
+  return Use(accept)
 }
 
-declare global {
-  namespace Bluish {
-    namespace Controller {
-      interface Metadata {
-        '@http:accept': string[]
-      }
-    }
-
-    namespace Action {
-      interface Metadata {
-        '@http:accept': string[]
-      }
-    }
-  }
-}
+export type Accept = ApplicationHttpSourceAccept

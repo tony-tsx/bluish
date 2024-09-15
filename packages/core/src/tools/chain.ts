@@ -1,4 +1,4 @@
-import { Next } from '../typings/Next.js'
+import { Next } from '../decorators/Next.js'
 
 export function chain<
   TArgs extends any[],

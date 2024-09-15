@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { it, expect, beforeEach, describe } from 'vitest'
+import { it, expect, beforeEach, describe, vi } from 'vitest'
 import { Controller } from '../../decorators/Controller.js'
 import { Action } from '../../decorators/Action.js'
 import { Application } from '../Application.js'
 import BluishCoreTesting from '../../core-testing.js'
 import { Metadata } from '../../decorators/Metadata.js'
-import { Selector } from '../../decorators/Selector.js'
+import { Input } from '../../decorators/Input.js'
 import { Inject } from '../../decorators/Inject.js'
-import { Use } from '../../decorators/Use.js'
-import { Pipe } from '../../decorators/Pipe.js'
+import { UseMiddleware } from '../../decorators/UseMiddleware.js'
+import { UsePipe } from '../../decorators/UsePipe.js'
 import { Context } from '../Context.js'
 import { Injectable } from '../../decorators/Injectable.js'
 
@@ -23,7 +23,7 @@ it('adds static action in controller', async () => {
     public static action() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.actions).toHaveLength(1)
 })
@@ -35,7 +35,7 @@ it('adds instance action in controller', async () => {
     public action() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.actions).toHaveLength(1)
 })
@@ -50,7 +50,7 @@ it('adds multiple actions in controller', async () => {
     public action2() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.actions).toHaveLength(2)
 })
@@ -60,7 +60,7 @@ it('adds metadata in controller', async () => {
   @Metadata('isTest', true)
   class Root {}
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(
     Object.fromEntries(app.controllers.findByConstructable(Root)!.metadata),
@@ -71,14 +71,35 @@ it('adds metadata in controller', async () => {
 
 it('overrides metadata in controller', async () => {
   @Controller
-  @Metadata('isTest', false)
   @Metadata('isTest', true)
+  @Metadata('isTest', false)
   class Root {
     @Action
     public action() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
+
+  expect(
+    Object.fromEntries(app.controllers.findByConstructable(Root)!.metadata),
+  ).toEqual({
+    isTest: true,
+  })
+})
+
+it('overrides metadata in controller inherith', async () => {
+  @Controller
+  @Metadata('isTest', false)
+  class Parent {
+    @Action
+    public action() {}
+  }
+
+  @Controller
+  @Metadata('isTest', true)
+  class Root extends Parent {}
+
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(
     Object.fromEntries(app.controllers.findByConstructable(Root)!.metadata),
@@ -90,42 +111,42 @@ it('overrides metadata in controller', async () => {
 it('adds constructor argument selector in controller', async () => {
   @Controller
   class Root {
-    constructor(@Selector(() => true) service: unknown) {}
+    constructor(@Input(() => true) service: unknown) {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   const controller = app.controllers.findByConstructable(Root)!
 
-  expect(controller.arguments.selectors).toHaveLength(1)
+  expect(controller.arguments.get(0)?.input).toHaveLength(1)
 })
 
 it('adds instance property selector in controller', async () => {
   @Controller
   class Root {
-    @Selector(() => true)
+    @Input(() => true)
     public service: unknown
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   const controller = app.controllers.findByConstructable(Root)!
 
-  expect(controller.properties.selectors).toHaveLength(1)
+  expect(controller.properties.get('service')?.input).toHaveLength(1)
 })
 
 it('adds static property selector in controller', async () => {
   @Controller
   class Root {
-    @Selector(() => true)
+    @Input(() => true)
     public static service: unknown
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   const controller = app.controllers.findByConstructable(Root)!
 
-  expect(controller.properties.selectors).toHaveLength(1)
+  expect(controller.static.get('service')).toBeDefined()
 })
 
 it('adds constructor argument inject in controller', async () => {
@@ -134,35 +155,35 @@ it('adds constructor argument inject in controller', async () => {
     constructor(@Inject service: unknown) {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   const controller = app.controllers.findByConstructable(Root)!
 
-  expect(controller.arguments.injects).toHaveLength(1)
+  expect(controller.arguments.get(0)?.inject).toBeDefined()
 })
 
 it('adds middleware in controller', async () => {
   @Controller
-  @Use(() => {})
+  @UseMiddleware(() => {})
   class Root {
     @Action
     public action() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.middlewares).toHaveLength(1)
 })
 
 it('adds pipe in controller', async () => {
   @Controller
-  @Pipe(() => {})
+  @UsePipe(() => {})
   class Root {
     @Action
     public action() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.pipes).toHaveLength(1)
 })
@@ -177,7 +198,7 @@ it('adds multiple static actions in controller', async () => {
     public static action2() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.actions).toHaveLength(2)
 })
@@ -192,35 +213,35 @@ it('adds multiple instance actions in controller', async () => {
     public action2() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.actions).toHaveLength(2)
 })
 
 it('adds multiple middlewares in controller', async () => {
   @Controller
-  @Use(() => {})
-  @Use(() => {})
+  @UseMiddleware(() => {})
+  @UseMiddleware(() => {})
   class Root {
     @Action
     public action() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.middlewares).toHaveLength(2)
 })
 
 it('adds multiple pipes in controller', async () => {
   @Controller
-  @Pipe(() => {})
-  @Pipe(() => {})
+  @UsePipe(() => {})
+  @UsePipe(() => {})
   class Root {
     @Action
     public action() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   expect(app.controllers.findByConstructable(Root)!.pipes).toHaveLength(2)
 })
@@ -232,13 +253,13 @@ it('build controller instance', async () => {
     public action() {}
   }
 
-  const app = await new Application().controller(Root).initialize()
+  const app = await new Application().useController(Root).bootstrap()
 
   const context = new Context()
 
   await app.controllers
     .findByConstructable(Root)!
-    .actions.findByPropertyKey('action')!
+    .actions.findByInstancePropertyKey('action')!
     .run(context)
 
   expect(context.target).toBeInstanceOf(Root)
@@ -255,11 +276,11 @@ describe('reflect metadata design:paramtypes', async () => {
       constructor(public service: Service) {}
     }
 
-    const app = await new Application().controller(Root).initialize()
+    const app = await new Application().useController(Root).bootstrap()
     const controller = app.controllers.findByConstructable(Root)!
 
-    expect(controller.arguments.injects).toHaveLength(1)
-    expect(controller.arguments.injects.get(0)!.ref).toBe(Service)
+    expect(controller.arguments).toHaveLength(1)
+    expect(controller.arguments.get(0)!.inject!.ref).toBe(Service)
   })
 
   it('adds multiple injections by metadata in constructor', async () => {
@@ -274,12 +295,12 @@ describe('reflect metadata design:paramtypes', async () => {
       ) {}
     }
 
-    const app = await new Application().controller(Root).initialize()
+    const app = await new Application().useController(Root).bootstrap()
     const controller = app.controllers.findByConstructable(Root)!
 
-    expect(controller.arguments.injects).toHaveLength(2)
-    expect(controller.arguments.injects.get(0)!.ref).toBe(Service1)
-    expect(controller.arguments.injects.get(1)!.ref).toBe(Service2)
+    expect(controller.arguments).toHaveLength(2)
+    expect(controller.arguments.get(0)!.inject!.ref).toBe(Service1)
+    expect(controller.arguments.get(1)!.inject!.ref).toBe(Service2)
   })
 
   it('adds multiple injections by metadata in property', async () => {
@@ -295,17 +316,15 @@ describe('reflect metadata design:paramtypes', async () => {
       public service2!: Service2
     }
 
-    const app = await new Application().controller(Root).initialize()
+    const app = await new Application().useController(Root).bootstrap()
 
     expect(
-      app.controllers
-        .findByConstructable(Root)!
-        .properties.injects.get('service1')!.ref,
+      app.controllers.findByConstructable(Root)!.properties.get('service1')!
+        .inject!.ref,
     ).toBe(Service1)
     expect(
-      app.controllers
-        .findByConstructable(Root)!
-        .properties.injects.get('service2')!.ref,
+      app.controllers.findByConstructable(Root)!.properties.get('service2')!
+        .inject!.ref,
     ).toBe(Service2)
   })
 
@@ -318,12 +337,11 @@ describe('reflect metadata design:paramtypes', async () => {
       public service!: Service
     }
 
-    const app = await new Application().controller(Root).initialize()
+    const app = await new Application().useController(Root).bootstrap()
 
     expect(
-      app.controllers
-        .findByConstructable(Root)!
-        .properties.injects.get('service')!.ref,
+      app.controllers.findByConstructable(Root)!.properties.get('service')!
+        .inject!.ref,
     ).toBe(Service)
   })
 
@@ -342,15 +360,15 @@ describe('reflect metadata design:paramtypes', async () => {
       public service3!: Service1
     }
 
-    const app = await new Application().controller(Root).initialize()
+    const app = await new Application().useController(Root).bootstrap()
     const controller = app.controllers.findByConstructable(Root)!
 
-    expect(controller.arguments.injects).toHaveLength(2)
-    expect(controller.arguments.injects.get(0)!.ref).toBe(Service1)
-    expect(controller.arguments.injects.get(1)!.ref).toBe(Service2)
+    expect(controller.arguments).toHaveLength(2)
+    expect(controller.arguments.get(0)!.inject!.ref).toBe(Service1)
+    expect(controller.arguments.get(1)!.inject!.ref).toBe(Service2)
 
-    expect(controller.properties.injects).toHaveLength(1)
-    expect(controller.properties.injects.get('service3')!.ref).toBe(Service1)
+    expect(controller.properties).toHaveLength(1)
+    expect(controller.properties.get('service3')!.inject!.ref).toBe(Service1)
   })
 })
 
@@ -368,9 +386,9 @@ it('adds actions from decorators in another controller', async () => {
   }
 
   const app = await new Application()
-    .controller(DecoratorController)
-    .controller(Root)
-    .initialize()
+    .useController(DecoratorController)
+    .useController(Root)
+    .bootstrap()
 
   const decoratorController =
     app.controllers.findByConstructable(DecoratorController)!
@@ -392,9 +410,9 @@ it('adds metadata from decorators in another controller', async () => {
   }
 
   const app = await new Application()
-    .controller(DecoratorController)
-    .controller(Root)
-    .initialize()
+    .useController(DecoratorController)
+    .useController(Root)
+    .bootstrap()
 
   const decoratorController =
     app.controllers.findByConstructable(DecoratorController)!
@@ -409,7 +427,7 @@ it('adds metadata from decorators in another controller', async () => {
 it("don't adds selectors from decorators in another controller", async () => {
   @Controller
   class DecoratorController {
-    constructor(@Selector(() => true) service: unknown) {}
+    constructor(@Input(() => true) service: unknown) {}
   }
 
   @Controller
@@ -419,16 +437,16 @@ it("don't adds selectors from decorators in another controller", async () => {
   }
 
   const app = await new Application()
-    .controller(DecoratorController)
-    .controller(Root)
-    .initialize()
+    .useController(DecoratorController)
+    .useController(Root)
+    .bootstrap()
 
   const decoratorController =
     app.controllers.findByConstructable(DecoratorController)!
   const rootController = app.controllers.findByConstructable(Root)!
 
-  expect(decoratorController.arguments.selectors).toHaveLength(1)
-  expect(rootController.arguments.selectors).toHaveLength(0)
+  expect(decoratorController.arguments).toHaveLength(1)
+  expect(rootController.arguments).toHaveLength(0)
 })
 
 it("don't adds injects from decorators in another controller", async () => {
@@ -444,21 +462,21 @@ it("don't adds injects from decorators in another controller", async () => {
   }
 
   const app = await new Application()
-    .controller(DecoratorController)
-    .controller(Root)
-    .initialize()
+    .useController(DecoratorController)
+    .useController(Root)
+    .bootstrap()
 
   const decoratorController =
     app.controllers.findByConstructable(DecoratorController)!
   const rootController = app.controllers.findByConstructable(Root)!
 
-  expect(decoratorController.arguments.injects).toHaveLength(1)
-  expect(rootController.arguments.injects).toHaveLength(0)
+  expect(decoratorController.arguments).toHaveLength(1)
+  expect(rootController.arguments).toHaveLength(0)
 })
 
 it("don't adds middlewares from decorators in another controller", async () => {
   @Controller
-  @Use(() => {})
+  @UseMiddleware(() => {})
   class DecoratorController {
     @Action
     public action() {}
@@ -471,9 +489,9 @@ it("don't adds middlewares from decorators in another controller", async () => {
   }
 
   const app = await new Application()
-    .controller(DecoratorController)
-    .controller(Root)
-    .initialize()
+    .useController(DecoratorController)
+    .useController(Root)
+    .bootstrap()
 
   const decoratorController =
     app.controllers.findByConstructable(DecoratorController)!
@@ -485,7 +503,7 @@ it("don't adds middlewares from decorators in another controller", async () => {
 
 it("don't adds pipes from decorators in another controller", async () => {
   @Controller
-  @Pipe(() => {})
+  @UsePipe(() => {})
   class DecoratorController {
     @Action
     public action() {}
@@ -498,9 +516,9 @@ it("don't adds pipes from decorators in another controller", async () => {
   }
 
   const app = await new Application()
-    .controller(DecoratorController)
-    .controller(Root)
-    .initialize()
+    .useController(DecoratorController)
+    .useController(Root)
+    .bootstrap()
 
   const decoratorController =
     app.controllers.findByConstructable(DecoratorController)!
@@ -522,16 +540,16 @@ it('adds injectable dependency in constructor arguments', async () => {
     public action() {}
   }
 
-  const app = await new Application().controller(Test).initialize()
+  const app = await new Application().useController(Test).bootstrap()
 
   const controller = app.controllers.findByConstructable(Test)!
 
   const context = new Context()
 
   // @ts-expect-error: TODO
-  context.action = controller.actions.findByPropertyKey('action')!
+  context.action = controller.actions.findByInstancePropertyKey('action')!
 
-  const instance = await controller.toInstance(context)
+  const instance = await controller.to(context)
 
   expect(instance).toBeInstanceOf(Test)
   expect(instance.service).toBeInstanceOf(Service)
@@ -552,16 +570,16 @@ it('adds injectable dependency in class properties', async () => {
     public action() {}
   }
 
-  const app = await new Application().controller(Test).initialize()
+  const app = await new Application().useController(Test).bootstrap()
 
   const controller = app.controllers.findByConstructable(Test)!
 
   const context = new Context()
 
   // @ts-expect-error: TODO
-  context.action = controller.actions.findByPropertyKey('action')!
+  context.action = controller.actions.findByInstancePropertyKey('action')!
 
-  const instance = await controller.toInstance(context)
+  const instance = await controller.to(context)
 
   expect(instance).toBeInstanceOf(Test)
   expect(instance.service).toBeInstanceOf(Service)
@@ -577,7 +595,7 @@ it('adds injectable dependency in static class properties', async () => {
     public static readonly service: Service
   }
 
-  const app = await new Application().controller(Test).initialize()
+  const app = await new Application().useController(Test).bootstrap()
 
   const controller = app.controllers.findByConstructable(Test)!
 
@@ -588,19 +606,139 @@ it('adds injectable dependency in static class properties', async () => {
   )
 })
 
-it('adds action from extends controller', async () => {
-  @Controller
-  class Super {
-    @Action
-    public action() {}
-  }
+describe('inheritance', () => {
+  it('inherits middleware', async () => {
+    const middleware = vi.fn()
+    @UseMiddleware(middleware)
+    class Parent {}
 
-  @Controller
-  class Root extends Super {}
+    @Controller({ inherits: { middlewares: true } })
+    class Root extends Parent {}
 
-  const app = await new Application().controller(Root).initialize()
+    const app = await new Application().useController(Root).bootstrap()
 
-  const controller = app.controllers.findByConstructable(Root)!
+    expect(app.controllers.findByConstructable(Root)!.middlewares).toHaveLength(
+      1,
+    )
+  })
 
-  expect(controller.actions).toHaveLength(1)
+  it('inherits action', async () => {
+    @Controller
+    class Super {
+      @Action
+      public action() {}
+    }
+
+    @Controller({ inherits: { actions: true } })
+    class Root extends Super {}
+
+    const app = await new Application().useController(Root).bootstrap()
+
+    const controller = app.controllers.findByConstructable(Root)!
+
+    expect(controller.actions).toHaveLength(1)
+  })
+
+  it('inherits metadata', async () => {
+    @Controller
+    @Metadata('isTest', true)
+    class Parent {}
+
+    @Controller({ inherits: { metadata: true } })
+    class Root extends Parent {}
+
+    const app = await new Application().useController(Root).bootstrap()
+
+    expect(
+      Object.fromEntries(app.controllers.findByConstructable(Root)!.metadata),
+    ).toEqual({
+      isTest: true,
+    })
+  })
+
+  it('inherits selectors', async () => {
+    @Controller
+    class Parent {
+      constructor(@Input(() => true) service: unknown) {}
+    }
+
+    @Controller({ inherits: { selectors: true } })
+    class Root extends Parent {}
+
+    const app = await new Application().useController(Root).bootstrap()
+
+    const controller = app.controllers.findByConstructable(Root)!
+
+    expect(controller.arguments).toHaveLength(1)
+  })
+
+  it('inherits injects', async () => {
+    @Controller
+    class Parent {
+      constructor(@Inject service: unknown) {}
+    }
+
+    @Controller({ inherits: { injects: true } })
+    class Root extends Parent {}
+
+    const app = await new Application().useController(Root).bootstrap()
+
+    const controller = app.controllers.findByConstructable(Root)!
+
+    expect(controller.arguments.get(0)?.inject).toBeDefined()
+  })
+
+  it('inherits multiple actions', async () => {
+    @Controller
+    class Parent {
+      @Action
+      public action1() {}
+
+      @Action
+      public action2() {}
+    }
+
+    @Controller({ inherits: { actions: true } })
+    class Root extends Parent {}
+
+    const app = await new Application().useController(Root).bootstrap()
+
+    const controller = app.controllers.findByConstructable(Root)!
+
+    expect(controller.actions).toHaveLength(2)
+  })
+
+  describe("don't", () => {
+    it('inherits middleware', async () => {
+      const middleware = vi.fn()
+      @UseMiddleware(middleware)
+      class Parent {}
+
+      @Controller({ inherits: { middlewares: false } })
+      class Root extends Parent {}
+
+      const app = await new Application().useController(Root).bootstrap()
+
+      expect(
+        app.controllers.findByConstructable(Root)!.middlewares,
+      ).toHaveLength(0)
+    })
+
+    it('inherits action', async () => {
+      @Controller
+      class Super {
+        @Action
+        public action() {}
+      }
+
+      @Controller({ inherits: { actions: false } })
+      class Root extends Super {}
+
+      const app = await new Application().useController(Root).bootstrap()
+
+      const controller = app.controllers.findByConstructable(Root)!
+
+      expect(controller.actions).toHaveLength(0)
+    })
+  })
 })

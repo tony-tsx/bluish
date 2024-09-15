@@ -4,40 +4,81 @@ import { ApplicationInjectable } from './ApplicationInjectable.js'
 import { Application } from './Application.js'
 import { InjectableNotFoundError } from '../errors/InjectableNotFoundError.js'
 
-const storage = new Map<unknown, unknown>()
+const singletons = new Map<Application, Map<unknown, unknown>>()
 
-const refs = new Map<unknown, ApplicationInjectable>()
+const refs = new Map<Application, Map<unknown, ApplicationInjectable>>()
+
+function refToString(ref: unknown) {
+  if (typeof ref === 'string') return `string:${ref}`
+  if (typeof ref === 'symbol') return `symbol:${ref.description}`
+  if (typeof ref === 'function') return `function:${ref.name}`
+  if (ref === null) return 'null'
+  if (typeof ref === 'object') return `object:${ref.constructor.name}`
+  return `unknown:${ref}`
+}
 
 export class Module {
-  #store = new Map<unknown, unknown>()
+  #context = new Map<unknown, unknown>()
 
   public readonly context!: Context
+
   public readonly application!: Application
-
-  public get pipes() {
-    if (this.context) return this.context.action.pipes
-
-    return this.application.pipes
-  }
 
   constructor(public readonly scope: Application | Context) {
     if (scope instanceof Application) this.application = scope
-    else if (scope instanceof Context) this.context = scope
-    else throw new Error('TODO')
+    else if (scope instanceof Context) {
+      this.context = scope
+      Object.defineProperty(this, 'application', {
+        get: () => this.context.action.controller.application,
+        enumerable: false,
+        configurable: false,
+      })
+    } else throw new Error('TODO')
+  }
+
+  public hasSingleton(ref: unknown) {
+    if (!singletons.has(this.application))
+      singletons.set(this.application, new Map())
+
+    return singletons.get(this.application)!.has(ref)
+  }
+
+  public getSingleton(ref: unknown) {
+    if (!this.hasSingleton(ref)) throw new Error('TODO')
+
+    return singletons.get(this.application)!.get(ref)
+  }
+
+  public hasRef(ref: unknown) {
+    if (!refs.has(this.application)) refs.set(this.application, new Map())
+
+    return refs.get(this.application)!.has(ref)
+  }
+
+  public getRef(ref: unknown) {
+    if (!this.hasRef(ref)) throw new Error('TODO')
+
+    return refs.get(this.application)!.get(ref)
+  }
+
+  public setRef(ref: unknown, injectable: ApplicationInjectable) {
+    if (!refs.has(this.application)) refs.set(this.application, new Map())
+
+    refs.get(this.application)!.set(ref, injectable)
   }
 
   public find(ref: unknown) {
-    if (!refs.has(ref)) {
+    if (!this.hasRef(ref)) {
       const _injectable = getMetadataArgsStorage().injectables.find(
         injectable => injectable.ref === ref,
       )
 
       if (!_injectable) throw new InjectableNotFoundError('TODO')
 
-      refs.set(ref, new ApplicationInjectable(_injectable))
+      this.setRef(ref, new ApplicationInjectable(this.application, _injectable))
     }
 
-    return refs.get(ref)!
+    return this.getRef(ref)!
   }
 
   public has(ref: unknown) {
@@ -47,22 +88,25 @@ export class Module {
   }
 
   public resolve(ref: unknown) {
-    if (!this.has(ref)) throw new Error('TODO')
+    if (!this.has(ref))
+      throw new TypeError(
+        `reference not found in argument list: ${refToString(ref)}`,
+      )
 
-    if (storage.has(ref)) return storage.get(ref)
+    if (this.hasSingleton(ref)) return this.getSingleton(ref)
 
-    if (this.#store.has(ref)) return this.#store.get(ref)
+    if (this.#context.has(ref)) return this.#context.get(ref)
 
     const injectable = this.find(ref)
 
-    const value = injectable.toInstance(this)
+    const value = injectable.to(this)
 
     if (injectable.scope === 'transient') return value
 
     if (injectable.scope === 'context') {
-      this.#store.set(ref, value)
+      this.#context.set(ref, value)
 
-      value.then(value => this.#store.set(ref, value))
+      value.then(value => this.#context.set(ref, value))
 
       return value
     }

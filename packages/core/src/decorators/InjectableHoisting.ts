@@ -5,6 +5,7 @@ export function InjectableHoisting(
   propertyKey: string | symbol,
 ) {
   getMetadataArgsStorage().injectableHoistings.push({
+    type: 'injectable-hoisting',
     target,
     propertyKey,
   })

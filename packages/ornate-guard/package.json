@@ -25,7 +25,8 @@
     "build:esm": "yarn build:esm:tsc && yarn build:esm:package.json",
     "build:cjs": "yarn build:cjs:tsc && yarn build:cjs:package.json",
     "build": "yarn run build:esm && yarn run build:cjs",
-    "prepublish": "yarn run build"
+    "test": "vitest --run",
+    "prepublish": "yarn run test && yarn run build"
   },
   "dependencies": {
     "bytes": "^3.1.2",
@@ -45,7 +46,7 @@
     "@types/qs": "^6.9.8",
     "@types/supertest": "^6.0.2",
     "@types/type-is": "^1",
-    "ornate-guard": "0.0.0-experimental-0d58063",
+    "ornate-guard": "0.0.0-experimental-9f67356",
     "path-to-regexp": "^7.0.0",
     "supertest": "^7.0.0",
     "vitest": "^2.0.3"

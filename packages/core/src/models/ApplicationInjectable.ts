@@ -1,9 +1,8 @@
-import { InjectOutOfScopeError } from '../errors/InjectOutOfScopeError.js'
 import { isMatchToClass } from '../tools/isMatchToClass.js'
 import { Constructable } from '../typings/Class.js'
+import { Application } from './Application.js'
 import { ApplicationSourceArguments } from './ApplicationSourceArguments.js'
 import { ApplicationSourceProperties } from './ApplicationSourceProperties.js'
-import { Context } from './Context.js'
 import {
   getMetadataArgsStorage,
   MetadataInjectableArg,
@@ -11,8 +10,6 @@ import {
 import { Module } from './Module.js'
 
 export class ApplicationInjectable {
-  #singleton: unknown
-
   public readonly ref: any
 
   public readonly target: Constructable | undefined
@@ -21,56 +18,75 @@ export class ApplicationInjectable {
 
   public readonly hoisting: string | symbol | undefined
 
-  public readonly arguments = new ApplicationSourceArguments()
+  public readonly arguments: ApplicationSourceArguments
 
-  public readonly properties = new ApplicationSourceProperties()
+  public readonly properties!: ApplicationSourceProperties
 
-  public virtualizer:
-    | undefined
-    | (() => unknown)
-    | ((context: Context) => unknown)
-
-  constructor(public readonly _injectable: MetadataInjectableArg) {
+  constructor(
+    public readonly application: Application,
+    public readonly _injectable: MetadataInjectableArg,
+  ) {
     this.ref = this._injectable.ref
     this.target = this._injectable.target
-    this.virtualizer = this._injectable.virtualizer
     this.scope = this._injectable.scope
+
+    this.arguments = new ApplicationSourceArguments(
+      undefined,
+      undefined,
+      application.pipes,
+    )
 
     const args = getMetadataArgsStorage()
 
+    for (const [
+      parameterIndex,
+      ref,
+    ] of _injectable.virtualizer?.refs?.entries() ?? [])
+      this.arguments.add({
+        type: 'inject',
+        target: {},
+        ref: () => ref,
+        parameterIndex,
+      })
+
     if (!this.target) return this
 
-    for (const _selector of args.selectors) {
-      if (!isMatchToClass(this.target, _selector.target)) continue
+    this.properties = new ApplicationSourceProperties(
+      this.target.prototype,
+      null,
+    )
 
-      if (_selector.propertyKey === undefined) {
-        if (_selector.parameterIndex === undefined) throw new Error('TODO')
+    for (const _input of args.inputs) {
+      if (!isMatchToClass(this.target, _input.target, false)) continue
 
-        this.arguments.selectors.add(_selector)
+      if (_input.propertyKey === undefined) {
+        if (_input.parameterIndex === undefined) throw new Error('TODO')
+
+        this.arguments.add(_input)
 
         continue
       }
 
-      if (_selector.parameterIndex === undefined) {
-        this.properties.selectors.add(_selector)
+      if (_input.parameterIndex === undefined) {
+        this.properties.add(_input)
 
         continue
       }
     }
 
     for (const _inject of args.injects) {
-      if (!isMatchToClass(this.target, _inject.target)) continue
+      if (!isMatchToClass(this.target, _inject.target, false)) continue
 
       if (_inject.propertyKey === undefined) {
         if (_inject.parameterIndex === undefined) throw new Error('TODO')
 
-        this.arguments.injects.add(_inject)
+        this.arguments.add(_inject)
 
         continue
       }
 
       if (_inject.parameterIndex === undefined) {
-        this.properties.injects.add(_inject)
+        this.properties.add(_inject)
 
         continue
       }
@@ -79,63 +95,35 @@ export class ApplicationInjectable {
     }
 
     for (const _injectableHoisting of args.injectableHoistings) {
-      if (!isMatchToClass(this.target, _injectableHoisting.target)) continue
+      if (!isMatchToClass(this.target, _injectableHoisting.target, false))
+        continue
 
       this.hoisting = _injectableHoisting.propertyKey
     }
   }
 
-  public async toInstance(module: Module) {
-    if (this.scope === 'singleton') {
-      if (this.#singleton) return this.#singleton
+  public async to(module: Module) {
+    if (this._injectable.virtualizer) {
+      const args = await this.arguments.to(module)
 
-      if (this.virtualizer) {
-        this.#singleton = this.virtualizer(module.context)
-
-        return this.#singleton
-      }
-
-      const [args, properties] = await Promise.all([
-        this.arguments.injects.toArguments(module),
-        this.properties.injects.toProperties(module),
-      ])
-
-      let target = new this.target!(...args)
-
-      Object.assign(target, properties)
-
-      if (this.hoisting) {
-        if (typeof target[this.hoisting] === 'function')
-          target = target[this.hoisting]()
-        else target = target[this.hoisting]
-      }
-
-      this.#singleton = target
-
-      return this.#singleton
+      return this._injectable.virtualizer.handle(...args)
     }
 
-    if (!module.context)
-      throw new InjectOutOfScopeError(
-        `Static injection not allowed for a ${this.scope} scope injectable`,
-      )
-
-    if (this.virtualizer) return this.virtualizer(module.context)
-
     const [args, properties] = await Promise.all([
-      this.arguments.toArguments(module),
-      this.properties.toProperties(module),
+      this.arguments.to(module),
+      this.properties.to(module),
     ])
 
-    const target = new this.target!(...args)
+    let target = new this.target!(...args)
 
     Object.assign(target, properties)
 
-    if (this.hoisting === undefined) return target
+    if (this.hoisting) {
+      if (typeof target[this.hoisting] === 'function')
+        target = target[this.hoisting]()
+      else target = target[this.hoisting]
+    }
 
-    if (typeof target[this.hoisting] === 'function')
-      return target[this.hoisting]()
-
-    return target[this.hoisting]
+    return target
   }
 }

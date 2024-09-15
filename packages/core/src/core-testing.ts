@@ -2,22 +2,37 @@ import { Action } from './decorators/Action.js'
 import { Controller } from './decorators/Controller.js'
 import { Inject } from './decorators/Inject.js'
 import { Next } from './decorators/Next.js'
-import { Selector } from './decorators/Selector.js'
+import { Input } from './decorators/Input.js'
 import { Application } from './models/Application.js'
 import { Context } from './models/Context.js'
-import { BLUISH_METADATA_ARGS_STORAGE } from './models/MetadataArgsStorage.js'
+import {
+  BLUISH_METADATA_ARGS_STORAGE,
+  getMetadataArgsStorage,
+  MetadataArgsStorage,
+} from './models/MetadataArgsStorage.js'
 import { AnyMiddleware, Middleware } from './models/Middleware.js'
 import { Class, Constructable } from './typings/Class.js'
+import { MiddlewareCompose } from './models/MiddlewareCompose.js'
 
 namespace BluishCoreTesting {
   let defaultApplication: Application = new Application()
 
   export class BluishCoreTestingContext extends Context {}
 
-  export function resetMetadataArgsStorage() {
+  export function resetMetadataArgsStorage(hard = false) {
     const _global = globalThis as any
 
+    const args = getMetadataArgsStorage()
+
     delete _global[BLUISH_METADATA_ARGS_STORAGE]
+
+    _global[BLUISH_METADATA_ARGS_STORAGE] = new MetadataArgsStorage()
+
+    if (hard) return
+
+    _global[BLUISH_METADATA_ARGS_STORAGE].injectables = args.injectables
+    _global[BLUISH_METADATA_ARGS_STORAGE].injectableHoistings =
+      args.injectableHoistings
   }
 
   export function setApplication(application: Application) {
@@ -43,25 +58,31 @@ namespace BluishCoreTesting {
     null,
     (
       application: Application,
-      _middleware: AnyMiddleware,
+      _middleware: AnyMiddleware | AnyMiddleware[],
       context: Context = new BluishCoreTestingContext(),
       next?: Next,
     ) => {
-      const middleware = Middleware.from(_middleware)
+      const middleware = Array.isArray(_middleware)
+        ? new MiddlewareCompose(_middleware)
+        : Middleware.from(_middleware)
 
-      application.middlewares.run(
+      return application.middlewares.run(
         context,
         async () => await middleware.run(context, async () => next?.()),
       )
     },
   ) as {
-    (middleware: AnyMiddleware, context?: Context, next?: Next): void
     (
-      application: Application,
-      middleware: AnyMiddleware,
+      middleware: AnyMiddleware | AnyMiddleware[],
       context?: Context,
       next?: Next,
-    ): void
+    ): Promise<unknown>
+    (
+      application: Application,
+      middleware: AnyMiddleware | AnyMiddleware[],
+      context?: Context,
+      next?: Next,
+    ): Promise<unknown>
   }
 
   export const runInject = _normalize.bind(
@@ -98,7 +119,7 @@ namespace BluishCoreTesting {
     null,
     async (
       application: Application,
-      decorator: ReturnType<typeof Selector>,
+      decorator: ReturnType<typeof Input>,
       context: Context = new BluishCoreTestingContext(),
     ): Promise<unknown> => {
       let value = undefined
@@ -129,7 +150,7 @@ namespace BluishCoreTesting {
         typeof target === 'function' ? target : target.constructor
       ) as Constructable
 
-      await application.controller(constructable).initialize()
+      await application.useController(constructable).bootstrap()
 
       const controller =
         application.controllers.findByConstructable(constructable)!
@@ -137,7 +158,7 @@ namespace BluishCoreTesting {
       const action =
         typeof target === 'function'
           ? controller.actions.findByStaticPropertyKey(propertyKey)
-          : controller.actions.findByPropertyKey(propertyKey)
+          : controller.actions.findByInstancePropertyKey(propertyKey)
 
       await action!.run(context)
 

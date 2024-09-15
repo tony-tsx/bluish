@@ -60,3 +60,18 @@ export const UnavailableForLegalReasons = factory(
   451,
   'UnavailableForLegalReasons',
 )
+
+export const InternalServerError = factory(500, 'InternalServerError')
+export const NotImplemented = factory(501, 'NotImplemented')
+export const BadGateway = factory(502, 'BadGateway')
+export const ServiceUnavailable = factory(503, 'ServiceUnavailable')
+export const GatewayTimeout = factory(504, 'GatewayTimeout')
+export const HTTPVersionNotSupported = factory(505, 'HTTPVersionNotSupported')
+export const VariantAlsoNegotiates = factory(506, 'VariantAlsoNegotiates')
+export const InsufficientStorage = factory(507, 'InsufficientStorage')
+export const LoopDetected = factory(508, 'LoopDetected')
+export const NotExtended = factory(510, 'NotExtended')
+export const NetworkAuthenticationRequired = factory(
+  511,
+  'NetworkAuthenticationRequired',
+)

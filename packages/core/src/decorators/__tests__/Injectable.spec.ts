@@ -4,7 +4,7 @@ import BluishCoreTesting from '../../core-testing.js'
 import { getMetadataArgsStorage } from '../../models/MetadataArgsStorage.js'
 
 beforeEach(() => {
-  BluishCoreTesting.resetMetadataArgsStorage()
+  BluishCoreTesting.resetMetadataArgsStorage(true)
 })
 
 it('adds injectable class in metadata args storage', () => {
@@ -12,7 +12,11 @@ it('adds injectable class in metadata args storage', () => {
   class Service {}
 
   expect(getMetadataArgsStorage().injectables).toEqual([
-    { target: Service, ref: Service, scope: 'singleton' },
+    expect.objectContaining({
+      target: Service,
+      ref: Service,
+      scope: 'singleton',
+    }),
   ])
 })
 
@@ -21,7 +25,11 @@ it('adds injectable class (scope: context) in metadata args storage', () => {
   class Service {}
 
   expect(getMetadataArgsStorage().injectables).toEqual([
-    { target: Service, ref: Service, scope: 'context' },
+    expect.objectContaining({
+      target: Service,
+      ref: Service,
+      scope: 'context',
+    }),
   ])
 })
 
@@ -30,7 +38,11 @@ it('adds injectable class (scope: transient) in metadata args storage', () => {
   class Service {}
 
   expect(getMetadataArgsStorage().injectables).toEqual([
-    { target: Service, ref: Service, scope: 'transient' },
+    expect.objectContaining({
+      target: Service,
+      ref: Service,
+      scope: 'transient',
+    }),
   ])
 })
 
@@ -41,18 +53,26 @@ it('adds injectable class with ref in metadata args storage', () => {
   class Service {}
 
   expect(getMetadataArgsStorage().injectables).toEqual([
-    { target: Service, ref: SERVICE_REF, scope: 'singleton' },
+    expect.objectContaining({
+      target: Service,
+      ref: SERVICE_REF,
+      scope: 'singleton',
+    }),
   ])
 })
 
 it('adds virtual injectable in metadata args storage', () => {
-  const virtualizer = () => '123'
+  const handle = () => '123'
 
   const ref = Symbol()
 
-  Injectable.register(ref, 'singleton', virtualizer)
+  Injectable.register(ref, 'singleton', handle)
 
   expect(getMetadataArgsStorage().injectables).toEqual([
-    { ref, virtualizer, scope: 'singleton' },
+    expect.objectContaining({
+      ref,
+      virtualizer: { handle, refs: [] },
+      scope: 'singleton',
+    }),
   ])
 })

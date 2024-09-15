@@ -1,29 +1,17 @@
-import { Metadata } from '@bluish/core'
+import { Class, Metadata } from '@bluish/core'
+import { HTTP_PATH } from '../constants/constants.js'
 
-export function Path(path: string | string[]) {
-  const paths = Array.isArray(path)
-    ? path
-    : path.startsWith('/')
-      ? path.split('/').slice(1)
-      : path.split('/')
+export function Path(_path: string | string[]) {
+  const paths = Array.isArray(_path)
+    ? _path
+    : _path.startsWith('/')
+      ? _path.split('/').slice(1)
+      : _path.split('/')
 
-  return Metadata('@http:path', paths, (value, previous) =>
-    previous.concat(value),
-  )
-}
-
-declare global {
-  namespace Bluish {
-    namespace Controller {
-      interface Metadata {
-        '@http:path': string[]
-      }
-    }
-
-    namespace Action {
-      interface Metadata {
-        '@http:path': string[]
-      }
-    }
+  return (target: Class | object, propertyKey?: string | symbol) => {
+    Metadata(HTTP_PATH, paths, (value, previous) => previous.concat(value))(
+      target,
+      propertyKey,
+    )
   }
 }

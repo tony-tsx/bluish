@@ -4,19 +4,22 @@ import { Class } from '../typings/Class.js'
 import { Context } from './Context.js'
 import { getMetadataArgsStorage } from './MetadataArgsStorage.js'
 import { AnyMiddleware, FunctionMiddleware, Middleware } from './Middleware.js'
-import { Pipe } from '../decorators/Pipe.js'
-import { ApplicationController } from './ApplicationController.js'
-import { ApplicationControllerAction } from './ApplicationControllerAction.js'
-import { ApplicationControllerCollection } from './ApplicationControllerCollection.js'
+import { ApplicationSource } from './ApplicationSource.js'
+import { ApplicationSourceAction } from './ApplicationSourceAction.js'
+import { ApplicationControllerCollection } from './ApplicationSourceCollection.js'
 import { ApplicationSourcePipeCollection } from './ApplicationSourcePipeCollection.js'
 import { ApplicationSourceMiddlewareCollection } from './ApplicationSourceMiddlewareCollection.js'
-import { injectable } from '../pipes/injectable.js'
 import { Module } from './Module.js'
+import { ApplicationSourceMetadata } from './ApplicationSourceMetadata.js'
+import { Pipe } from './Pipe.js'
+import { PipeFunction } from '../decorators/UsePipe.js'
+import { injectable } from '../pipes/injectable.js'
+import { IUsable } from '../decorators/Use.js'
 
 export interface ApplicationOptions {
   middlewares?: AnyMiddleware[]
   controllers?: (Class | string)[]
-  pipes?: Pipe[]
+  pipes?: (Pipe | PipeFunction)[]
 }
 
 export class Application {
@@ -24,7 +27,9 @@ export class Application {
 
   #registers: (string | Class)[] = []
 
-  #virtual: ApplicationController | null = null
+  #virtual: ApplicationSource
+
+  public readonly metadata = new ApplicationSourceMetadata()
 
   public readonly controllers = new ApplicationControllerCollection(this)
 
@@ -41,68 +46,98 @@ export class Application {
     controllers = [],
     pipes = [],
   }: ApplicationOptions = {}) {
-    for (const middleware of middlewares) this.use(middleware)
+    this.usePipe(injectable)
 
-    for (const controller of controllers) this.controller(controller)
+    for (const middleware of middlewares) this.useMiddleware(middleware)
 
-    for (const pipe of pipes) this.pipe(pipe)
+    for (const controller of controllers) this.useController(controller)
 
-    this.pipe(injectable)
+    for (const pipe of pipes) this.usePipe(pipe)
+
+    this.#virtual = new ApplicationSource(this, {
+      type: 'controller',
+      target: class VirtualController {},
+    })
   }
 
-  public use(middleware: AnyMiddleware): this
-  public use<TContext extends Context>(
-    context: Class<TContext>,
-    middleware: FunctionMiddleware<TContext>,
+  public use(usable: IUsable) {
+    usable.use(this)
+
+    return this
+  }
+
+  public useMiddleware<TContext extends Context>(
+    context: Class<TContext> | Class<TContext>[],
+    run: FunctionMiddleware<TContext>,
   ): this
-  public use<TContext extends Context>(
-    contextOrMiddleware: Class<TContext> | Class<TContext>[] | AnyMiddleware,
-    maybeMiddleware?: FunctionMiddleware<TContext>,
+  public useMiddleware<TContext extends Context>(
+    run: FunctionMiddleware<TContext>,
+  ): this
+  public useMiddleware<TContext extends Context>(
+    contextOrAnyMiddleware:
+      | Class<TContext>
+      | Class<TContext>[]
+      | AnyMiddleware<TContext>,
+    maybeFunctionMiddleware?: FunctionMiddleware<TContext>,
+  ): this
+  public useMiddleware(
+    contextOrAnyMiddleware:
+      | Class<Context>
+      | Class<Context>[]
+      | AnyMiddleware<Context>,
+    maybeFunctionMiddleware?: FunctionMiddleware<Context>,
   ): this {
-    this.middlewares.add(Middleware.from(contextOrMiddleware, maybeMiddleware))
+    this.middlewares.add(
+      Middleware.from(contextOrAnyMiddleware, maybeFunctionMiddleware),
+    )
 
     return this
   }
 
-  public pipe(pipe: Pipe) {
-    this.pipes.add(pipe)
+  public usePipe(pipe: Pipe | PipeFunction) {
+    if (typeof pipe === 'function') this.pipes.add(new Pipe(pipe))
+    else this.pipes.add(pipe)
 
     return this
   }
 
-  public controller(register: Class | string) {
+  public useController(register: Class | string) {
     this.#registers.push(register)
 
     return this
   }
 
-  public action(
+  public useAction(
     virtualizer: (context: Context) => unknown,
-  ): ApplicationControllerAction
-  public action<TContext extends Context>(
+    refs?: unknown[],
+  ): ApplicationSourceAction
+  public useAction<TContext extends Context>(
     context: Class<TContext>,
-    virtualizer: (context: Context) => unknown,
-  ): ApplicationControllerAction
-  public action<TContext extends Context>(
-    contextOrAction: Class<TContext> | ((context: Context) => unknown),
-    maybeVirtualizer?: (context: Context) => unknown,
+    virtualizer: (context: TContext) => unknown,
+    refs?: unknown[],
+  ): ApplicationSourceAction
+  public useAction<TContext extends Context>(
+    contextOrHandle: Class<TContext> | ((context: Context) => unknown),
+    maybeRefsOrVirtualizer?: unknown[] | ((context: Context) => unknown),
+    maybeRefs?: unknown[],
   ) {
-    const context = maybeVirtualizer
-      ? (contextOrAction as Class<Context>)
-      : Context
-    const virtualizer = maybeVirtualizer
-      ? maybeVirtualizer
-      : (contextOrAction as (context: Context) => unknown)
+    const context =
+      typeof maybeRefsOrVirtualizer === 'function'
+        ? (contextOrHandle as Class<Context>)
+        : Context
+    const handle =
+      typeof maybeRefsOrVirtualizer === 'function'
+        ? maybeRefsOrVirtualizer
+        : (contextOrHandle as (context: Context) => unknown)
+    const refs = Array.isArray(maybeRefsOrVirtualizer)
+      ? maybeRefsOrVirtualizer
+      : (maybeRefs ?? [])
 
-    if (!this.#virtual)
-      this.#virtual = new ApplicationController(this, {
-        target: class VirtualController {},
-      })
-
-    const action = new ApplicationControllerAction(this.#virtual, {
+    const action = new ApplicationSourceAction(this.#virtual, {
+      type: 'action',
       context,
       target: this.#virtual.target,
-      virtualizer,
+      virtualizer: { handle, refs },
     })
 
     this.#virtual.actions.add(action)
@@ -110,7 +145,7 @@ export class Application {
     return action
   }
 
-  public async initialize() {
+  public async bootstrap() {
     this.#isInitialized = true
 
     const targets = await Promise.all(
@@ -139,20 +174,9 @@ export class Application {
       getMetadataArgsStorage().controllers.map(async _controller => {
         if (!targets.includes(_controller.target)) return
 
-        const controller = new ApplicationController(this, _controller)
+        const controller = new ApplicationSource(this, _controller)
 
-        const properties = await controller.static.toProperties(module)
-
-        for (const propertyKey of [
-          ...Object.getOwnPropertySymbols(properties),
-          ...Object.getOwnPropertyNames(properties),
-        ])
-          Object.defineProperty(controller.target, propertyKey, {
-            value: properties[propertyKey],
-            configurable: false,
-            writable: false,
-            enumerable: true,
-          })
+        Object.assign(controller.target, await controller.static.to(module))
 
         this.controllers!.add(controller)
       }),

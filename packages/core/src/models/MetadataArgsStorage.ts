@@ -1,88 +1,113 @@
-import { Pipe } from '../decorators/Pipe.js'
-import { SelectorFunction } from '../decorators/Selector.js'
+import { PipeFunction } from '../decorators/UsePipe.js'
+import { InputSelector } from '../decorators/Input.js'
 import { Class, Constructable } from '../typings/Class.js'
 import { Context } from './Context.js'
 import { AnyMiddleware } from './Middleware.js'
+import { ControllerInheritsOptions } from '../decorators/Controller.js'
+import { IUsable } from '../decorators/Use.js'
 
-export interface MetadataControllerArg {
+export interface IVirtual {
+  handle(...args: any[]): any
+  refs: any[]
+}
+
+export interface IMetadataArg<TType extends string> {
+  readonly type: TType
+}
+
+export interface MetadataControllerArg extends IMetadataArg<'controller'> {
   target: Constructable
-  inherit?: () => Class
+  inherit?: ControllerInheritsOptions
   middlewares?: AnyMiddleware[]
 }
 
-export interface MetadataActionArg {
+export interface MetadataActionArg extends IMetadataArg<'action'> {
   context?: Class<Context>
   target: Class | object
-  virtualizer?: (context: Context) => unknown
+  virtualizer?: IVirtual
   propertyKey?: string | symbol
+  propertyDescriptor?: TypedPropertyDescriptor<any>
   middlewares?: AnyMiddleware[]
 }
 
-export interface MetadataArg {
+export interface MetadataArg extends IMetadataArg<'metadata'> {
   target: Class | object
-  propertyKey: undefined | string | symbol
-  parameterIndex: undefined | number
-  key: string | symbol
+  propertyKey?: undefined | string | symbol
+  parameterIndex?: undefined | number
+  propertyDescriptor?: TypedPropertyDescriptor<any>
+  key: unknown
   value: unknown | (() => unknown)
   reducer?: (value: any, previous: any) => any
 }
 
-export interface MetadataMiddlewareArg {
+export interface MetadataMiddlewareArg extends IMetadataArg<'middleware'> {
   target: Class | object
   propertyKey?: string | symbol
+  parameterIndex?: undefined
   middleware: AnyMiddleware
 }
 
-export interface MetadataIsolatedArg {
+export interface MetadataUsableArg extends IMetadataArg<'usable'> {
+  target: Class | object
+  propertyKey?: undefined | string | symbol
+  parameterIndex?: undefined | number
+  propertyDescriptor?: undefined | TypedPropertyDescriptor<any>
+  usable: IUsable
+}
+
+export interface MetadataIsolatedArg extends IMetadataArg<'isolated'> {
   target: Class | object
   propertyKey?: string | symbol
 }
 
-export interface MetadataInjectArg {
+export interface MetadataInjectArg extends IMetadataArg<'inject'> {
   target: Class | object
   propertyKey?: undefined | string | symbol
   parameterIndex?: undefined | number
   ref?: any
 }
 
-export interface MetadataSelectorArg {
+export interface MetadataInputArg extends IMetadataArg<'input'> {
   target: Class | object
   propertyKey?: undefined | string | symbol
   parameterIndex?: undefined | number
-  context: Class<Context>
-  selector: SelectorFunction
+  context?: Class<Context>
+  selector: InputSelector
 }
 
-export interface MetadataInjectableArg {
+export interface MetadataInjectableArg extends IMetadataArg<'injectable'> {
   ref: any
   scope: 'singleton' | 'context' | 'transient'
   target?: Constructable
-  virtualizer?: (() => unknown) | ((context: Context) => unknown)
+  virtualizer?: IVirtual
 }
 
-export interface MetadataInjectableHoistingArg {
+export interface MetadataInjectableHoistingArg
+  extends IMetadataArg<'injectable-hoisting'> {
   target: Class | object
   propertyKey: string | symbol
 }
 
-export interface MetadataPipeArg {
+export interface MetadataPipeArg extends IMetadataArg<'pipe'> {
   target: Class | object
-  propertyKey?: string | symbol
+  propertyKey?: undefined | string | symbol
   parameterIndex?: undefined | number
-  description?: TypedPropertyDescriptor<any>
-  pipe: Pipe
+  propertyDescriptor?: undefined | TypedPropertyDescriptor<any>
+  pipe: PipeFunction
 }
 
 export class MetadataArgsStorage {
   public readonly actions: MetadataActionArg[] = []
 
-  public readonly middlewares: MetadataMiddlewareArg[] = []
-
   public readonly isolated: MetadataIsolatedArg[] = []
 
   public readonly injects: MetadataInjectArg[] = []
 
-  public readonly selectors: MetadataSelectorArg[] = []
+  public readonly middlewares: MetadataMiddlewareArg[] = []
+
+  public readonly inputs: MetadataInputArg[] = []
+
+  public readonly usables: MetadataUsableArg[] = []
 
   public readonly pipes: MetadataPipeArg[] = []
 

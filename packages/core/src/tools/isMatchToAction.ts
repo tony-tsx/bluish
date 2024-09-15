@@ -1,13 +1,13 @@
 import { isMatchToClass } from './isMatchToClass.js'
 import { Class } from '../typings/Class.js'
-import { ApplicationControllerAction } from '../models/ApplicationControllerAction.js'
+import { ApplicationSourceAction } from '../models/ApplicationSourceAction.js'
 
 export function isMatchToAction(
-  action: ApplicationControllerAction,
+  action: ApplicationSourceAction,
   target: Class | object,
   propertyKey: string | symbol,
 ) {
-  if (!isMatchToClass(action.controller.target, target)) return false
+  if (!isMatchToClass(action.controller.target, target, false)) return false
 
   if (typeof action.target !== typeof target) return false
 
