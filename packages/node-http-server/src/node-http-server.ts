@@ -1,5 +1,6 @@
-export * from './models/HttpServer.js'
+export * from './models/NodeHttpServer.js'
 export * from './models/toRequestListener.js'
 export * from './models/NodeHttpRequest.js'
 export * from './models/NodeHttpResponse.js'
 export * from './models/NodeHttpContext.js'
+export { NodeHttpServer as default } from './models/NodeHttpServer.js'

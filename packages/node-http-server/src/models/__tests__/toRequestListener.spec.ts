@@ -16,7 +16,7 @@ import supertest from 'supertest'
 import { Application } from '@bluish/core'
 import { Router } from '@bluish/http-router'
 import { json } from '@bluish/http/json'
-import { HttpServer } from '../HttpServer.js'
+import { NodeHttpServer } from '../NodeHttpServer.js'
 import { IHttpResponse } from '../../../../http/dist/esm/interfaces/IHttpResponse.js'
 
 class User {
@@ -93,7 +93,7 @@ const application = await new Application({
   .use(json())
   .bootstrap()
 
-const server = new HttpServer(new Router(application))
+const server = new NodeHttpServer(new Router(application))
 
 const agent = supertest(server)
 

@@ -10,6 +10,8 @@ export class NodeHttpResponse<
   extends http.ServerResponse<TRequest>
   implements IHttpResponse
 {
+  #body: string | Readable | Buffer | undefined
+
   public readonly headers: Record<string, string | string[] | undefined> = {}
 
   public get status() {
@@ -20,7 +22,18 @@ export class NodeHttpResponse<
     this.statusCode = value
   }
 
-  body?: string | Readable | Buffer | undefined;
+  public get body() {
+    return this.#body
+  }
+
+  public set body(value: string | Readable | Buffer | undefined) {
+    this.#body = value
+
+    if (!(this.#body instanceof Readable)) return
+
+    this.writeHead(this.statusCode, this.headers)
+    this.#body.pipe(this)
+  }
 
   [key: number]: any
   [key: string]: any

@@ -4,13 +4,18 @@ import { Router } from '@bluish/http-router'
 import { NodeHttpRequest } from './NodeHttpRequest.js'
 import { NodeHttpResponse } from './NodeHttpResponse.js'
 
-export interface HttpServerOptions<
+export interface PureNodeHttpServerOptions {
+  onResponseBodyReadableReceive?: 'pause' | 'auto send' | 'nothing'
+}
+
+export interface NodeHttpServerOptions<
   TRequest extends typeof NodeHttpRequest = typeof NodeHttpRequest,
   TResponse extends typeof NodeHttpResponse = typeof NodeHttpResponse,
   // @ts-expect-error: TODO
-> extends http.ServerOptions<TRequest, TResponse> {}
+> extends http.ServerOptions<TRequest, TResponse>,
+    PureNodeHttpServerOptions {}
 
-export class HttpServer<
+export class NodeHttpServer<
   TRequest extends typeof NodeHttpRequest = typeof NodeHttpRequest,
   TResponse extends typeof NodeHttpResponse = typeof NodeHttpResponse,
   // @ts-expect-error: TODO
@@ -21,7 +26,7 @@ export class HttpServer<
       IncomingMessage = NodeHttpRequest as TRequest,
       ServerResponse = NodeHttpResponse as TResponse,
       ...options
-    }: HttpServerOptions<TRequest, TResponse> = {},
+    }: NodeHttpServerOptions<TRequest, TResponse> = {},
   ) {
     super(
       {
@@ -29,7 +34,7 @@ export class HttpServer<
         ServerResponse,
         ...options,
       },
-      toRequestListener(router),
+      toRequestListener(router, options),
     )
   }
 }
