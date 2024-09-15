@@ -5,7 +5,11 @@ export class HttpResponseStatusMiddleware extends HttpMiddleware {
     super(async (context, next) => {
       await next()
 
-      if (context.response.status !== undefined) return
+      if (
+        context.response.status !== undefined &&
+        !isNaN(context.response.status)
+      )
+        return
 
       if (context.response.body === null) context.response.status = 204
       else if (context.request.method === 'POST') context.response.status = 201

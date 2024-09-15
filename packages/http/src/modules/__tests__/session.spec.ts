@@ -2,9 +2,8 @@ import { session, HttpSessionStore } from '../session.js'
 import { cookie } from '../cookie.js'
 import { beforeEach, expect, it, vi } from 'vitest'
 
-import HttpTesting from '../../http-testing.js'
+import HttpTesting from '../testing.js'
 import BluishCoreTesting from '@bluish/core/testing'
-import { toHttpContext } from '../../../.test/toHttpContext.js'
 
 const { runMiddleware } = BluishCoreTesting
 
@@ -33,7 +32,7 @@ beforeEach(() => {
 })
 
 it('adds session in request response cookie', async () => {
-  const context = toHttpContext()
+  const context = HttpTesting.toContext()
 
   await runMiddleware(
     [

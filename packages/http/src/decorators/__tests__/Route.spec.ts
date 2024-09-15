@@ -6,12 +6,12 @@ import { DELETE, GET, POST, PUT } from '../Route.js'
 import { Application, Use } from '@bluish/core'
 import { Body } from '../Body.js'
 import { Param } from '../Param.js'
-import { toHttpContext } from '../../../.test/toHttpContext.js'
 import BluishCoreTesting from '@bluish/core/testing'
 import { HttpResponseBodyMiddleware } from '../../middlewares/HttpResponseBodyMiddleware.js'
 import { HttpResponseStatusMiddleware } from '../../middlewares/HttpResponseStatusMiddleware.js'
 import { HttpRequestParamsMiddleware } from '../../middlewares/HttpRequestParamsMiddleware.js'
 import { json, Json } from '../../modules/json.js'
+import HttpTesting from '../../modules/testing.js'
 
 const { run } = BluishCoreTesting
 
@@ -32,7 +32,7 @@ describe('GET', () => {
 
     vi.spyOn(Users, 'find')
 
-    await run(Users, 'find', toHttpContext('/users'))
+    await run(Users, 'find', HttpTesting.toContext('/users'))
 
     expect(Users.find).toHaveBeenCalledWith()
   })
@@ -52,7 +52,11 @@ describe('GET', () => {
 
     vi.spyOn(Users, 'findById')
 
-    const context = await run(Users, 'findById', toHttpContext('/users/1'))
+    const context = await run(
+      Users,
+      'findById',
+      HttpTesting.toContext('/users/1'),
+    )
 
     expect(context.response.status).toBe(200)
     expect(context.response.headers).toEqual({

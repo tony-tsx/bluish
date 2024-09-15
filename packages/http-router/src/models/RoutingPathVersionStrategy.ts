@@ -15,7 +15,7 @@ export class RoutingPathVersionStrategy<
   ) {
     super(application, {
       extractVersionFromHttpContext(context) {
-        const [firstPath] = context.request.url.pathname.split('/')
+        const [firstPath] = context.request.self.pathname.split('/')
 
         if (!firstPath) return null
 

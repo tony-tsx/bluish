@@ -1,7 +1,7 @@
 import { Input, Middleware } from '@bluish/core'
 import type { HttpCookieItemOptions } from './cookie.js'
 import { HttpContext } from '../models/HttpContext.js'
-import { HttpRequest } from '../models/HttpRequest.js'
+import { IHttpRequest } from '../interfaces/IHttpRequest.js'
 
 export abstract class HttpSessionStore<TSession extends object> {
   public abstract get(
@@ -20,7 +20,7 @@ export interface HttpSessionOptions<TSession extends object>
   key?: string
   renew?: boolean
   secret?: string
-  generateIdentifier: (request: HttpRequest) => string
+  generateIdentifier: (request: IHttpRequest) => string
 }
 
 export function session<TSession extends object>({

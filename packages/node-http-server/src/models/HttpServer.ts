@@ -1,17 +1,35 @@
 import http from 'node:http'
 import { toRequestListener } from './toRequestListener.js'
 import { Router } from '@bluish/http-router'
+import { NodeHttpRequest } from './NodeHttpRequest.js'
+import { NodeHttpResponse } from './NodeHttpResponse.js'
 
 export interface HttpServerOptions<
-  Request extends typeof http.IncomingMessage = typeof http.IncomingMessage,
-  Response extends typeof http.ServerResponse = typeof http.ServerResponse,
-> extends http.ServerOptions<Request, Response> {}
+  TRequest extends typeof NodeHttpRequest = typeof NodeHttpRequest,
+  TResponse extends typeof NodeHttpResponse = typeof NodeHttpResponse,
+  // @ts-expect-error: TODO
+> extends http.ServerOptions<TRequest, TResponse> {}
 
-export class HttpServer extends http.Server {
+export class HttpServer<
+  TRequest extends typeof NodeHttpRequest = typeof NodeHttpRequest,
+  TResponse extends typeof NodeHttpResponse = typeof NodeHttpResponse,
+  // @ts-expect-error: TODO
+> extends http.Server<TRequest, TResponse> {
   constructor(
     public readonly router: Router,
-    options: HttpServerOptions = {},
+    {
+      IncomingMessage = NodeHttpRequest as TRequest,
+      ServerResponse = NodeHttpResponse as TResponse,
+      ...options
+    }: HttpServerOptions<TRequest, TResponse> = {},
   ) {
-    super(options, toRequestListener(router))
+    super(
+      {
+        IncomingMessage,
+        ServerResponse,
+        ...options,
+      },
+      toRequestListener(router),
+    )
   }
 }

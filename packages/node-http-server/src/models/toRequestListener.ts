@@ -1,31 +1,17 @@
-import { HttpContext, HttpResponseStage } from '@bluish/http'
-import http from 'http'
-import { Request } from './Request.js'
-import { Response } from './Response.js'
 import { Router } from '@bluish/http-router'
+import { NodeHttpRequest } from './NodeHttpRequest.js'
+import { NodeHttpResponse } from './NodeHttpResponse.js'
+import { NodeHttpContext } from './NodeHttpContext.js'
 
 export function toRequestListener(router: Router) {
-  return async (
-    _request: http.IncomingMessage,
-    _response: http.ServerResponse,
-  ) => {
-    const response = new Response(_response)
-
-    const context = new HttpContext(
-      new Request(_request),
-      new Response(_response),
-    )
+  return async (request: NodeHttpRequest, response: NodeHttpResponse) => {
+    const context = new NodeHttpContext(request, response)
 
     await router.dispatch(context)
 
-    if (response.stage < HttpResponseStage.HeaderSent) {
-      _response.writeHead(context.response.status, context.response.headers)
-      response.stage = HttpResponseStage.HeaderSent
-    }
-
-    if (response.stage < HttpResponseStage.Sent) {
-      _response.end(context.response.body)
-      response.stage = HttpResponseStage.Sent
+    if (!response.headersSent) {
+      response.writeHead(response.statusCode, context.response.headers)
+      response.end(context.response.body)
     }
   }
 }

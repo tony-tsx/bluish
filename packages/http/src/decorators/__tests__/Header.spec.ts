@@ -1,13 +1,12 @@
-import HttpTesting from '../../http-testing.js'
+import HttpTesting from '../../modules/testing.js'
 import { expect, it } from 'vitest'
 import { Header } from '../Header.js'
 import BluishCoreTesting from '@bluish/core/testing'
-import { toHttpContext } from '../../../.test/toHttpContext.js'
 
 it('catch header in http context', async () => {
   const value = await BluishCoreTesting.runSelector(
     Header('Authorization'),
-    toHttpContext({
+    HttpTesting.toContext({
       headers: { Authorization: 'Bearer 12345678' },
     }),
   )

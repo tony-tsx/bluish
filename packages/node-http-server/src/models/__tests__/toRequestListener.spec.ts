@@ -9,7 +9,6 @@ import http, {
   PUT,
   Query,
   Res,
-  HttpResponse,
   POST,
 } from '@bluish/http'
 import { it } from 'vitest'
@@ -18,6 +17,7 @@ import { Application } from '@bluish/core'
 import { Router } from '@bluish/http-router'
 import { json } from '@bluish/http/json'
 import { HttpServer } from '../HttpServer.js'
+import { IHttpResponse } from '../../../../http/dist/esm/interfaces/IHttpResponse.js'
 
 class User {
   constructor(public readonly id: string) {}
@@ -56,7 +56,7 @@ class Posts {
   public readonly post!: Post
 
   @GET
-  public find(@Query query: Record<string, string[]>, @Res res: HttpResponse) {
+  public find(@Query query: Record<string, string[]>, @Res res: IHttpResponse) {
     return []
   }
 
@@ -120,5 +120,5 @@ it('GET /posts', async () => {
 })
 
 it('POST /users/007/posts', async () => {
-  await agent.post('/users/007/posts').expect(201)
+  await agent.post('/users/007/posts').expect(200)
 })

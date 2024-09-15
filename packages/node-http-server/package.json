@@ -36,7 +36,8 @@
   "devDependencies": {
     "@bluish/core": "workspace:^",
     "@bluish/http": "workspace:^",
-    "@bluish/http-router": "workspace:^"
+    "@bluish/http-router": "workspace:^",
+    "vitest": "^2.1.1"
   },
   "packageManager": "yarn@4.3.1"
 }

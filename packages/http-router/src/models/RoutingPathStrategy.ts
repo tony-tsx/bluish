@@ -64,7 +64,7 @@ export class RoutingPathStrategy<
 
   public dispatch(context: HttpContext): Promise<unknown> {
     for (const [match, strategy] of this.paths) {
-      const result = match.match(context.request.url.pathname)
+      const result = match.match(context.request.self.pathname)
 
       if (!result) continue
 

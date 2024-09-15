@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { HttpSource } from '../HttpSource.js'
 import { GET } from '../Route.js'
 import { Param } from '../Param.js'
-import { toHttpContext } from '../../../.test/toHttpContext.js'
 import { Use } from '@bluish/core'
 import { HttpRequestParamsMiddleware } from '../../middlewares/HttpRequestParamsMiddleware.js'
+import HttpTesting from '../../modules/testing.js'
 
 beforeEach(() => {
   BluishCoreTesting.resetMetadataArgsStorage()
@@ -22,7 +22,7 @@ it('adds param in controller property', async () => {
     public action() {}
   }
 
-  const context = toHttpContext('/testing/123')
+  const context = HttpTesting.toContext('/testing/123')
 
   await BluishCoreTesting.run(Root.prototype, 'action', context)
 
@@ -41,7 +41,7 @@ it('adds param in controller property and transform it', async () => {
     public action() {}
   }
 
-  const context = toHttpContext('/testing/123')
+  const context = HttpTesting.toContext('/testing/123')
 
   await BluishCoreTesting.run(Root.prototype, 'action', context)
 
@@ -62,7 +62,7 @@ it('adds param in controller argument', async () => {
     public action() {}
   }
 
-  const context = toHttpContext('/testing/123')
+  const context = HttpTesting.toContext('/testing/123')
 
   await BluishCoreTesting.run(Root.prototype, 'action', context)
 
@@ -83,7 +83,7 @@ it('adds param in controller argument and transform it', async () => {
     public action() {}
   }
 
-  const context = toHttpContext('/testing/123')
+  const context = HttpTesting.toContext('/testing/123')
 
   await BluishCoreTesting.run(Root.prototype, 'action', context)
 
@@ -105,7 +105,7 @@ describe('reflect metadata', async () => {
       public action() {}
     }
 
-    const context = toHttpContext('/testing/123')
+    const context = HttpTesting.toContext('/testing/123')
 
     await BluishCoreTesting.run(Root.prototype, 'action', context)
 
@@ -123,7 +123,7 @@ describe('reflect metadata', async () => {
       public action() {}
     }
 
-    const context = toHttpContext('/testing/123')
+    const context = HttpTesting.toContext('/testing/123')
 
     await BluishCoreTesting.run(Root.prototype, 'action', context)
 

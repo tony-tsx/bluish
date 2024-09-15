@@ -1,7 +1,7 @@
 import { IUsable, Use } from '@bluish/core'
-import { ApplicationHttpSourceContentType } from '../http.js'
 import { ApplicationHttpSourceAccept } from '../models/ApplicationHttpSourceAccept.js'
 import { ApplicationHttpSourceAcceptSessionBufferAlloc } from '../models/ApplicationHttpSourceAcceptSessionBufferAlloc.js'
+import { ApplicationHttpSourceContentType } from '../models/ApplicationHttpSourceContentType.js'
 
 export class ApplicationHttpSourceAcceptSessionJson extends ApplicationHttpSourceAcceptSessionBufferAlloc {
   public toBody(): unknown | Promise<unknown> {

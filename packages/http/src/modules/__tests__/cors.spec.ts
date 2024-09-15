@@ -1,4 +1,4 @@
-import HttpTesting from '../../http-testing.js'
+import HttpTesting from '../testing.js'
 import CoreTesting from '@bluish/core/testing'
 import { expect, it, vi } from 'vitest'
 import { cors } from '../cors.js'

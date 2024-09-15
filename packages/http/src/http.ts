@@ -26,6 +26,9 @@ export * from './decorators/Version.js'
 export * from './errors/HttpError.js'
 export * from './errors/HttpActionInternalServerError.js'
 
+export * from './interfaces/IHttpRequest.js'
+export * from './interfaces/IHttpResponse.js'
+
 export * from './middlewares/HttpMiddleware.js'
 export * from './modules/cookie.js'
 export * from './modules/cors.js'
@@ -35,8 +38,6 @@ export * from './models/ApplicationHttpSourceAccept.js'
 export * from './models/ApplicationHttpSourceAcceptSessionBufferAlloc.js'
 export * from './models/ApplicationHttpSourceContentType.js'
 export * from './models/HttpContext.js'
-export * from './models/HttpRequest.js'
-export * from './models/HttpResponse.js'
 
 export * from './tools/getAccept.js'
 export * from './tools/getContentType.js'

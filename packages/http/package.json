@@ -13,9 +13,9 @@
       "import": "./dist/esm/http.js"
     },
     "./testing": {
-      "types": "./dist/esm/http-testing.d.ts",
-      "require": "./dist/cjs/http-testing.js",
-      "import": "./dist/esm/http-testing.js"
+      "types": "./dist/esm/modules/testing.d.ts",
+      "require": "./dist/cjs/modules/testing.js",
+      "import": "./dist/esm/modules/testing.js"
     },
     "./json": {
       "types": "./dist/esm/modules/json.d.ts",
@@ -61,9 +61,9 @@
   "dependencies": {
     "bytes": "^3.1.2",
     "content-type": "^1.0.5",
+    "path-to-regexp": "^7.0.0",
     "qs": "^6.11.2",
-    "type-is": "^1.6.18",
-    "path-to-regexp": "^7.0.0"
+    "type-is": "^1.6.18"
   },
   "peerDependencies": {
     "@bluish/core": "^0.0.0"

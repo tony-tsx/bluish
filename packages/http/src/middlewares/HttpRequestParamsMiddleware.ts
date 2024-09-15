@@ -8,7 +8,7 @@ export class HttpRequestParamsMiddleware extends HttpMiddleware {
   constructor() {
     super(async (context: HttpContext, next: Next) => {
       const result = match(getPath(context.action))(
-        context.request.url.pathname,
+        context.request.self.pathname,
       )
 
       if (result === false) return next()
