@@ -1,12 +1,12 @@
 import { expect, it } from 'vitest'
-import { HttpSource } from '../../decorators/HttpSource.js'
+import { HttpController } from '../../decorators/HttpController.js'
 import { POST } from '../../decorators/Route.js'
 import { Application } from '@bluish/core'
 import { getAccept } from '../getAccept.js'
 import { ApplicationHttpSourceAcceptJson, Json } from '../../modules/json.js'
 
 it('get accept', async () => {
-  @HttpSource('/root')
+  @HttpController('/root')
   class Root {
     @POST
     public static action() {}
@@ -22,7 +22,7 @@ it('get accept', async () => {
 })
 
 it('get accept (declare application/json)', async () => {
-  @HttpSource('/root')
+  @HttpController('/root')
   class Root {
     @POST
     @Json()

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import supertest from 'supertest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { HttpSource } from '../HttpSource.js'
+import { HttpController } from '../HttpController.js'
 import { DELETE, GET, POST, PUT } from '../Route.js'
 import { Application, Use } from '@bluish/core'
 import { Body } from '../Body.js'
@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe('GET', () => {
   it('send /users request', async () => {
-    @HttpSource('/users')
+    @HttpController('/users')
     @Json.ContentType()
     class Users {
       @GET
@@ -38,7 +38,7 @@ describe('GET', () => {
   })
 
   it('send /users/:user request', async () => {
-    @HttpSource('/users')
+    @HttpController('/users')
     @Use(new HttpResponseBodyMiddleware())
     @Use(new HttpResponseStatusMiddleware())
     @Use(new HttpRequestParamsMiddleware())
@@ -73,7 +73,7 @@ describe('GET', () => {
 
 describe('POST', () => {
   it.skip('send /users request', async () => {
-    @HttpSource('/users')
+    @HttpController('/users')
     @Json.ContentType()
     class Users {
       @POST
@@ -104,7 +104,7 @@ describe('POST', () => {
 
 describe('PUT', () => {
   it.skip('send /users/:user request', async () => {
-    @HttpSource('/users')
+    @HttpController('/users')
     @Json.ContentType()
     class Users {
       @PUT('/:user')
@@ -135,7 +135,7 @@ describe('PUT', () => {
 
 describe('DELETE', () => {
   it.skip('send /users/:user request', async () => {
-    @HttpSource('/users')
+    @HttpController('/users')
     @Json.ContentType()
     class Users {
       @DELETE('/:user')

@@ -2,18 +2,18 @@ import { Constructable, Controller, ControllerOptions } from '@bluish/core'
 import { Path } from './Path.js'
 import { Version } from './Version.js'
 
-export interface HttpSourceOptions extends ControllerOptions {
+export interface HttpControllerOptions extends ControllerOptions {
   version?: number
 }
 
-export function HttpSource(target: Constructable): void
-export function HttpSource(
+export function HttpController(target: Constructable): void
+export function HttpController(
   path: string | string[],
-  options?: HttpSourceOptions,
+  options?: HttpControllerOptions,
 ): (target: Constructable) => void
-export function HttpSource(
+export function HttpController(
   targetOrPath: string | string[] | Constructable,
-  { version, ...options }: HttpSourceOptions = {},
+  { version, ...options }: HttpControllerOptions = {},
 ) {
   if (typeof targetOrPath === 'string' || Array.isArray(targetOrPath))
     return (target: Constructable) => {

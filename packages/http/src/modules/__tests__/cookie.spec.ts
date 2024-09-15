@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpCookie, cookie, Cookie } from '../cookie.js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { HttpSource } from '../../decorators/HttpSource.js'
+import { HttpController } from '../../decorators/HttpController.js'
 import { GET } from '../../decorators/Route.js'
 import { UseMiddleware } from '@bluish/core'
 import BluishCoreTesting from '@bluish/core/testing'
@@ -16,7 +16,7 @@ const run = BluishCoreTesting.run
 
 describe('cookie middleware', () => {
   it('parse request cookie', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -41,7 +41,7 @@ describe('cookie middleware', () => {
   })
 
   it('parse request cookie', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie({}))
     class Test {
       @GET('/test')
@@ -62,7 +62,7 @@ describe('cookie middleware', () => {
   })
 
   it('parse signed request cookie', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie({ secret: 'super secret' }))
     class Test {
       @GET('/step')
@@ -94,7 +94,7 @@ describe('cookie middleware', () => {
 
 describe('cookie.set', () => {
   it('set request cookie', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -113,7 +113,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie http only', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -132,7 +132,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie max age 10', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -151,7 +151,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie secure', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -170,7 +170,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie same site strict', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -189,7 +189,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie same site lax', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -208,7 +208,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie same site none', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -227,7 +227,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie domain', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -246,7 +246,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie path', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -265,7 +265,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookie with multiple options', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -293,7 +293,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookies with different keys', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -313,7 +313,7 @@ describe('cookie.set', () => {
   })
 
   it('set request cookies with different keys and options', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie())
     class Test {
       @GET('/test')
@@ -335,7 +335,7 @@ describe('cookie.set', () => {
 
 describe('cookie.sign', () => {
   it('sign cookie', async () => {
-    @HttpSource
+    @HttpController
     @UseMiddleware(cookie({ secret: 'super secret' }))
     class Test {
       @GET('/test')

@@ -1,14 +1,14 @@
 import { Application } from '@bluish/core'
 import { it, expect } from 'vitest'
-import { HttpSource } from '../../decorators/HttpSource.js'
+import { HttpController } from '../../decorators/HttpController.js'
 import { GET } from '../../decorators/Route.js'
 import { getPath } from '../getPath.js'
 
 it('factory path using controller inherit', async () => {
-  @HttpSource('/root')
+  @HttpController('/root')
   class TestRoot {}
 
-  @HttpSource('/test')
+  @HttpController('/test')
   class Test extends TestRoot {
     @GET
     public static action() {}
@@ -26,13 +26,13 @@ it('factory path using controller inherit', async () => {
 })
 
 it('factory path using controller inherit', async () => {
-  @HttpSource('/root1')
+  @HttpController('/root1')
   class TestRoot1 {}
 
-  @HttpSource('/root2')
+  @HttpController('/root2')
   class TestRoot2 extends TestRoot1 {}
 
-  @HttpSource('/test')
+  @HttpController('/test')
   class Test extends TestRoot2 {
     @GET
     public static action() {}

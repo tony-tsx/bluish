@@ -1,12 +1,12 @@
 import { expect, it } from 'vitest'
 import { Version } from '../../decorators/Version.js'
-import { HttpSource } from '../../decorators/HttpSource.js'
+import { HttpController } from '../../decorators/HttpController.js'
 import { GET } from '../../decorators/Route.js'
 import { Application } from '@bluish/core'
 import { getVersion } from '../getVersion.js'
 
 it('get version from action', async () => {
-  @HttpSource('/root')
+  @HttpController('/root')
   class Root {
     @GET
     @Version(1)
@@ -27,7 +27,7 @@ it('get version from action', async () => {
 })
 
 it('get version from controller', async () => {
-  @HttpSource('/root')
+  @HttpController('/root')
   @Version(1)
   class Root {
     @GET
@@ -51,7 +51,7 @@ it('get version from inherit controller', async () => {
   @Version(1)
   class V1 {}
 
-  @HttpSource('/root')
+  @HttpController('/root')
   class Root extends V1 {
     @GET
     public static action() {}

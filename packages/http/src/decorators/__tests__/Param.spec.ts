@@ -1,6 +1,6 @@
 import BluishCoreTesting from '@bluish/core/testing'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { HttpSource } from '../HttpSource.js'
+import { HttpController } from '../HttpController.js'
 import { GET } from '../Route.js'
 import { Param } from '../Param.js'
 import { Use } from '@bluish/core'
@@ -12,7 +12,7 @@ beforeEach(() => {
 })
 
 it('adds param in controller property', async () => {
-  @HttpSource('/testing')
+  @HttpController('/testing')
   @Use(new HttpRequestParamsMiddleware())
   class Root {
     @Param
@@ -31,7 +31,7 @@ it('adds param in controller property', async () => {
 })
 
 it('adds param in controller property and transform it', async () => {
-  @HttpSource('/testing')
+  @HttpController('/testing')
   @Use(new HttpRequestParamsMiddleware())
   class Root {
     @Param(value => Number(value))
@@ -50,7 +50,7 @@ it('adds param in controller property and transform it', async () => {
 })
 
 it('adds param in controller argument', async () => {
-  @HttpSource('/testing')
+  @HttpController('/testing')
   @Use(new HttpRequestParamsMiddleware())
   class Root {
     constructor(
@@ -71,7 +71,7 @@ it('adds param in controller argument', async () => {
 })
 
 it('adds param in controller argument and transform it', async () => {
-  @HttpSource('/testing')
+  @HttpController('/testing')
   @Use(new HttpRequestParamsMiddleware())
   class Root {
     constructor(
@@ -95,7 +95,7 @@ describe('reflect metadata', async () => {
   await import('reflect-metadata')
 
   it('adds param in controller property and transform it', async () => {
-    @HttpSource('/testing')
+    @HttpController('/testing')
     @Use(new HttpRequestParamsMiddleware())
     class Root {
       @Param
@@ -114,7 +114,7 @@ describe('reflect metadata', async () => {
   })
 
   it('adds param in controller argument and transform it', async () => {
-    @HttpSource('/testing')
+    @HttpController('/testing')
     @Use(new HttpRequestParamsMiddleware())
     class Root {
       constructor(@Param('param') public readonly param: number) {}
