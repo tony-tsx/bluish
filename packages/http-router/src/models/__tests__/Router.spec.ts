@@ -2,11 +2,11 @@ import { expect, it, vi } from 'vitest'
 import { Router } from '../Router.js'
 import { Application } from '@bluish/core'
 import { json } from '@bluish/http/json'
-import http, { GET, HttpSource } from '@bluish/http'
+import http, { GET, HttpController } from '@bluish/http'
 import BluishHttpTesting from '@bluish/http/testing'
 
 it('', async () => {
-  @HttpSource('/users')
+  @HttpController('/users')
   class Users {
     @GET
     public static find() {

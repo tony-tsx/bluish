@@ -3,7 +3,7 @@ import http, {
   Body,
   DELETE,
   GET,
-  HttpSource,
+  HttpController,
   Param,
   PATCH,
   PUT,
@@ -27,7 +27,7 @@ class Post {
   constructor(public readonly id: string) {}
 }
 
-@HttpSource('/users')
+@HttpController('/users')
 class Users {
   @Param(id => new User(id as string))
   public readonly user!: User
@@ -50,7 +50,7 @@ class Users {
   public remove() {}
 }
 
-@HttpSource('/posts')
+@HttpController('/posts')
 class Posts {
   @Param(id => new Post(id as string))
   public readonly post!: Post
@@ -73,7 +73,7 @@ class Posts {
   public remove() {}
 }
 
-@HttpSource('/:user/posts', { inherits: { actions: false } })
+@HttpController('/:user/posts', { inherits: { actions: false } })
 class UserPosts extends Users {
   @GET
   public override find(@Query query: Record<string, string[]>) {
