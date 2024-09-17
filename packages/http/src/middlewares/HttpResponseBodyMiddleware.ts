@@ -44,7 +44,7 @@ export class HttpResponseBodyMiddleware extends HttpMiddleware {
 
       await next()
 
-      if (context.response.body) return
+      if (context.response.body !== undefined) return
 
       const payload = context.payload ?? context.return
 
