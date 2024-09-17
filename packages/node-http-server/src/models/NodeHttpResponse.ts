@@ -27,6 +27,8 @@ export class NodeHttpResponse<
   }
 
   public set body(value: any) {
+    if (value === null) this.status = 204
+
     this.#body = value
 
     if (!(this.#body instanceof Readable)) return

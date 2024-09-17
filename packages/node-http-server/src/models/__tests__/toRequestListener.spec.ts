@@ -10,14 +10,14 @@ import http, {
   Query,
   Res,
   POST,
+  IHttpResponse,
 } from '@bluish/http'
-import { it } from 'vitest'
+import { beforeEach, it, vi } from 'vitest'
 import supertest from 'supertest'
 import { Application } from '@bluish/core'
 import { Router } from '@bluish/http-router'
 import { json } from '@bluish/http/json'
 import { NodeHttpServer } from '../NodeHttpServer.js'
-import { IHttpResponse } from '../../../../http/dist/esm/interfaces/IHttpResponse.js'
 
 class User {
   constructor(public readonly id: string) {}
@@ -33,21 +33,24 @@ class Users {
   public readonly user!: User
 
   @GET
-  public find(@Query query: Record<string, string[]>) {
+  public static find(
+    @Query query: Record<string, string[]>,
+    @Res res: IHttpResponse,
+  ): unknown {
     return []
   }
 
   @PUT
-  public save(@Body body: any) {}
+  public static save(@Body body: any) {}
 
   @PATCH
-  public update(@Body body: any) {}
+  public static update(@Body body: any) {}
 
   @GET('/:user')
-  public findOne() {}
+  public static findOne() {}
 
   @DELETE('/:user')
-  public remove() {}
+  public static remove() {}
 }
 
 @HttpController('/posts')
@@ -76,12 +79,12 @@ class Posts {
 @HttpController('/:user/posts', { inherits: { actions: false } })
 class UserPosts extends Users {
   @GET
-  public override find(@Query query: Record<string, string[]>) {
+  public static override find(@Query query: Record<string, string[]>) {
     return []
   }
 
   @POST
-  public insert(@Query query: Record<string, string[]>) {
+  public static insert(@Query query: Record<string, string[]>) {
     return []
   }
 }
@@ -106,6 +109,25 @@ it('GET /users', async () => {
     .get('/users')
     .expect('Content-Type', 'application/json')
     .expect(200)
+    .expect('[]')
+})
+
+it('GET /users', async () => {
+  vi.spyOn(Users, 'find').mockResolvedValue([{ username: 'John Doe' }])
+
+  await agent
+    .get('/users')
+    .expect('Content-Type', 'application/json')
+    .expect(200)
+    .expect('[{"username":"John Doe"}]')
+})
+
+it('GET /users', async () => {
+  vi.spyOn(Users, 'find').mockImplementationOnce(async (_, res) => {
+    res.body = null
+  })
+
+  await agent.get('/users').expect(204)
 })
 
 it('GET /users/007/posts', async () => {
