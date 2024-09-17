@@ -4,7 +4,7 @@ import { Controller } from '../../decorators/Controller.js'
 import { Action } from '../../decorators/Action.js'
 import { Context } from '../Context.js'
 import { UseMiddleware } from '../../decorators/UseMiddleware.js'
-import { Metadata } from '../../core.js'
+import { Metadata, Middleware } from '../../core.js'
 
 describe('.run', () => {
   it('run static action', async () => {
@@ -190,4 +190,98 @@ it('adds action metadata', async () => {
       .actions.findByInstancePropertyKey('action')!
       .metadata.get('isTest'),
   ).toBe(true)
+})
+
+it('multiples middleware with differents contexts', async () => {
+  class ContextLevel1 extends Context {}
+
+  class ContextLevel2 extends ContextLevel1 {}
+
+  class ContextLevel3 extends ContextLevel2 {}
+
+  class ContextLevel4 extends ContextLevel3 {}
+
+  const middlewareLevel0 = new Middleware(
+    Context,
+    vi.fn((_, next) => next()),
+  )
+
+  const middlewareLevel1 = new Middleware(
+    ContextLevel1,
+    vi.fn((_, next) => next()),
+  )
+
+  const middlewareLevel2 = new Middleware(
+    ContextLevel2,
+    vi.fn((_, next) => next()),
+  )
+
+  const middlewareLevel3 = new Middleware(
+    ContextLevel3,
+    vi.fn((_, next) => next()),
+  )
+
+  const middlewareLevel4 = new Middleware(
+    ContextLevel4,
+    vi.fn((_, next) => next()),
+  )
+
+  @Controller
+  class Test {
+    @Action
+    @UseMiddleware(middlewareLevel0)
+    @UseMiddleware(middlewareLevel1)
+    @UseMiddleware(middlewareLevel2)
+    @UseMiddleware(middlewareLevel3)
+    @UseMiddleware(middlewareLevel4)
+    public action() {}
+  }
+
+  const application = await new Application().useController(Test).bootstrap()
+
+  const action = application.controllers
+    .findByConstructable(Test)!
+    .actions.findByInstancePropertyKey('action')!
+
+  expect(action.middlewares).toHaveLength(5)
+
+  await action.run(new Context())
+
+  expect(middlewareLevel0.run).toHaveBeenCalledTimes(1)
+  expect(middlewareLevel1.run).toHaveBeenCalledTimes(0)
+  expect(middlewareLevel2.run).toHaveBeenCalledTimes(0)
+  expect(middlewareLevel3.run).toHaveBeenCalledTimes(0)
+  expect(middlewareLevel4.run).toHaveBeenCalledTimes(0)
+
+  await action.run(new ContextLevel1())
+
+  expect(middlewareLevel0.run).toHaveBeenCalledTimes(2)
+  expect(middlewareLevel1.run).toHaveBeenCalledTimes(1)
+  expect(middlewareLevel2.run).toHaveBeenCalledTimes(0)
+  expect(middlewareLevel3.run).toHaveBeenCalledTimes(0)
+  expect(middlewareLevel4.run).toHaveBeenCalledTimes(0)
+
+  await action.run(new ContextLevel2())
+
+  expect(middlewareLevel0.run).toHaveBeenCalledTimes(3)
+  expect(middlewareLevel1.run).toHaveBeenCalledTimes(2)
+  expect(middlewareLevel2.run).toHaveBeenCalledTimes(1)
+  expect(middlewareLevel3.run).toHaveBeenCalledTimes(0)
+  expect(middlewareLevel4.run).toHaveBeenCalledTimes(0)
+
+  await action.run(new ContextLevel3())
+
+  expect(middlewareLevel0.run).toHaveBeenCalledTimes(4)
+  expect(middlewareLevel1.run).toHaveBeenCalledTimes(3)
+  expect(middlewareLevel2.run).toHaveBeenCalledTimes(2)
+  expect(middlewareLevel3.run).toHaveBeenCalledTimes(1)
+  expect(middlewareLevel4.run).toHaveBeenCalledTimes(0)
+
+  await action.run(new ContextLevel4())
+
+  expect(middlewareLevel0.run).toHaveBeenCalledTimes(5)
+  expect(middlewareLevel1.run).toHaveBeenCalledTimes(4)
+  expect(middlewareLevel2.run).toHaveBeenCalledTimes(3)
+  expect(middlewareLevel3.run).toHaveBeenCalledTimes(2)
+  expect(middlewareLevel4.run).toHaveBeenCalledTimes(1)
 })
