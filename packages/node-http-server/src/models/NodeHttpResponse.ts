@@ -10,7 +10,7 @@ export class NodeHttpResponse<
   extends http.ServerResponse<TRequest>
   implements IHttpResponse
 {
-  #body: string | Readable | Buffer | undefined
+  #body: any
 
   public readonly headers: Record<string, string | string[] | undefined> = {}
 
@@ -26,7 +26,7 @@ export class NodeHttpResponse<
     return this.#body
   }
 
-  public set body(value: string | Readable | Buffer | undefined) {
+  public set body(value: any) {
     this.#body = value
 
     if (!(this.#body instanceof Readable)) return
