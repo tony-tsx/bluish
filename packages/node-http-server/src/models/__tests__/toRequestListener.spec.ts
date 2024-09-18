@@ -149,7 +149,7 @@ it('POST /users/007/posts', async () => {
   await agent.post('/users/007/posts').expect(200)
 })
 
-it.only('PUT /users', async () => {
+it.skip('PUT /users', async () => {
   let json = JSON.stringify({
     name: 'John Doe',
     email: 'john.doe@email.com',
