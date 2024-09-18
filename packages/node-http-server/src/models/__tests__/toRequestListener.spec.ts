@@ -18,6 +18,7 @@ import { Application } from '@bluish/core'
 import { Router } from '@bluish/http-router'
 import { json } from '@bluish/http/json'
 import { NodeHttpServer } from '../NodeHttpServer.js'
+import { Readable } from 'node:stream'
 
 class User {
   constructor(public readonly id: string) {}
@@ -64,7 +65,10 @@ class Posts {
   }
 
   @PUT
-  public save(@Body body: any) {}
+  public save(@Body body: any, @Res res: IHttpResponse) {
+    res.status = 201
+    return body
+  }
 
   @PATCH
   public update(@Body body: any) {}
@@ -143,4 +147,30 @@ it('GET /posts', async () => {
 
 it('POST /users/007/posts', async () => {
   await agent.post('/users/007/posts').expect(200)
+})
+
+it.only('PUT /users', async () => {
+  let json = JSON.stringify({
+    name: 'John Doe',
+    email: 'john.doe@email.com',
+  })
+
+  const stream = new Readable({
+    read() {},
+  })
+
+  const r = agent.put('/users').send().expect(201).expect({
+    name: 'John Doe',
+    email: 'john.doe@email.com',
+  })
+
+  do {
+    const chunk = json.slice(0, 2)
+    json = json.slice(2)
+
+    stream.push(chunk)
+    await new Promise(resolve => setTimeout(resolve, 10))
+  } while (json.length)
+
+  await r
 })

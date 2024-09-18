@@ -16,7 +16,7 @@ export class NodeHttpRequest
 
   public query!: Record<string, any>
 
-  public body: any
+  public body: any = this
 
   constructor(socket: net.Socket) {
     super(socket)
