@@ -6,7 +6,7 @@ import { getPath } from '../tools/getPath.js'
 
 export class HttpRequestParamsMiddleware extends HttpMiddleware {
   constructor() {
-    super(async (context: HttpContext, next: Next) => {
+    super((context: HttpContext, next: Next) => {
       const result = match(getPath(context.action))(
         context.request.self.pathname,
       )

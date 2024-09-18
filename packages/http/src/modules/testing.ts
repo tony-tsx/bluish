@@ -15,7 +15,7 @@ namespace HttpTesting {
     method?: HttpMethod | Lowercase<HttpMethod>
     headers?: Record<string, undefined | string | string[]>
     url?: string | URL
-    body?: string
+    body?: any
   }
 
   export function toContext(options?: ToContextOptions): HttpContext
