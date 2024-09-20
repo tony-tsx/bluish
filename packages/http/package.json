@@ -78,7 +78,7 @@
     "@types/type-is": "^1",
     "path-to-regexp": "^7.0.0",
     "supertest": "^7.0.0",
-    "vitest": "^2.0.3"
+    "vitest": "^2.1.1"
   },
   "packageManager": "yarn@4.3.1"
 }
