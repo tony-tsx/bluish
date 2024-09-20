@@ -26,8 +26,9 @@ export type ApplicationHttpSourceContentTypeSerializer = (
 
 export interface ApplicationHttpSourceContentTypeConfiguration {
   contentType: string | string[]
-  priority?: number
   serializer: ApplicationHttpSourceContentTypeSerializer
+  quality?: number
+  q?: number
 }
 
 export class ApplicationHttpSourceContentType implements IUsable {
@@ -35,9 +36,13 @@ export class ApplicationHttpSourceContentType implements IUsable {
 
   public readonly contentType: string[]
 
-  public is(accept: string): string | false {
+  public readonly quality: number
+
+  public is(accept: string | string[]): string | false {
+    const accepts = Array.isArray(accept) ? accept : [accept]
+
     for (const contentType of this.contentType) {
-      const type = is(contentType, accept)
+      const type = is(contentType, accepts)
 
       if (type === false) continue
 
@@ -50,9 +55,12 @@ export class ApplicationHttpSourceContentType implements IUsable {
   constructor({
     contentType,
     serializer,
+    q = 0.5,
+    quality = q,
   }: ApplicationHttpSourceContentTypeConfiguration) {
     this.contentType = Array.isArray(contentType) ? contentType : [contentType]
     this.serializer = serializer
+    this.quality = quality
   }
   use(
     target:

@@ -27,3 +27,5 @@ export const ALL_HTTP_METHODS = [
 ] as const satisfies HttpMethod[]
 
 export const HTTP_QUALIFIED_ACCEPT = Symbol()
+
+export const HTTP_QUALIFIED_ACCEPT_QUALITY_CHUNKED = Symbol()

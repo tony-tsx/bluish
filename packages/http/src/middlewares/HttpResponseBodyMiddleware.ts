@@ -12,24 +12,24 @@ export class HttpResponseBodyMiddleware extends HttpMiddleware {
   constructor() {
     super(async (context, next) => {
       const contentTypes = getContentType(context.action)
-      const accepts = qualifierAccept(context)
 
       let contentType: ApplicationHttpSourceContentType | undefined
       let type: string | undefined
 
-      for (const accept of accepts) {
-        for (const _contentType of contentTypes) {
-          const _type = _contentType.is(accept)
+      for (const [, accepts] of qualifierAccept(context, true)) {
+        const acceptedContentTypes = contentTypes.filter(contentType =>
+          contentType.is(accepts),
+        )
 
-          if (_type === false) continue
+        if (!acceptedContentTypes.length) continue
 
-          contentType = _contentType
-          type = _type
+        contentType = acceptedContentTypes.reduce((left, right) =>
+          right.quality > left.quality ? right : left,
+        )
 
-          break
-        }
+        type = contentType.is(accepts) as string
 
-        if (contentType) break
+        break
       }
 
       if (!contentType)

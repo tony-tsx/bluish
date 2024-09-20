@@ -30,14 +30,20 @@ export class ApplicationHttpSourceAcceptJson extends ApplicationHttpSourceAccept
 
 export interface ApplicationHttpSourceContentTypeJsonOptions {
   contentType?: string | string[]
+  quality?: number
+  q?: number
 }
 
 export class ApplicationHttpSourceContentTypeJson extends ApplicationHttpSourceContentType {
   constructor({
     contentType = 'application/json',
+    quality,
+    q,
   }: ApplicationHttpSourceContentTypeJsonOptions = {}) {
     super({
       contentType,
+      quality,
+      q,
       serializer: (error, payload) => ({
         content: JSON.stringify(error ?? payload),
       }),
@@ -45,12 +51,14 @@ export class ApplicationHttpSourceContentTypeJson extends ApplicationHttpSourceC
   }
 }
 
-export interface JsonOptions extends ApplicationHttpSourceAcceptJsonOptions {}
+export interface JsonOptions
+  extends ApplicationHttpSourceAcceptJsonOptions,
+    ApplicationHttpSourceContentTypeJson {}
 
 export const json = (options?: JsonOptions): IUsable => ({
   use(target) {
     new ApplicationHttpSourceAcceptJson(options).use(target)
-    new ApplicationHttpSourceContentTypeJson().use(target)
+    new ApplicationHttpSourceContentTypeJson(options).use(target)
   },
 })
 

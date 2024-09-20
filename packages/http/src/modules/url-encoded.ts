@@ -51,15 +51,21 @@ export class ApplicationHttpSourceAcceptUrlEncoded extends ApplicationHttpSource
 export interface ApplicationHttpSourceContentTypeUrlEncodedOptions {
   extended?: boolean
   contentType?: string | string[]
+  quality?: number
+  q?: number
 }
 
 export class ApplicationHttpSourceContentTypeUrlEncoded extends ApplicationHttpSourceContentType {
   constructor({
     extended = false,
     contentType = 'application/x-www-form-urlencoded',
+    quality,
+    q,
   }: ApplicationHttpSourceContentTypeUrlEncodedOptions = {}) {
     super({
       contentType,
+      quality,
+      q,
       serializer: (error, payload) => {
         const content = (error ?? payload) as any
 
