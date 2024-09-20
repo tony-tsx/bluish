@@ -73,9 +73,21 @@ export class ApplicationSourceAction {
       this.pipes,
     )
 
-    if (this.propertyKey === undefined) {
-      if (!_action.virtualizer?.refs) return this
+    this._action.metadata ??= {}
 
+    for (const key of Object.getOwnPropertySymbols(this._action.metadata)) {
+      const value = this._action.metadata[key]
+
+      this.metadata.define(key, value)
+    }
+
+    for (const key of Object.getOwnPropertyNames(this._action.metadata)) {
+      const value = this._action.metadata[key]
+
+      this.metadata.define(key, value)
+    }
+
+    if (_action.virtualizer?.refs)
       for (const [parameterIndex, ref] of _action.virtualizer.refs.entries())
         this.arguments.add({
           ref: () => ref,
@@ -83,7 +95,8 @@ export class ApplicationSourceAction {
           target: _action.virtualizer,
           parameterIndex,
         })
-    }
+
+    if (!this.propertyKey) return this
 
     const paramtypes = getReflectMetadata<unknown[]>(
       'design:paramtypes',

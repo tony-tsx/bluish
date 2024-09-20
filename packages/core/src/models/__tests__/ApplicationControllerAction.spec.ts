@@ -4,7 +4,7 @@ import { Controller } from '../../decorators/Controller.js'
 import { Action } from '../../decorators/Action.js'
 import { Context } from '../Context.js'
 import { UseMiddleware } from '../../decorators/UseMiddleware.js'
-import { Metadata, Middleware } from '../../core.js'
+import { getMetadataArgsStorage, Metadata, Middleware } from '../../core.js'
 
 describe('.run', () => {
   it('run static action', async () => {
@@ -284,4 +284,52 @@ it('multiples middleware with differents contexts', async () => {
   expect(middlewareLevel2.run).toHaveBeenCalledTimes(3)
   expect(middlewareLevel3.run).toHaveBeenCalledTimes(2)
   expect(middlewareLevel4.run).toHaveBeenCalledTimes(1)
+})
+
+it('adds action metadata by action metadata argument', async () => {
+  @Controller
+  class Root {
+    public static act() {}
+  }
+
+  getMetadataArgsStorage().actions.push({
+    type: 'action',
+    target: Root,
+    metadata: { isTest: true },
+    propertyKey: 'act',
+  })
+
+  const application = await new Application().useController(Root).bootstrap()
+
+  expect(
+    application.controllers
+      .findByConstructable(Root)!
+      .actions.findByStaticPropertyKey('act')!
+      .metadata.get('isTest'),
+  ).toBe(true)
+})
+
+it('adds action metadata (symbol) by action metadata argument', async () => {
+  const IS_TEST = Symbol()
+
+  @Controller
+  class Root {
+    public static act() {}
+  }
+
+  getMetadataArgsStorage().actions.push({
+    type: 'action',
+    target: Root,
+    metadata: { [IS_TEST]: true },
+    propertyKey: 'act',
+  })
+
+  const application = await new Application().useController(Root).bootstrap()
+
+  expect(
+    application.controllers
+      .findByConstructable(Root)!
+      .actions.findByStaticPropertyKey('act')!
+      .metadata.get(IS_TEST),
+  ).toBe(true)
 })

@@ -28,6 +28,7 @@ export interface MetadataActionArg extends IMetadataArg<'action'> {
   propertyKey?: string | symbol
   propertyDescriptor?: TypedPropertyDescriptor<any>
   middlewares?: AnyMiddleware[]
+  metadata?: Record<string | symbol, any>
 }
 
 export interface MetadataArg extends IMetadataArg<'metadata'> {
