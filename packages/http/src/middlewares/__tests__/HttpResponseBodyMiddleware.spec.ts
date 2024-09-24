@@ -68,3 +68,26 @@ it('content type quality priority', async () => {
   )
   expect(context.response.body).toBe('message=Hello%2C%20World!')
 })
+
+it('dont adds body if return is void', async () => {
+  @HttpController('/root')
+  class Root {
+    @GET
+    @Json.ContentType({ q: 1 })
+    public static get() {}
+  }
+
+  const application = await new Application()
+    .useController(Root)
+    .use(http())
+    .bootstrap()
+
+  const context = HttpTesting.toContext('/root')
+
+  await application.controllers
+    .findByConstructable(Root)!
+    .actions.findByStaticPropertyKey('get')!
+    .run(context)
+
+  expect(context.response.body).toBeUndefined()
+})

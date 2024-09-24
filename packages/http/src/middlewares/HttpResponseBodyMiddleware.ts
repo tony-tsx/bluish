@@ -48,6 +48,8 @@ export class HttpResponseBodyMiddleware extends HttpMiddleware {
 
       const payload = context.payload ?? context.return
 
+      if (payload === undefined) return
+
       await contentType.add(type!, null, payload, context)
     })
   }
