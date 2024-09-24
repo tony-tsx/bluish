@@ -185,14 +185,7 @@ export class ApplicationSourceAction {
 
     const args = await this.arguments.to(context.module)
 
-    const value = await target[this.propertyKey!](...args)
-
-    Object.defineProperty(context, 'return', {
-      value,
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    })
+    return await target[this.propertyKey!](...args)
   }
 
   public run(context: Context) {
@@ -216,7 +209,15 @@ export class ApplicationSourceAction {
             return resolve(undefined)
           }
 
-          this._run(context).then(resolve, reject)
+          this._run(context).then(value => {
+            Object.defineProperty(context, 'return', {
+              value,
+              writable: false,
+              enumerable: false,
+              configurable: false,
+            })
+            resolve(value)
+          }, reject)
         }),
     )
   }

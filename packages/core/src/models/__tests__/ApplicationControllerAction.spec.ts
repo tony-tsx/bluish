@@ -4,7 +4,12 @@ import { Controller } from '../../decorators/Controller.js'
 import { Action } from '../../decorators/Action.js'
 import { Context } from '../Context.js'
 import { UseMiddleware } from '../../decorators/UseMiddleware.js'
-import { getMetadataArgsStorage, Metadata, Middleware } from '../../core.js'
+import {
+  Constructable,
+  getMetadataArgsStorage,
+  Metadata,
+  Middleware,
+} from '../../core.js'
 
 describe('.run', () => {
   it('run static action', async () => {
@@ -332,4 +337,24 @@ it('adds action metadata (symbol) by action metadata argument', async () => {
       .actions.findByStaticPropertyKey('act')!
       .metadata.get(IS_TEST),
   ).toBe(true)
+})
+
+it('call action decorator function virtually', async () => {
+  const context = new Context()
+
+  function TestController(target: Constructable) {
+    Controller(target)
+    Action(() => 'testResult')(target)
+  }
+  @TestController
+  class Root {}
+
+  const application = await new Application().useController(Root).bootstrap()
+
+  const actions = application.controllers.findByConstructable(Root)!.actions
+  const action = Array.from(actions).pop()
+
+  await action!.run(context)
+
+  expect(context.return).toBe('testResult')
 })
