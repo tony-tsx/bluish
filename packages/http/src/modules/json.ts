@@ -53,7 +53,7 @@ export class ApplicationHttpSourceContentTypeJson extends ApplicationHttpSourceC
 
 export interface JsonOptions
   extends ApplicationHttpSourceAcceptJsonOptions,
-    ApplicationHttpSourceContentTypeJson {}
+    ApplicationHttpSourceContentTypeJsonOptions {}
 
 export const json = (options?: JsonOptions): IUsable => ({
   use(target) {
