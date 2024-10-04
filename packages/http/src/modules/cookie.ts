@@ -160,6 +160,14 @@ export class HttpCookie {
     )
   }
 
+  public get(name: string, onlySigned: boolean = false): string | undefined {
+    if (!(name in this)) return undefined
+
+    if (onlySigned && !this.isSigned(name)) return undefined
+
+    return this[name]
+  }
+
   public set(
     name: string,
     value: string,
@@ -197,7 +205,7 @@ export class HttpCookie {
     this.context.response.headers['Set-Cookie'].push(cookie.join('; '))
   }
 
-  [key: string]: unknown
+  [key: string]: any
 }
 
 export function cookie(options: HttpCookieOptions = {}) {
@@ -226,13 +234,13 @@ export function Cookie(
   maybePropertyKeyOrOnlySigned?: boolean | string | symbol,
   maybeParameterIndex?: number,
 ) {
-  if (typeof targetOrName === 'string') {
-    if (maybePropertyKeyOrOnlySigned === true)
-      return Input(HttpContext, context => {
-        return context.cookie[targetOrName]
-      })
-    return Input(HttpContext, context => context.cookie[targetOrName])
-  }
+  if (typeof targetOrName === 'string')
+    return Input(HttpContext, context => {
+      return context.cookie.get(
+        targetOrName,
+        maybePropertyKeyOrOnlySigned as boolean,
+      )
+    })
 
   if (maybePropertyKeyOrOnlySigned === undefined)
     throw new TypeError('Cookie decorator must be used on a method parameter')

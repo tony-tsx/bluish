@@ -39,7 +39,7 @@ export function session<TSession extends object>({
 
     const cookie = context.cookie
 
-    let sessionID = cookie[key] as string | undefined
+    let sessionID = cookie.get(key, true)
 
     sessionID ??= generateIdentifier(context.request)
 
