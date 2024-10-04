@@ -1,4 +1,4 @@
-import { Class, getReflectMetadata, Input } from '@bluish/core'
+import { Class, Input } from '@bluish/core'
 import { HttpContext } from '../models/HttpContext.js'
 
 export type ParamTransform = (value: unknown, context: HttpContext) => unknown
@@ -6,10 +6,12 @@ export type ParamTransform = (value: unknown, context: HttpContext) => unknown
 export function Param(target: Class | object, propertyKey: string): void
 export function Param(
   transform: ParamTransform,
+  dependencies?: (string | symbol)[],
 ): (target: Class | object, propertyKey: string) => void
 export function Param(
   name: string,
   transform?: ParamTransform,
+  dependencies?: (string | symbol)[],
 ): (
   target: Class | object,
   propertyKey: undefined | string | symbol,
@@ -17,18 +19,33 @@ export function Param(
 ) => void
 export function Param(
   targetOrNameOrTransform: string | ParamTransform | Class | object,
-  maybePropertyKeyOrTransform?: string | ParamTransform,
+  maybeDependenciesOrPropertyKeyOrTransform?:
+    | string
+    | ParamTransform
+    | (string | symbol)[],
+  maybeDependencies?: (string | symbol)[],
 ): any {
   if (typeof targetOrNameOrTransform === 'string') {
     const name = targetOrNameOrTransform
-    const transform = maybePropertyKeyOrTransform as ParamTransform | undefined
+    const dependencies = maybeDependencies ?? []
 
-    if (transform)
-      return Input(HttpContext, context => {
-        if (context.request.params[name] === undefined) return null
+    if (maybeDependenciesOrPropertyKeyOrTransform)
+      if (typeof maybeDependenciesOrPropertyKeyOrTransform !== 'function')
+        throw new TypeError()
+      else
+        return Input(
+          HttpContext,
+          function (context) {
+            if (context.request.params[name] === undefined) return undefined
 
-        return transform(context.request.params[name], context)
-      })
+            return maybeDependenciesOrPropertyKeyOrTransform.call(
+              this,
+              context.request.params[name],
+              context,
+            )
+          },
+          dependencies,
+        )
 
     return (
       target: Class | object,
@@ -37,17 +54,6 @@ export function Param(
     ) => {
       if (propertyKey === undefined) {
         if (parameterIndex === undefined) throw new TypeError()
-
-        const type = getReflectMetadata<any[]>('design:paramtypes', target)?.[
-          parameterIndex
-        ]
-
-        if (type)
-          return Input(HttpContext, context => {
-            if (context.request.params[name] === undefined) return undefined
-
-            return type(context.request.params[name])
-          })(target, propertyKey, parameterIndex)
 
         return Input(HttpContext, context => context.request.params[name])(
           target,
@@ -59,30 +65,8 @@ export function Param(
       if (parameterIndex === undefined) {
         if (typeof propertyKey !== 'string') throw new TypeError()
 
-        const type = getReflectMetadata<any>('design:type', target, propertyKey)
-
-        if (type)
-          return Input(HttpContext, context => {
-            if (context.request.params[name] === undefined) return undefined
-
-            return type(context.request.params[name])
-          })(target, propertyKey)
-
         return Input(HttpContext, context => context.request.params[name])
       }
-
-      const type = getReflectMetadata<any[]>(
-        'design:paramtypes',
-        target,
-        propertyKey,
-      )?.[parameterIndex]
-
-      if (type)
-        return Input(HttpContext, context => {
-          if (context.request.params[name] === undefined) return undefined
-
-          return type(context.request.params[name])
-        })(target, propertyKey, parameterIndex)
 
       return Input(HttpContext, context => context.request.params[name])(
         target,
@@ -92,31 +76,40 @@ export function Param(
     }
   }
 
-  if (maybePropertyKeyOrTransform === undefined) {
+  if (
+    maybeDependenciesOrPropertyKeyOrTransform === undefined ||
+    Array.isArray(maybeDependenciesOrPropertyKeyOrTransform)
+  ) {
+    const dependencies = Array.isArray(
+      maybeDependenciesOrPropertyKeyOrTransform,
+    )
+      ? maybeDependenciesOrPropertyKeyOrTransform
+      : []
+
     if (typeof targetOrNameOrTransform !== 'function') throw new TypeError()
 
     const transform = targetOrNameOrTransform as ParamTransform
 
     return (target: Class | object, propertyKey: string) => {
-      Input(HttpContext, context =>
-        transform(context.request.params[propertyKey], context),
+      Input(
+        HttpContext,
+        function (context) {
+          return transform.call(
+            this,
+            context.request.params[propertyKey],
+            context,
+          )
+        },
+        dependencies,
       )(target, propertyKey)
     }
   }
 
-  if (typeof maybePropertyKeyOrTransform !== 'string') throw new TypeError()
+  if (typeof maybeDependenciesOrPropertyKeyOrTransform !== 'string')
+    throw new TypeError()
 
   const target = targetOrNameOrTransform as Class | object
-  const propertyKey = maybePropertyKeyOrTransform
-
-  const type = getReflectMetadata<any>('design:type', target, propertyKey)
-
-  if (type)
-    return Input(HttpContext, context => {
-      if (context.request.params[propertyKey] === undefined) return undefined
-
-      return type(context.request.params[propertyKey])
-    })(target, propertyKey)
+  const propertyKey = maybeDependenciesOrPropertyKeyOrTransform
 
   return Input(HttpContext, context => context.request.params[propertyKey])(
     target,

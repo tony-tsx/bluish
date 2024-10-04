@@ -1,5 +1,5 @@
 import BluishCoreTesting from '@bluish/core/testing'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, expect, it } from 'vitest'
 import { HttpController } from '../HttpController.js'
 import { GET } from '../Route.js'
 import { Param } from '../Param.js'
@@ -89,45 +89,4 @@ it('adds param in controller argument and transform it', async () => {
 
   expect(context.request.params).toEqual({ param: '123' })
   expect(context.target.param).toBe(123)
-})
-
-describe('reflect metadata', async () => {
-  await import('reflect-metadata')
-
-  it('adds param in controller property and transform it', async () => {
-    @HttpController('/testing')
-    @Use(new HttpRequestParamsMiddleware())
-    class Root {
-      @Param
-      public readonly param!: number
-
-      @GET('/:param')
-      public action() {}
-    }
-
-    const context = HttpTesting.toContext('/testing/123')
-
-    await BluishCoreTesting.run(Root.prototype, 'action', context)
-
-    expect(context.request.params).toEqual({ param: '123' })
-    expect(context.target.param).toBe(123)
-  })
-
-  it('adds param in controller argument and transform it', async () => {
-    @HttpController('/testing')
-    @Use(new HttpRequestParamsMiddleware())
-    class Root {
-      constructor(@Param('param') public readonly param: number) {}
-
-      @GET('/:param')
-      public action() {}
-    }
-
-    const context = HttpTesting.toContext('/testing/123')
-
-    await BluishCoreTesting.run(Root.prototype, 'action', context)
-
-    expect(context.request.params).toEqual({ param: '123' })
-    expect(context.target.param).toBe(123)
-  })
 })
