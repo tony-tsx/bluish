@@ -169,12 +169,12 @@ export class ApplicationSourceAction {
     let target: any = this.target
 
     if (!this._action.propertyKey) {
-      const args = await this.arguments.to(context.module)
+      const args = await this.arguments.call(null, context.module)
 
       return this._action.virtualizer!.handle!(...args)
     }
 
-    if (typeof target === 'object') target = await this.controller.to(context)
+    if (typeof target === 'object') target = await this.controller.call(context)
 
     Object.defineProperty(context, 'target', {
       value: target,
@@ -183,7 +183,7 @@ export class ApplicationSourceAction {
       configurable: false,
     })
 
-    const args = await this.arguments.to(context.module)
+    const args = await this.arguments.call(target, context.module)
 
     return await target[this.propertyKey!](...args)
   }

@@ -104,19 +104,16 @@ export class ApplicationInjectable {
 
   public async to(module: Module) {
     if (this._injectable.virtualizer) {
-      const args = await this.arguments.to(module)
+      const args = await this.arguments.call(null, module)
 
       return this._injectable.virtualizer.handle(...args)
     }
 
-    const [args, properties] = await Promise.all([
-      this.arguments.to(module),
-      this.properties.to(module),
-    ])
+    let target = new this.target!(
+      ...(await this.arguments.call(this.target!.prototype, module)),
+    )
 
-    let target = new this.target!(...args)
-
-    Object.assign(target, properties)
+    Object.assign(target, await this.properties.call(target, module))
 
     if (this.hoisting) {
       if (typeof target[this.hoisting] === 'function')

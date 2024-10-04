@@ -23,6 +23,8 @@ export class ApplicationSourceProperty {
 
   public readonly metadata = new ApplicationSourceMetadata()
 
+  public readonly dependencies = new Set<string | symbol>()
+
   constructor(
     public readonly target: Class | object,
     public readonly propertyKey: string | symbol,
@@ -52,17 +54,23 @@ export class ApplicationSourceProperty {
     switch (_arg.type) {
       case 'usable':
         return void _arg.usable.use(this)
+
       case 'inject':
         this.inject = new ApplicationSourceInject(_arg)
+
         return void 0
       case 'input':
         this.input.add(_arg)
+        _arg.deps?.forEach(dependecy => this.dependencies.add(dependecy))
+
         return void 0
       case 'pipe':
         this.pipes.add(_arg)
+
         return void 0
       case 'metadata':
         this.metadata.add(_arg)
+
         return void 0
       default:
         throw new TypeError(
@@ -72,8 +80,9 @@ export class ApplicationSourceProperty {
     }
   }
 
-  public async to(module: Module) {
+  public async call<TThis>(target: TThis, module: Module) {
     const arg: PipeInput = {
+      this: target,
       target: this,
       module,
       metadata: this.metadata,
@@ -81,7 +90,7 @@ export class ApplicationSourceProperty {
       inject: null,
     }
 
-    arg.value = await this.input.get(module.context)
+    arg.value = await this.input.call(target, module.context)
 
     if (this.inject) arg.inject = await this.inject.ref
 

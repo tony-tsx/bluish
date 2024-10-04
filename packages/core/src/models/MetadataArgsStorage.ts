@@ -72,6 +72,7 @@ export interface MetadataInputArg extends IMetadataArg<'input'> {
   target: Class | object
   propertyKey?: undefined | string | symbol
   parameterIndex?: undefined | number
+  deps?: (string | symbol)[]
   context?: Class<Context>
   selector: InputSelector
 }

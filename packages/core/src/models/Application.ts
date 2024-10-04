@@ -176,7 +176,7 @@ export class Application {
 
         const controller = new ApplicationSource(this, _controller)
 
-        Object.assign(controller.target, await controller.static.to(module))
+        await controller.static.call(controller.target, module)
 
         this.controllers!.add(controller)
       }),

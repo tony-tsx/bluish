@@ -183,15 +183,12 @@ export class ApplicationSource {
     }
   }
 
-  public async to(context: Context) {
-    const [args, properties] = await Promise.all([
-      this.arguments.to(context.module),
-      this.properties.to(context.module),
-    ])
+  public async call(context: Context) {
+    const target = new this.target!(
+      ...(await this.arguments.call(this.target.prototype, context.module)),
+    )
 
-    const target = new this.target!(...args)
-
-    Object.assign(target, properties)
+    Object.assign(target, await this.properties.call(target, context.module))
 
     return target
   }

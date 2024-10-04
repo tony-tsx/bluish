@@ -50,15 +50,22 @@ export class ApplicationSourceProperties {
     this.#get(_arg.propertyKey).add(_arg)
   }
 
-  public async to(module: Module) {
-    const properties: Record<string | symbol, unknown> = {}
-
-    return Promise.all(
+  public async call(target: any, module: Module) {
+    await Promise.all(
       Array.from(this.#properties).map(async ([propertyKey, property]) => {
-        const value = await property.to(module)
+        target[propertyKey] = (async () => {
+          if (property.dependencies.size)
+            await Promise.all(
+              Array.from(property.dependencies).map(
+                dependency => target[dependency],
+              ),
+            )
 
-        properties[propertyKey] = value
+          return await property.call(target, module)
+        })()
+
+        target[propertyKey] = await target[propertyKey]
       }),
-    ).then(() => properties)
+    )
   }
 }

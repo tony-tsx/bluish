@@ -4,14 +4,19 @@ import { Context } from './Context.js'
 import { chain } from '../tools/chain.js'
 import { Next } from '../decorators/Next.js'
 
-function run(input: ApplicationSourceInput, context: Context, next: Next) {
-  if (input.is(context)) return input.get(context, next)
+function run(
+  this: unknown,
+  input: ApplicationSourceInput,
+  context: Context,
+  next: Next,
+) {
+  if (input.is(context)) return input.call(this, context, next)
 
   return next()
 }
 
 export class ApplicationSourceInputCollection extends Set<ApplicationSourceInput> {
-  #fn: null | ((context: Context) => Promise<unknown>) = null
+  #fn: null | ((next: Next | null, context: Context) => Promise<unknown>) = null
 
   public override add(_selector: MetadataInputArg | ApplicationSourceInput) {
     if (_selector instanceof ApplicationSourceInput) return super.add(_selector)
@@ -19,9 +24,9 @@ export class ApplicationSourceInputCollection extends Set<ApplicationSourceInput
     return super.add(new ApplicationSourceInput(_selector))
   }
 
-  public async get(context: Context) {
-    if (!this.#fn) this.#fn = chain(Array.from(this), run).bind(null, null)
+  public async call<TThis = unknown>(self: TThis, context: Context) {
+    if (!this.#fn) this.#fn = chain(Array.from(this), run)
 
-    return this.#fn(context)
+    return this.#fn.call(self, null, context)
   }
 }

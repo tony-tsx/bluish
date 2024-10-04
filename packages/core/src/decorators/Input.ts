@@ -1,39 +1,54 @@
 import { Context } from '../models/Context.js'
 import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
+import { is } from '../tools/is.js'
 import { Class } from '../typings/Class.js'
 import { Next } from './Next.js'
 
-export type InputSelector<TContext extends Context = Context> = (
+export type InputSelector<TContext extends Context = Context, TThis = any> = (
+  this: TThis,
   context: TContext,
   next: Next,
 ) => unknown
 
-export function Input(
-  selector: InputSelector,
+export function Input<TThis = any>(
+  selector: InputSelector<Context, TThis>,
+  deps?: (string | symbol)[],
 ): (
-  target: Class | object,
+  target: Class<TThis> | object,
   propertyKey: undefined | string | symbol,
   parameterIndex?: number,
 ) => void
-export function Input<TContext extends Context>(
-  context: Class<TContext> | InputSelector,
-  selector: InputSelector<TContext>,
+export function Input<TContext extends Context, TThis = unknown>(
+  context: Class<TContext> | InputSelector<Context, TThis>,
+  selector: InputSelector<TContext, TThis>,
+  deps?: (string | symbol)[],
 ): (
-  target: Class | object,
+  target: Class<TThis> | object,
   propertyKey: undefined | string | symbol,
   parameterIndex?: number,
 ) => void
 export function Input<TContext extends Context>(
   contextOrSelector: Class<TContext> | InputSelector,
-  maybeSelector?: InputSelector<TContext>,
+  maybeDepsOrSelector?: InputSelector<TContext> | (string | symbol)[],
+  maybeDeps?: (string | symbol)[],
 ) {
-  const context = maybeSelector
-    ? (contextOrSelector as Class<Context>)
-    : Context
+  const deps = (() => {
+    if (Array.isArray(maybeDeps)) return maybeDeps
+
+    if (Array.isArray(maybeDepsOrSelector))
+      return maybeDepsOrSelector ? maybeDepsOrSelector : []
+
+    return []
+  })()
+
+  const context = is.constructor(contextOrSelector, Context)
+    ? contextOrSelector
+    : (Context as Class<Context>)
 
   const selector =
-    (maybeSelector as InputSelector | undefined) ||
-    (contextOrSelector as InputSelector)
+    typeof maybeDepsOrSelector === 'function'
+      ? (maybeDepsOrSelector as InputSelector)
+      : (contextOrSelector as InputSelector)
 
   return (
     target: Class | object,
@@ -47,6 +62,7 @@ export function Input<TContext extends Context>(
       parameterIndex,
       context,
       selector,
+      deps,
     })
   }
 }

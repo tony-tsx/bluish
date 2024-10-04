@@ -77,8 +77,9 @@ export class ApplicationSourceArgument {
     }
   }
 
-  public async to(module: Module) {
+  public async call<TThis>(target: TThis, module: Module) {
     const arg: PipeInput = {
+      this: target,
       target: this,
       module,
       metadata: this.metadata,
@@ -86,7 +87,7 @@ export class ApplicationSourceArgument {
       inject: null,
     }
 
-    arg.value = await this.input.get(module.context)
+    arg.value = await this.input.call(target, module.context)
 
     if (this.inject) arg.inject = this.inject.ref
 

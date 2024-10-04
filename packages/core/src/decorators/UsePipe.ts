@@ -7,6 +7,7 @@ import { Class } from '../typings/Class.js'
 import { Next } from './Next.js'
 
 export type PipeInput = {
+  readonly this: unknown
   readonly target: ApplicationSourceArgument | ApplicationSourceProperty
   readonly module: Module
   readonly metadata: ApplicationSourceMetadata

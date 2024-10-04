@@ -55,12 +55,12 @@ export class ApplicationSourceArguments {
     this.#get(_arg.parameterIndex).add(_arg)
   }
 
-  public async to(module: Module) {
+  public async call<TThis>(target: TThis, module: Module) {
     const args: unknown[] = []
 
     return Promise.all(
       Array.from(this.#arguments).map(async ([parameterIndex, argument]) => {
-        args[parameterIndex] = await argument.to(module)
+        args[parameterIndex] = await argument.call(target, module)
       }),
     ).then(() => args)
   }
