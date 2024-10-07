@@ -37,7 +37,7 @@ it('adds schema validation', async () => {
   vi.spyOn(Test, 'act')
 
   await BluishCoreTesting.run(
-    new Application().usePipe(guard),
+    new Application().use(guard()),
     Test,
     'act',
     Object.assign(new Context(), {
@@ -73,7 +73,7 @@ it('throw validation error', async () => {
 
   await expect(
     BluishCoreTesting.run(
-      new Application().usePipe(guard),
+      new Application().use(guard()),
       Test,
       'act',
       Object.assign(new Context(), {
@@ -112,9 +112,11 @@ it('catch validation error', async () => {
   const handleValidationError = vi.fn(() => {})
 
   await BluishCoreTesting.run(
-    new Application()
-      .usePipe(guard)
-      .useMiddleware(guard.onCatch(handleValidationError)),
+    new Application().use(
+      guard({
+        catch: [[Context, handleValidationError]],
+      }),
+    ),
     Test,
     'act',
     Object.assign(new Context(), {
@@ -148,7 +150,7 @@ it('skip non-guard injection', async () => {
   vi.spyOn(Test, 'act')
 
   await BluishCoreTesting.run(
-    new Application().usePipe(guard),
+    new Application().use(guard()),
     Test,
     'act',
     Object.assign(new Context(), {
@@ -190,9 +192,11 @@ it('skip non-validation error onCatch', async () => {
 
   expect(
     BluishCoreTesting.run(
-      new Application()
-        .usePipe(guard)
-        .useMiddleware(guard.onCatch(handleValidationError)),
+      new Application().use(
+        guard({
+          catch: [[Context, handleValidationError]],
+        }),
+      ),
       Test,
       'act',
       Object.assign(new Context(), {
@@ -230,9 +234,11 @@ describe('reflect-metadata', async () => {
     const handleValidationError = vi.fn(() => {})
 
     await BluishCoreTesting.run(
-      new Application()
-        .usePipe(guard)
-        .useMiddleware(guard.onCatch(handleValidationError)),
+      new Application().use(
+        guard({
+          catch: [[Context, handleValidationError]],
+        }),
+      ),
       Test,
       'act',
       Object.assign(new Context(), {
