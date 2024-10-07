@@ -1,5 +1,8 @@
 import { MiddlewareCompose } from '@bluish/core'
-import { HttpErrorMiddleware } from './middlewares/HttpErrorMiddleware.js'
+import {
+  HttpErrorMiddleware,
+  httpErrorMiddlewareOptions,
+} from './middlewares/HttpErrorMiddleware.js'
 import { HttpResponseBodyMiddleware } from './middlewares/HttpResponseBodyMiddleware.js'
 import { HttpResponseStatusMiddleware } from './middlewares/HttpResponseStatusMiddleware.js'
 import { HttpRequestBodyMiddleware } from './middlewares/HttpRequestBodyMiddleware.js'
@@ -44,9 +47,11 @@ export * from './tools/getVersion.js'
 
 export * as HttpTools from './tools/http-tools.js'
 
-export default function http() {
+export interface HttpOptions extends httpErrorMiddlewareOptions {}
+
+export default function http(options: HttpOptions = {}) {
   const middleware = new MiddlewareCompose([
-    new HttpErrorMiddleware(),
+    new HttpErrorMiddleware(options),
     new HttpResponseStatusMiddleware(),
     new HttpResponseBodyMiddleware(),
     new HttpRequestBodyMiddleware(),

@@ -3,17 +3,24 @@ import {
   HTTP_CONTEXT_ACTION_CONTENT_TYPE,
 } from '../constants/constants.js'
 import { HttpError } from '../errors/HttpError.js'
+import { HttpContext } from '../http.js'
 import { HttpMiddleware } from './HttpMiddleware.js'
 
+export interface httpErrorMiddlewareOptions {
+  onUnknownCatch?(error: unknown, context: HttpContext): unknown
+}
+
 export class HttpErrorMiddleware extends HttpMiddleware {
-  constructor() {
+  constructor({ onUnknownCatch }: httpErrorMiddlewareOptions = {}) {
     super(async (context, next) => {
       try {
         return await next()
       } catch (error) {
         if (typeof error !== 'object') throw error
 
-        if (!(error instanceof HttpError)) throw error
+        if (!(error instanceof HttpError))
+          if (onUnknownCatch) return await onUnknownCatch(error, context)
+          else throw error
 
         if (error.status >= 500) throw error
 
