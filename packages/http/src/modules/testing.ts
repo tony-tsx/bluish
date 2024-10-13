@@ -10,10 +10,11 @@ function isHttpMethod(
   )
 }
 
-namespace HttpTesting {
+namespace BluishHttpTesting {
   export interface ToContextOptions {
     method?: HttpMethod | Lowercase<HttpMethod>
     headers?: Record<string, undefined | string | string[]>
+    query?: Record<string, undefined | string | string[]>
     url?: string | URL
     body?: any
   }
@@ -99,4 +100,4 @@ namespace HttpTesting {
   }
 }
 
-export default HttpTesting
+export default BluishHttpTesting

@@ -1,10 +1,10 @@
-import HttpTesting from '../testing.js'
+import BluishHttpTesting from '../testing.js'
 import CoreTesting from '@bluish/core/testing'
 import { expect, it, vi } from 'vitest'
 import { cors } from '../cors.js'
 
 it('adds access control allow origin *', async () => {
-  const context = HttpTesting.toContext()
+  const context = BluishHttpTesting.toContext()
 
   await CoreTesting.runMiddleware(cors(), context)
 
@@ -12,7 +12,7 @@ it('adds access control allow origin *', async () => {
 })
 
 it('adds access control allow origin with origin', async () => {
-  const context = HttpTesting.toContext()
+  const context = BluishHttpTesting.toContext()
 
   await CoreTesting.runMiddleware(
     cors({ origin: 'https://example.com' }),
@@ -25,7 +25,7 @@ it('adds access control allow origin with origin', async () => {
 })
 
 it('adds access control allow origin with function', async () => {
-  const context = HttpTesting.toContext()
+  const context = BluishHttpTesting.toContext()
 
   await CoreTesting.runMiddleware(
     cors({ origin: () => 'https://example.com' }),
@@ -38,7 +38,7 @@ it('adds access control allow origin with function', async () => {
 })
 
 it('adds access control allow multiple origin', async () => {
-  const context = HttpTesting.toContext({
+  const context = BluishHttpTesting.toContext({
     headers: { Origin: 'https://example.com' },
   })
 
@@ -53,7 +53,7 @@ it('adds access control allow multiple origin', async () => {
 })
 
 it('adds access control allow multiple origin with function', async () => {
-  const context = HttpTesting.toContext({
+  const context = BluishHttpTesting.toContext({
     headers: { Origin: 'https://example.org' },
   })
 
@@ -68,7 +68,7 @@ it('adds access control allow multiple origin with function', async () => {
 })
 
 it('adds access control allow origin false', async () => {
-  const context = HttpTesting.toContext({
+  const context = BluishHttpTesting.toContext({
     headers: { Origin: 'https://example.com' },
   })
 
@@ -81,7 +81,7 @@ it('adds access control allow origin false', async () => {
 })
 
 it('adds access control allow origin with regexp', async () => {
-  const context = HttpTesting.toContext({
+  const context = BluishHttpTesting.toContext({
     headers: { Origin: 'https://example.com' },
   })
 
@@ -96,7 +96,7 @@ it('adds access control allow origin with regexp', async () => {
 })
 
 it('allow credentials', async () => {
-  const context = HttpTesting.toContext()
+  const context = BluishHttpTesting.toContext()
 
   await CoreTesting.runMiddleware(cors({ credentials: true }), context)
 
@@ -106,7 +106,7 @@ it('allow credentials', async () => {
 })
 
 it('configure expose headers', async () => {
-  const context = HttpTesting.toContext()
+  const context = BluishHttpTesting.toContext()
 
   await CoreTesting.runMiddleware(
     cors({ exposedHeaders: ['X-Example'] }),
@@ -119,7 +119,7 @@ it('configure expose headers', async () => {
 })
 
 it('configure allowed methods', async () => {
-  const context = HttpTesting.toContext({
+  const context = BluishHttpTesting.toContext({
     method: 'OPTIONS',
   })
 
@@ -135,7 +135,7 @@ it('configure allowed methods', async () => {
 })
 
 it('configure allowed headers', async () => {
-  const context = HttpTesting.toContext({
+  const context = BluishHttpTesting.toContext({
     method: 'OPTIONS',
     headers: { 'Access-Control-Request-Headers': 'X-Example' },
   })
@@ -151,7 +151,7 @@ it('configure allowed headers', async () => {
 })
 
 it('configure max age', async () => {
-  const context = HttpTesting.toContext({
+  const context = BluishHttpTesting.toContext({
     method: 'OPTIONS',
   })
 
@@ -161,7 +161,7 @@ it('configure max age', async () => {
 })
 
 it('continue preflight', async () => {
-  const context = HttpTesting.toContext({
+  const context = BluishHttpTesting.toContext({
     method: 'OPTIONS',
   })
 

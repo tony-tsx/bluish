@@ -11,7 +11,7 @@ import { HttpResponseBodyMiddleware } from '../../middlewares/HttpResponseBodyMi
 import { HttpResponseStatusMiddleware } from '../../middlewares/HttpResponseStatusMiddleware.js'
 import { HttpRequestParamsMiddleware } from '../../middlewares/HttpRequestParamsMiddleware.js'
 import { json, Json } from '../../modules/json.js'
-import HttpTesting from '../../modules/testing.js'
+import BluishHttpTesting from '../../modules/testing.js'
 
 const { run } = BluishCoreTesting
 
@@ -32,7 +32,7 @@ describe('GET', () => {
 
     vi.spyOn(Users, 'find')
 
-    await run(Users, 'find', HttpTesting.toContext('/users'))
+    await run(Users, 'find', BluishHttpTesting.toContext('/users'))
 
     expect(Users.find).toHaveBeenCalledWith()
   })
@@ -55,7 +55,7 @@ describe('GET', () => {
     const context = await run(
       Users,
       'findById',
-      HttpTesting.toContext('/users/1'),
+      BluishHttpTesting.toContext('/users/1'),
     )
 
     expect(context.response.status).toBe(200)

@@ -2,7 +2,7 @@ import { session, HttpSessionStore } from '../session.js'
 import { cookie } from '../cookie.js'
 import { beforeEach, expect, it, vi } from 'vitest'
 
-import HttpTesting from '../testing.js'
+import BluishHttpTesting from '../testing.js'
 import BluishCoreTesting from '@bluish/core/testing'
 
 const { runMiddleware } = BluishCoreTesting
@@ -32,7 +32,7 @@ beforeEach(() => {
 })
 
 it('adds session in request response cookie', async () => {
-  const context = HttpTesting.toContext()
+  const context = BluishHttpTesting.toContext()
 
   await runMiddleware(
     [
@@ -51,7 +51,7 @@ it('adds session in request response cookie', async () => {
 
 it('skip session middleware if session already definied', async () => {
   const generateIdentifier = vi.fn(() => 'test123')
-  const context = HttpTesting.toContext()
+  const context = BluishHttpTesting.toContext()
 
   context.session = {}
 
@@ -61,7 +61,7 @@ it('skip session middleware if session already definied', async () => {
 })
 
 it('throws an error if the cookie middleware is required', async () => {
-  const context = HttpTesting.toContext()
+  const context = BluishHttpTesting.toContext()
 
   await expect(
     runMiddleware(

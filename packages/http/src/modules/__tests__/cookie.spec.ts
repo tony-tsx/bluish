@@ -6,7 +6,7 @@ import { GET } from '../../decorators/Route.js'
 import { UseMiddleware } from '@bluish/core'
 import BluishCoreTesting from '@bluish/core/testing'
 import 'reflect-metadata'
-import HttpTesting from '../testing.js'
+import BluishHttpTesting from '../testing.js'
 
 beforeEach(() => {
   BluishCoreTesting.resetMetadataArgsStorage()
@@ -28,7 +28,7 @@ describe('cookie middleware', () => {
     await run(
       Test,
       'test',
-      HttpTesting.toContext('/test', {
+      BluishHttpTesting.toContext('/test', {
         headers: { Cookie: 'key=value' },
       }),
     )
@@ -53,7 +53,7 @@ describe('cookie middleware', () => {
     await run(
       Test,
       'test',
-      HttpTesting.toContext('/test', {
+      BluishHttpTesting.toContext('/test', {
         headers: { Cookie: 'key=value' },
       }),
     )
@@ -76,12 +76,12 @@ describe('cookie middleware', () => {
 
     vi.spyOn(Test, 'test')
 
-    const { response } = await run(Test, 'step', HttpTesting.toContext('/step'))
+    const { response } = await run(Test, 'step', BluishHttpTesting.toContext('/step'))
 
     await run(
       Test,
       'test',
-      HttpTesting.toContext('/test', {
+      BluishHttpTesting.toContext('/test', {
         headers: { Cookie: response.headers['Set-Cookie']![0] },
       }),
     )
@@ -103,7 +103,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -122,7 +122,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -141,7 +141,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -160,7 +160,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -179,7 +179,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -198,7 +198,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -217,7 +217,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -236,7 +236,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -255,7 +255,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -281,7 +281,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -303,7 +303,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -323,7 +323,7 @@ describe('cookie.set', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({
@@ -344,7 +344,7 @@ describe('cookie.sign', () => {
       }
     }
 
-    const { response } = await run(Test, 'act', HttpTesting.toContext('/test'))
+    const { response } = await run(Test, 'act', BluishHttpTesting.toContext('/test'))
 
     expect(response.headers).toEqual(
       expect.objectContaining({

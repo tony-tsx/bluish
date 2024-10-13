@@ -3,7 +3,7 @@ import {
   ApplicationHttpSourceAccept,
   ApplicationHttpSourceAcceptSession,
 } from '../ApplicationHttpSourceAccept.js'
-import HttpTesting from '../../modules/testing.js'
+import BluishHttpTesting from '../../modules/testing.js'
 import { Readable } from 'node:stream'
 
 it('use with stream', async () => {
@@ -30,7 +30,7 @@ it('use with stream', async () => {
 
   let message = 'Hello, World!'
 
-  const context = HttpTesting.toContext({ body: readable })
+  const context = BluishHttpTesting.toContext({ body: readable })
 
   const chunk = message.slice(0, 2)
   message = message.slice(2)

@@ -3,7 +3,7 @@ import http, { GET, HttpController } from '../../http.js'
 import { Application } from '@bluish/core'
 import { Json } from '../../modules/json.js'
 import { UrlEncoded } from '../../modules/url-encoded.js'
-import HttpTesting from '../../modules/testing.js'
+import BluishHttpTesting from '../../modules/testing.js'
 
 it('content type quality priority', async () => {
   @HttpController('/root')
@@ -21,7 +21,7 @@ it('content type quality priority', async () => {
     .use(http())
     .bootstrap()
 
-  const context = HttpTesting.toContext('/root', {
+  const context = BluishHttpTesting.toContext('/root', {
     headers: {
       Accept: 'application/x-www-form-urlencoded; q=1, application/json; q=1',
     },
@@ -52,7 +52,7 @@ it('content type quality priority', async () => {
     .use(http())
     .bootstrap()
 
-  const context = HttpTesting.toContext('/root', {
+  const context = BluishHttpTesting.toContext('/root', {
     headers: {
       Accept: 'application/x-www-form-urlencoded; q=1, application/json; q=0.8',
     },
@@ -82,7 +82,7 @@ it('dont adds body if return is void', async () => {
     .use(http())
     .bootstrap()
 
-  const context = HttpTesting.toContext('/root')
+  const context = BluishHttpTesting.toContext('/root')
 
   await application.controllers
     .findByConstructable(Root)!
