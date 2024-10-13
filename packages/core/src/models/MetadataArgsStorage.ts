@@ -45,6 +45,7 @@ export interface MetadataMiddlewareArg extends IMetadataArg<'middleware'> {
   target: Class | object
   propertyKey?: string | symbol
   parameterIndex?: undefined
+  propertyDescriptor?: TypedPropertyDescriptor<any>
   middleware: AnyMiddleware
 }
 
@@ -59,6 +60,7 @@ export interface MetadataUsableArg extends IMetadataArg<'usable'> {
 export interface MetadataIsolatedArg extends IMetadataArg<'isolated'> {
   target: Class | object
   propertyKey?: string | symbol
+  propertyDescriptor?: undefined | TypedPropertyDescriptor<any>
 }
 
 export interface MetadataInjectArg extends IMetadataArg<'inject'> {

@@ -10,17 +10,29 @@ import { Class } from '../typings/Class.js'
 export function UseMiddleware<TContext extends Context>(
   context: Class<TContext> | Class<TContext>[],
   run: FunctionMiddleware<TContext>,
-): (target: Class | object, propertyKey?: string | symbol) => void
+): (
+  target: Class | object,
+  propertyKey?: string | symbol,
+  propertyDescriptor?: TypedPropertyDescriptor<any>,
+) => void
 export function UseMiddleware<TContext extends Context>(
   run: FunctionMiddleware<TContext>,
-): (target: Class | object, propertyKey?: string | symbol) => void
+): (
+  target: Class | object,
+  propertyKey?: string | symbol,
+  propertyDescriptor?: TypedPropertyDescriptor<any>,
+) => void
 export function UseMiddleware<TContext extends Context>(
   contextOrAnyMiddleware:
     | Class<TContext>
     | Class<TContext>[]
     | AnyMiddleware<TContext>,
   maybeFunctionMiddleware?: FunctionMiddleware<TContext>,
-): (target: Class | object, propertyKey?: string | symbol) => void
+): (
+  target: Class | object,
+  propertyKey?: string | symbol,
+  propertyDescriptor?: TypedPropertyDescriptor<any>,
+) => void
 export function UseMiddleware<TContext extends Context>(
   contextOrAnyMiddleware:
     | Class<TContext>
@@ -28,11 +40,16 @@ export function UseMiddleware<TContext extends Context>(
     | AnyMiddleware<TContext>,
   maybeFunctionMiddleware?: FunctionMiddleware<TContext>,
 ) {
-  return (target: Class | object, propertyKey?: string | symbol) => {
+  return (
+    target: Class | object,
+    propertyKey?: string | symbol,
+    propertyDescriptor?: TypedPropertyDescriptor<any>,
+  ) => {
     getMetadataArgsStorage().middlewares.unshift({
       type: 'middleware',
       target,
       propertyKey,
+      propertyDescriptor,
       middleware: Middleware.from(
         contextOrAnyMiddleware,
         maybeFunctionMiddleware,

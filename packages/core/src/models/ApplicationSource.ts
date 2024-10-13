@@ -142,15 +142,21 @@ export class ApplicationSource {
 
       if (action) return void action.add(_arg)
 
-      if (_arg.type === 'middleware')
+      if (_arg.type === 'middleware') {
+        if (_arg.propertyDescriptor) return void 0
+
         throw new TypeError(
           'Metadata arg type middleware not allowed in source property',
         )
+      }
 
-      if (_arg.type === 'isolated')
+      if (_arg.type === 'isolated') {
+        if (_arg.propertyKey) return void 0
+
         throw new TypeError(
           'Metadata arg type isolated not allowed in source property',
         )
+      }
 
       if (typeof _arg.target === 'function') return void this.static.add(_arg)
 
