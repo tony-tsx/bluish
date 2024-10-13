@@ -1,27 +1,31 @@
 import { Class, Input } from '@bluish/core'
 import { HttpContext } from '../models/HttpContext.js'
 
-export type ParamTransform = (value: unknown, context: HttpContext) => unknown
+export type ParamTransform<TThis> = (
+  this: TThis,
+  value: unknown,
+  context: HttpContext,
+) => unknown
 
 export function Param(target: Class | object, propertyKey: string): void
-export function Param(
-  transform: ParamTransform,
+export function Param<TThis>(
+  transform: ParamTransform<TThis>,
   dependencies?: (string | symbol)[],
 ): (target: Class | object, propertyKey: string) => void
-export function Param(
+export function Param<TThis>(
   name: string,
-  transform?: ParamTransform,
+  transform?: ParamTransform<TThis>,
   dependencies?: (string | symbol)[],
 ): (
   target: Class | object,
   propertyKey: undefined | string | symbol,
   parameterIndex: number,
 ) => void
-export function Param(
-  targetOrNameOrTransform: string | ParamTransform | Class | object,
+export function Param<TThis>(
+  targetOrNameOrTransform: string | ParamTransform<TThis> | Class | object,
   maybeDependenciesOrPropertyKeyOrTransform?:
     | string
-    | ParamTransform
+    | ParamTransform<TThis>
     | (string | symbol)[],
   maybeDependencies?: (string | symbol)[],
 ): any {
@@ -35,7 +39,7 @@ export function Param(
       else
         return Input(
           HttpContext,
-          function (context) {
+          function (this: TThis, context) {
             if (context.request.params[name] === undefined) return undefined
 
             return maybeDependenciesOrPropertyKeyOrTransform.call(
@@ -88,12 +92,12 @@ export function Param(
 
     if (typeof targetOrNameOrTransform !== 'function') throw new TypeError()
 
-    const transform = targetOrNameOrTransform as ParamTransform
+    const transform = targetOrNameOrTransform as ParamTransform<TThis>
 
     return (target: Class | object, propertyKey: string) => {
       Input(
         HttpContext,
-        function (context) {
+        function (this: TThis, context) {
           return transform.call(
             this,
             context.request.params[propertyKey],
