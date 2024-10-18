@@ -63,7 +63,7 @@ describe('GET', () => {
       'Content-Length': '28',
       'Content-Type': 'application/json',
     })
-    expect(context.response.body).toBe(
+    expect(context.response.body.toString()).toBe(
       JSON.stringify({ id: '1', name: 'John Doe' }),
     )
 

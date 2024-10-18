@@ -1,7 +1,4 @@
-import {
-  HTTP_CONTEXT_ACTION_CONTENT_MIME_TYPE,
-  HTTP_CONTEXT_ACTION_CONTENT_TYPE,
-} from '../constants/constants.js'
+import { HTTP_CONTEXT_ACTION_CONTENT_TYPE } from '../constants/constants.js'
 import { HttpError } from '../errors/HttpError.js'
 import { HttpContext } from '../http.js'
 import { HttpMiddleware } from './HttpMiddleware.js'
@@ -22,39 +19,18 @@ export class HttpErrorMiddleware extends HttpMiddleware {
           if (onUnknownCatch) return await onUnknownCatch(error, context)
           else throw error
 
-        if (error.status >= 500) throw error
-
         context.response.status = error.status
 
         if (context[HTTP_CONTEXT_ACTION_CONTENT_TYPE]) {
-          const data = await context[
-            HTTP_CONTEXT_ACTION_CONTENT_TYPE
-          ].serializer(error, null, context)
+          const [type, contentType] = context[HTTP_CONTEXT_ACTION_CONTENT_TYPE]
 
-          if (data.type === undefined)
-            if (context[HTTP_CONTEXT_ACTION_CONTENT_MIME_TYPE])
-              data.type = context[HTTP_CONTEXT_ACTION_CONTENT_MIME_TYPE]
-            else
-              data.type =
-                context[HTTP_CONTEXT_ACTION_CONTENT_TYPE].contentType[0]
-
-          context.response.headers['Content-Type'] = data.type
-
-          if (data.length === undefined) {
-            if (typeof data.content === 'string')
-              data.length = data.content.length
-            else data.length = data.content.byteLength
-          }
-
-          context.response.headers['Content-Length'] = `${data.length}`
-
-          context.response.body = data.content
+          return await contentType.set(type, error, null, context)
         }
 
-        const content = `${error.message}`
+        const content = Buffer.from(`${error.message}`)
 
-        context.response.headers['Content-Type'] = 'text/html'
-        context.response.headers['Content-Length'] = `${content.length}`
+        context.response.headers['Content-Type'] = 'plain/text'
+        context.response.headers['Content-Length'] = `${content.byteLength}`
         context.response.body = content
       }
     })

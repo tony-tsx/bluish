@@ -9,11 +9,12 @@ import {
 import { HttpContext } from './HttpContext.js'
 import { is } from 'type-is'
 import { HTTP_CONTENT_TYPE } from '../constants/constants.js'
+import { Readable } from 'node:stream'
 
 export interface ApplicationHttpSourceContentTypeSerializerReturn {
   type?: string
   length?: number
-  content: string | Buffer
+  content: string | Buffer | Readable | Uint8Array | ArrayBuffer
 }
 
 export type ApplicationHttpSourceContentTypeSerializer = (
@@ -75,25 +76,32 @@ export class ApplicationHttpSourceContentType implements IUsable {
     )
   }
 
-  public async add(
-    type: string,
+  public async set(
+    defaultType: string,
     error: unknown | null,
     payload: unknown,
     context: HttpContext,
   ) {
-    const data = await this.serializer(error, payload, context)
+    let { type, content, length } = await this.serializer(
+      error,
+      payload,
+      context,
+    )
 
-    if (data.type === undefined) data.type = type
+    if (type === undefined) type = defaultType
 
-    context.response.headers['Content-Type'] = data.type
+    if (typeof content === 'string') content = Buffer.from(content)
 
-    if (data.length === undefined) {
-      if (typeof data.content === 'string') data.length = data.content.length
-      else data.length = data.content.byteLength
-    }
+    context.response.headers['Content-Type'] = type
 
-    context.response.headers['Content-Length'] = `${data.length}`
+    if (length === undefined)
+      if (Buffer.isBuffer(content)) length = content.byteLength
+      else if (content instanceof ArrayBuffer) length = content.byteLength
+      else if (content instanceof Uint8Array) length = content.byteLength
 
-    context.response.body = data.content
+    if (length !== undefined)
+      context.response.headers['Content-Length'] = `${length}`
+
+    context.response.body = content
   }
 }

@@ -1,12 +1,31 @@
 import { STATUS_CODES } from 'http'
 
+export interface HttpErrorOptions extends ErrorOptions {
+  publicMessage?: string
+  properties?: Record<string, unknown>
+}
+
 export class HttpError extends Error {
+  public readonly publicMessage?: string
+  public readonly properties: Record<string, unknown>
+
   constructor(
     public readonly status: number,
     message = STATUS_CODES[status],
-    options?: ErrorOptions,
+    { publicMessage, properties = {}, ...options }: HttpErrorOptions = {},
   ) {
     super(message, options)
+
+    this.properties = properties
+    this.publicMessage = publicMessage
+  }
+
+  public toJSON() {
+    return {
+      status: this.status,
+      message: this.publicMessage ?? this.message,
+      ...this.properties,
+    }
   }
 }
 

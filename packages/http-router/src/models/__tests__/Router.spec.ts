@@ -34,7 +34,7 @@ it('', async () => {
     expect(context.response.status).toBe(200)
     expect(context.response.headers['Content-Type']).toBe('application/json')
     expect(context.response.headers['Content-Length']).toBe('2')
-    expect(context.response.body).toBe('{}')
+    expect(context.response.body.toString()).toBe('{}')
   }
 
   {
@@ -43,6 +43,8 @@ it('', async () => {
     )
 
     expect(context.response.status).toBe(404)
-    expect(context.response.body).toBe('Not Found')
+    expect(context.response.body.toString()).toBe(
+      '{"status":404,"message":"Not Found"}',
+    )
   }
 })

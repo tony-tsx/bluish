@@ -1,7 +1,6 @@
 import { Context } from '@bluish/core'
 import {
   HTTP_ACCEPT,
-  HTTP_CONTEXT_ACTION_CONTENT_MIME_TYPE,
   HTTP_CONTEXT_ACTION_CONTENT_TYPE,
 } from '../constants/constants.js'
 import { ApplicationHttpSourceContentType } from './ApplicationHttpSourceContentType.js'
@@ -13,9 +12,10 @@ export class HttpContext<
   TRequest extends IHttpRequest = IHttpRequest,
   TResponse extends IHttpResponse = IHttpResponse,
 > extends Context {
-  public [HTTP_CONTEXT_ACTION_CONTENT_TYPE]?: ApplicationHttpSourceContentType
-
-  public [HTTP_CONTEXT_ACTION_CONTENT_MIME_TYPE]?: string
+  public [HTTP_CONTEXT_ACTION_CONTENT_TYPE]?: [
+    string,
+    ApplicationHttpSourceContentType,
+  ]
 
   public [HTTP_ACCEPT]?: ApplicationHttpSourceAccept
 

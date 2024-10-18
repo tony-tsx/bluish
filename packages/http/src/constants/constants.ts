@@ -2,8 +2,6 @@ import { HttpMethod } from '../http.js'
 
 export const HTTP_CONTEXT_ACTION_CONTENT_TYPE = Symbol()
 
-export const HTTP_CONTEXT_ACTION_CONTENT_MIME_TYPE = Symbol()
-
 export const HTTP_ACCEPT = Symbol()
 
 export const HTTP_CONTENT_TYPE = Symbol()

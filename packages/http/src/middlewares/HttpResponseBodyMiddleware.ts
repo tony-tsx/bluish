@@ -2,10 +2,7 @@ import { getContentType } from '../tools/getContentType.js'
 import { HttpMiddleware } from './HttpMiddleware.js'
 import { ApplicationHttpSourceContentType } from '../models/ApplicationHttpSourceContentType.js'
 import { NotAcceptable } from '../errors/HttpError.js'
-import {
-  HTTP_CONTEXT_ACTION_CONTENT_MIME_TYPE,
-  HTTP_CONTEXT_ACTION_CONTENT_TYPE,
-} from '../constants/constants.js'
+import { HTTP_CONTEXT_ACTION_CONTENT_TYPE } from '../constants/constants.js'
 import { qualifierAccept } from '../tools/http-tools.js'
 
 export class HttpResponseBodyMiddleware extends HttpMiddleware {
@@ -39,8 +36,7 @@ export class HttpResponseBodyMiddleware extends HttpMiddleware {
             `The requested content type is not available. Supported content types are: ${contentTypes.flatMap(contentType => contentType.contentType).join(', ')}`,
           )
 
-      context[HTTP_CONTEXT_ACTION_CONTENT_TYPE] = contentType
-      context[HTTP_CONTEXT_ACTION_CONTENT_MIME_TYPE] = type
+      context[HTTP_CONTEXT_ACTION_CONTENT_TYPE] = [type!, contentType]
 
       await next()
 
@@ -50,7 +46,7 @@ export class HttpResponseBodyMiddleware extends HttpMiddleware {
 
       if (payload === undefined) return
 
-      await contentType.add(type!, null, payload, context)
+      await contentType.set(type!, null, payload, context)
     })
   }
 }

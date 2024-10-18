@@ -33,7 +33,7 @@ it('content type quality priority', async () => {
     .run(context)
 
   expect(context.response.headers['Content-Type']).toBe('application/json')
-  expect(context.response.body).toBe('{"message":"Hello, World!"}')
+  expect(context.response.body.toString()).toBe('{"message":"Hello, World!"}')
 })
 
 it('content type quality priority', async () => {
@@ -66,7 +66,7 @@ it('content type quality priority', async () => {
   expect(context.response.headers['Content-Type']).toBe(
     'application/x-www-form-urlencoded',
   )
-  expect(context.response.body).toBe('message=Hello%2C%20World!')
+  expect(context.response.body.toString()).toBe('message=Hello%2C%20World!')
 })
 
 it('dont adds body if return is void', async () => {
