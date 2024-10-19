@@ -5,6 +5,10 @@ export namespace is {
     return typeof value === 'string'
   }
 
+  export function number(value: unknown): value is number {
+    return typeof value === 'number'
+  }
+
   export function symbol(value: unknown): value is symbol {
     return typeof value === 'symbol'
   }

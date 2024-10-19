@@ -43,3 +43,4 @@ export * from './tools/getReflectMetadata.js'
 
 export * from './typings/Class.js'
 export * from './typings/Reference.js'
+export * from './tools/action-decorator-factory/action-decorator-factory.js'

@@ -189,6 +189,10 @@ export class ApplicationSource {
     }
   }
 
+  public async _constructor() {
+    await Promise.all(this.actions.map(action => action._constructor()))
+  }
+
   public async call(context: Context) {
     const target = new this.target!(
       ...(await this.arguments.call(this.target.prototype, context.module)),

@@ -15,6 +15,7 @@ import { Pipe } from './Pipe.js'
 import { PipeFunction } from '../decorators/UsePipe.js'
 import { injectable } from '../pipes/injectable.js'
 import { IUsable } from '../decorators/Use.js'
+import { ApplicationActionCollection } from './ApplicationActionCollection.js'
 
 export interface ApplicationOptions {
   middlewares?: AnyMiddleware[]
@@ -34,6 +35,8 @@ export class Application {
   public readonly controllers = new ApplicationControllerCollection(this)
 
   public readonly middlewares = new ApplicationSourceMiddlewareCollection(null)
+
+  public readonly actions = new ApplicationActionCollection(this)
 
   public readonly pipes = new ApplicationSourcePipeCollection(null)
 
@@ -138,6 +141,8 @@ export class Application {
       context,
       target: this.#virtual.target,
       virtualizer: { handle, refs },
+      middlewares: [],
+      options: {},
     })
 
     this.#virtual.actions.add(action)
@@ -177,6 +182,8 @@ export class Application {
         const controller = new ApplicationSource(this, _controller)
 
         await controller.static.call(controller.target, module)
+
+        await controller._constructor()
 
         this.controllers!.add(controller)
       }),

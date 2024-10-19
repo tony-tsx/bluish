@@ -18,6 +18,7 @@ import {
   MetadataPipeArg,
   MetadataUsableArg,
 } from './MetadataArgsStorage.js'
+import { Middleware } from './Middleware.js'
 
 export class ApplicationSourceAction {
   public readonly target: Class | object
@@ -49,6 +50,10 @@ export class ApplicationSourceAction {
     return isMatchToAction(this, _test.target, _test.propertyKey)
   }
 
+  public of(context: Class<Context>) {
+    return context === this.context || context.prototype instanceof this.context
+  }
+
   constructor(
     public readonly controller: ApplicationSource,
     public readonly _action: MetadataActionArg,
@@ -73,19 +78,10 @@ export class ApplicationSourceAction {
       this.pipes,
     )
 
-    this._action.metadata ??= {}
-
-    for (const key of Object.getOwnPropertySymbols(this._action.metadata)) {
-      const value = this._action.metadata[key]
-
-      this.metadata.define(key, value)
-    }
-
-    for (const key of Object.getOwnPropertyNames(this._action.metadata)) {
-      const value = this._action.metadata[key]
-
-      this.metadata.define(key, value)
-    }
+    if (!Array.isArray(this._action.metadata))
+      this.metadata.define(this._action.metadata)
+    else if (this._action.metadata)
+      for (const entry of this._action.metadata) this.metadata.define(entry)
 
     if (_action.virtualizer?.refs)
       for (const [parameterIndex, ref] of _action.virtualizer.refs.entries())
@@ -163,6 +159,18 @@ export class ApplicationSourceAction {
           `Unkknown metadata arg type in application source action: ${_arg.type}`,
         )
     }
+  }
+
+  public async _constructor() {
+    if (this._action.middlewares)
+      for (const middlewares of this._action.middlewares) {
+        if (typeof middlewares === 'undefined') continue
+
+        for (const middleware of middlewares)
+          this.middlewares.add(Middleware.from(middleware))
+      }
+
+    await this._action.constructor?.(this, this._action.options)
   }
 
   public async _run(context: Context) {

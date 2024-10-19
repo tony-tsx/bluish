@@ -5,6 +5,9 @@ import { Context } from './Context.js'
 import { AnyMiddleware } from './Middleware.js'
 import { ControllerInheritsOptions } from '../decorators/Controller.js'
 import { IUsable } from '../decorators/Use.js'
+import { ApplicationSourceMetadataEntry } from './ApplicationSourceMetadata.js'
+import { ApplicationSourceAction } from './ApplicationSourceAction.js'
+import { ApplicationSource } from './ApplicationSource.js'
 
 export interface IVirtual {
   handle(...args: any[]): any
@@ -19,6 +22,7 @@ export interface MetadataControllerArg extends IMetadataArg<'controller'> {
   target: Constructable
   inherit?: ControllerInheritsOptions
   middlewares?: AnyMiddleware[]
+  construct?: (controller: ApplicationSource) => void | Promise<void>
 }
 
 export interface MetadataActionArg extends IMetadataArg<'action'> {
@@ -27,8 +31,14 @@ export interface MetadataActionArg extends IMetadataArg<'action'> {
   virtualizer?: IVirtual
   propertyKey?: string | symbol
   propertyDescriptor?: TypedPropertyDescriptor<any>
-  middlewares?: AnyMiddleware[]
-  metadata?: Record<string | symbol, any>
+  parameterIndex?: number
+  middlewares?: (AnyMiddleware[] | undefined)[]
+  metadata?: ApplicationSourceMetadataEntry[] | Record<string | symbol, any>
+  options?: object
+  construct?: (
+    applicationSourceAction: ApplicationSourceAction,
+    options: any,
+  ) => void | Promise<void>
 }
 
 export interface MetadataArg extends IMetadataArg<'metadata'> {
