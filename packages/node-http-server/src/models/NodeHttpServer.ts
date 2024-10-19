@@ -3,6 +3,7 @@ import { toRequestListener } from './toRequestListener.js'
 import { Router } from '@bluish/http-router'
 import { NodeHttpRequest } from './NodeHttpRequest.js'
 import { NodeHttpResponse } from './NodeHttpResponse.js'
+import { Application } from '@bluish/core'
 
 export interface PureNodeHttpServerOptions {
   onResponseBodyReadableReceive?: 'pause' | 'auto send' | 'nothing'
@@ -20,6 +21,8 @@ export class NodeHttpServer<
   TResponse extends typeof NodeHttpResponse = typeof NodeHttpResponse,
   // @ts-expect-error: TODO
 > extends http.Server<TRequest, TResponse> {
+  public readonly application!: Application
+
   constructor(
     public readonly router: Router,
     {
@@ -36,5 +39,7 @@ export class NodeHttpServer<
       },
       toRequestListener(router, options),
     )
+
+    this.application = this.router.application
   }
 }
