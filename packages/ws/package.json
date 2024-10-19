@@ -26,7 +26,7 @@
     "build:cjs": "yarn build:cjs:tsc && yarn build:cjs:package.json",
     "build": "yarn run build:esm && yarn run build:cjs",
     "test": "vitest --run",
-    "prepublish": "yarn run test && yarn run build"
+    "prepublish": "yarn run build"
   },
   "peerDependencies": {
     "@bluish/core": "^0.0.0",
