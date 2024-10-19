@@ -164,6 +164,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@bluish/ws@workspace:^, @bluish/ws@workspace:packages/ws":
+  version: 0.0.0-use.local
+  resolution: "@bluish/ws@workspace:packages/ws"
+  dependencies:
+    "@bluish/core": "workspace:^"
+    "@bluish/http": "workspace:^"
+    vitest: "npm:^2.1.1"
+  peerDependencies:
+    "@bluish/core": ^0.0.0
+    "@bluish/http": ^0.0.0
+  languageName: unknown
+  linkType: soft
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
