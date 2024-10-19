@@ -139,6 +139,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@bluish/node-ws-server@workspace:packages/node-ws-server":
+  version: 0.0.0-use.local
+  resolution: "@bluish/node-ws-server@workspace:packages/node-ws-server"
+  dependencies:
+    "@bluish/core": "workspace:^"
+    "@bluish/http": "workspace:^"
+    "@bluish/ws": "workspace:^"
+    "@types/ws": "npm:^8"
+    vitest: "npm:^2.1.1"
+    ws: "npm:^8.18.0"
+  peerDependencies:
+    "@bluish/core": ^0.0.0
+    "@bluish/node-http-server": ^0.0.0
+    "@bluish/ws": ^0.0.0
+  dependenciesMeta:
+    "@types/ws":
+      optional: true
+  languageName: unknown
+  linkType: soft
+
 "@bluish/ornate-guard@workspace:packages/ornate-guard":
   version: 0.0.0-use.local
   resolution: "@bluish/ornate-guard@workspace:packages/ornate-guard"
@@ -1621,6 +1641,15 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/55db08f9c1799717404f14f00d0ed777f47d6d24474b5cc3b54e3c77df0f4ef7af93f90d49bcdb0741a18ee758cdb86c55e5eb05aa56206d14bd580eed6c2d2b
+  languageName: node
+  linkType: hard
+
+"@types/ws@npm:^8":
+  version: 8.5.12
+  resolution: "@types/ws@npm:8.5.12"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/3fd77c9e4e05c24ce42bfc7647f7506b08c40a40fe2aea236ef6d4e96fc7cb4006a81ed1b28ec9c457e177a74a72924f4768b7b4652680b42dfd52bc380e15f9
   languageName: node
   linkType: hard
 
@@ -7889,6 +7918,21 @@ __metadata:
     type-fest: "npm:^0.4.1"
     write-json-file: "npm:^3.2.0"
   checksum: 10c0/8e20db5fa444dad04e3703c18d8e0f89679caa60accbee5da9ea3aa076430b3f32d99f50d8860d29044245775795455c62d12d16a7856d407e30df7b79f39505
+  languageName: node
+  linkType: hard
+
+"ws@npm:^8.18.0":
+  version: 8.18.0
+  resolution: "ws@npm:8.18.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 10c0/25eb33aff17edcb90721ed6b0eb250976328533ad3cd1a28a274bd263682e7296a6591ff1436d6cbc50fa67463158b062f9d1122013b361cec99a05f84680e06
   languageName: node
   linkType: hard
 

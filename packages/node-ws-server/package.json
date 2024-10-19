@@ -1,0 +1,50 @@
+{
+  "name": "@bluish/node-ws-server",
+  "version": "0.0.0",
+  "type": "module",
+  "author": "Tony <tony.js@zoho.eu>",
+  "main": "./dist/cjs/node-ws-server.js",
+  "module": "./dist/esm/node-ws-server.js",
+  "types": "./dist/esm/node-ws-server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/node-ws-server.d.ts",
+      "require": "./dist/cjs/node-ws-server.js",
+      "import": "./dist/esm/node-ws-server.js"
+    }
+  },
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:esm:package.json": "node -e \"require('fs').writeFileSync('./dist/esm/package.json', '{\\\"type\\\": \\\"module\\\"}')\"",
+    "build:cjs:package.json": "node -e \"require('fs').writeFileSync('./dist/cjs/package.json', '{\\\"type\\\": \\\"commonjs\\\"}')\"",
+    "build:esm:tsc": "npx tsc -p tsconfig.build.json --module nodenext --outDir ./dist/esm --declaration",
+    "build:cjs:tsc": "npx tsc -p tsconfig.build.json --module commonjs --outDir ./dist/cjs",
+    "build:esm": "yarn build:esm:tsc && yarn build:esm:package.json",
+    "build:cjs": "yarn build:cjs:tsc && yarn build:cjs:package.json",
+    "build": "yarn run build:esm && yarn run build:cjs",
+    "test": "vitest --run",
+    "prepublish": "yarn run test && yarn run build"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "peerDependencies": {
+    "@bluish/core": "^0.0.0",
+    "@bluish/node-http-server": "^0.0.0",
+    "@bluish/ws": "^0.0.0"
+  },
+  "devDependencies": {
+    "@bluish/core": "workspace:^",
+    "@bluish/http": "workspace:^",
+    "@bluish/ws": "workspace:^",
+    "@types/ws": "^8",
+    "vitest": "^2.1.1"
+  },
+  "optionalDependencies": {
+    "@types/ws": "^8"
+  },
+  "packageManager": "yarn@4.3.1"
+}
