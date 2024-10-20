@@ -76,6 +76,7 @@ export class NodeWebSocketServer<
     ])
 
     this.on('connection', (ws, request) => {
+      let ready: Promise<unknown> | undefined
       const _ready = <T extends Function>(fn: T): T =>
         (async (...args: any[]) => {
           await ready
@@ -116,13 +117,15 @@ export class NodeWebSocketServer<
       ws.on('pong', pong)
       ws.on('error', error)
 
-      const context = new WebSocketConnectedContext(ws, request)
+      const context = new NodeWebSocketConnectedContext(ws, request)
 
-      const ready = Promise.all(
+      ready = Promise.all(
         actions
           .get(WebSocketConnectedContext)!
           .map(action => action.run(context)),
-      )
+      ).finally(() => {
+        ready = undefined
+      })
     })
   }
 }
