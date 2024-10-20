@@ -15,9 +15,11 @@ export namespace WS {
     context => context.connection,
   )
 
+  export interface Connected extends WebSocketConnectedContext {}
+
   export const Connected = actionDecoratorFactory({
     context: WebSocketConnectedContext,
-    input: context => context.connection,
+    input: context => context,
   })
 
   export const Message = actionDecoratorFactory({

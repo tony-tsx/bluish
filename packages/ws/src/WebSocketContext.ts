@@ -1,5 +1,6 @@
 import { Context } from '@bluish/core'
 import { IWebSocketConnection } from './IWebSocketConnection.js'
+import { HttpContext, IHttpRequest, IHttpResponse } from '@bluish/http'
 
 export class WebSocketContext extends Context {
   constructor(public readonly connection: IWebSocketConnection) {
@@ -7,7 +8,32 @@ export class WebSocketContext extends Context {
   }
 }
 
-export class WebSocketConnectedContext extends WebSocketContext {}
+export class WebSocketConnectedContext extends WebSocketContext {
+  public readonly response: IHttpResponse = {
+    headers: {},
+    status: 101,
+  }
+
+  constructor(
+    connection: IWebSocketConnection,
+    public readonly request: IHttpRequest,
+  ) {
+    super(connection)
+  }
+
+  [key: string]: any
+}
+
+const hasIstance = HttpContext[Symbol.hasInstance]
+
+Object.defineProperty(HttpContext, Symbol.hasInstance, {
+  value(instance: any) {
+    return (
+      hasIstance.call(this, instance) ||
+      instance instanceof WebSocketConnectedContext
+    )
+  },
+})
 
 export class WebSocketMessageContext extends WebSocketContext {
   constructor(
