@@ -1,0 +1,42 @@
+{
+  "name": "@bluish/node-amqp",
+  "version": "0.0.0",
+  "type": "module",
+  "author": "Tony <tony.js@zoho.eu>",
+  "main": "./dist/cjs/node-amqp.js",
+  "module": "./dist/esm/node-amqp.js",
+  "types": "./dist/esm/node-amqp.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/node-amqp.d.ts",
+      "require": "./dist/cjs/node-amqp.js",
+      "import": "./dist/esm/node-amqp.js"
+    }
+  },
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:esm:package.json": "node -e \"require('fs').writeFileSync('./dist/esm/package.json', '{\\\"type\\\": \\\"module\\\"}')\"",
+    "build:cjs:package.json": "node -e \"require('fs').writeFileSync('./dist/cjs/package.json', '{\\\"type\\\": \\\"commonjs\\\"}')\"",
+    "build:esm:tsc": "npx tsc -p tsconfig.build.json --module nodenext --outDir ./dist/esm --declaration",
+    "build:cjs:tsc": "npx tsc -p tsconfig.build.json --module commonjs --outDir ./dist/cjs",
+    "build:esm": "yarn build:esm:tsc && yarn build:esm:package.json",
+    "build:cjs": "yarn build:cjs:tsc && yarn build:cjs:package.json",
+    "build": "yarn run build:esm && yarn run build:cjs",
+    "test": "echo \"Error: no test specified\"",
+    "prepublish": "yarn run test && yarn run build"
+  },
+  "peerDependencies": {
+    "@bluish/core": "^0.0.0",
+    "amqplib": "*"
+  },
+  "devDependencies": {
+    "@bluish/core": "workspace:^",
+    "@types/amqplib": "^0",
+    "amqplib": "^0.10.4",
+    "vitest": "^2.1.1"
+  },
+  "packageManager": "yarn@4.3.1"
+}
