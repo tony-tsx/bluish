@@ -12,9 +12,23 @@ import {
   WebSocketErrorContext,
   WebSocketMessageContext,
   WebSocketContext,
+  IWebSocketConnection,
 } from '@bluish/ws'
+import { HttpMethod, IHttpRequest } from '@bluish/http'
 
 export { WebSocket }
+
+export class NodeWebSocketConnectedContext extends WebSocketConnectedContext {
+  constructor(connection: IWebSocketConnection, request: IHttpRequest) {
+    super(connection, request)
+
+    request.method = request.method?.toUpperCase() as HttpMethod
+
+    request.self = new URL(request.url ?? '', `http://${request.headers.host}`)
+
+    request.query = Object.fromEntries(request.self.searchParams)
+  }
+}
 
 Injectable.register(
   WebSocket,
