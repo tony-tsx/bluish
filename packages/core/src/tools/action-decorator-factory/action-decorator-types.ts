@@ -138,20 +138,31 @@ export interface ActionDecorator<
   ) => void
   /**
    * @example
-   *  ```ts
-   *  class Controller {
-   *    ＠Action()
-   *    public action() {}
-   *  }
-   *  ```
+   * ```ts
+   * class Controller {
+   *   ＠Action()
+   *   public action() {}
+   * }
+   * ```
+   *
+   * ```ts
+   * class Controller {
+   *   public action(＠Action() input: unknown) {}
+   * }
+   * ```
    */
-  (
-    options?: TOptions & ActionOptions,
-  ): (
-    target: Class | object,
-    propertyKey: symbol | string,
-    propertyDescriptor: TypedPropertyDescriptor<ActionFunction>,
-  ) => void
+  (options?: TOptions & ActionOptions): {
+    (
+      target: Class | object,
+      propertyKey: symbol | string,
+      propertyDescriptor: TypedPropertyDescriptor<ActionFunction>,
+    ): void
+    (
+      target: Class | object,
+      propertyKey: symbol | string,
+      parameterIndex: number,
+    ): void
+  }
   (
     targetOrContext:
       | Class<TContext>

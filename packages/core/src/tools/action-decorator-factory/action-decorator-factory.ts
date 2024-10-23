@@ -45,7 +45,8 @@ export function actionDecoratorFactory<
       | Class<TContext>
       | Class<object>
       | object
-      | ((...args: any[]) => any),
+      | ((...args: any[]) => any)
+      | TOptions,
     maybePropertyKeyOrVirtualRefsOrVirtualHandleOrOptions?:
       | symbol
       | string
@@ -63,6 +64,12 @@ export function actionDecoratorFactory<
 
     if (typeof maybeTargetOrContext === 'object') {
       const target = maybeTargetOrContext
+
+      if (
+        typeof maybePropertyKeyOrVirtualRefsOrVirtualHandleOrOptions ===
+        'undefined'
+      )
+        return Action(baseContext, maybeTargetOrContext as TOptions)
 
       if (
         !is.propertyKey(maybePropertyKeyOrVirtualRefsOrVirtualHandleOrOptions)
