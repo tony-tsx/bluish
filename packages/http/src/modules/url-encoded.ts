@@ -2,8 +2,18 @@ import { ApplicationHttpSourceAccept } from '../models/ApplicationHttpSourceAcce
 import { ApplicationHttpSourceAcceptSessionBufferAlloc } from '../models/ApplicationHttpSourceAcceptSessionBufferAlloc.js'
 import qs from 'qs'
 import nodeqs from 'node:querystring'
-import { IUsable, Use } from '@bluish/core'
-import { ApplicationHttpSourceContentType } from '../http.js'
+import {
+  Application,
+  ApplicationSource,
+  ApplicationSourceAction,
+  ApplicationSourceArgument,
+  ApplicationSourceProperty,
+  Context,
+  IUsable,
+  Middleware,
+  Use,
+} from '@bluish/core'
+import { ApplicationHttpSourceContentType, HttpContext } from '../http.js'
 
 export class ApplicationHttpSourceAcceptUrlEncodedSession extends ApplicationHttpSourceAcceptSessionBufferAlloc {
   constructor(public readonly extended: boolean) {
@@ -26,6 +36,12 @@ export interface ApplicationHttpSourceAcceptUrlEncodedOptions {
 }
 
 export class ApplicationHttpSourceAcceptUrlEncoded extends ApplicationHttpSourceAccept {
+  static readonly #qs = Middleware.from(HttpContext, (context, next) => {
+    context.request.query = qs.parse(context.request.self.search.slice(1))
+
+    return next()
+  }) as unknown as Middleware<Context>
+
   public readonly extended: boolean
 
   constructor({
@@ -45,6 +61,21 @@ export class ApplicationHttpSourceAcceptUrlEncoded extends ApplicationHttpSource
     })
 
     this.extended = extended
+  }
+
+  public use(
+    target:
+      | Application
+      | ApplicationSource
+      | ApplicationSourceAction
+      | ApplicationSourceArgument
+      | ApplicationSourceProperty,
+  ): void {
+    if (!this.extended) return super.use(target)
+
+    if (!('middlewares' in target)) return
+
+    target.middlewares.add(ApplicationHttpSourceAcceptUrlEncoded.#qs)
   }
 }
 
