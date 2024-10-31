@@ -10,6 +10,7 @@ import {
   ApplicationSourceArgument,
   ApplicationSourceProperty,
   IUsable,
+  FunctionMiddleware,
 } from '@bluish/core'
 import { HTTP_ACCEPT } from '../constants/constants.js'
 
@@ -29,6 +30,7 @@ export interface ApplicationHttpSourceAcceptConfiguration {
   limit?: number | string
   priority?: number
   start(context: HttpContext): ApplicationHttpSourceAcceptSession
+  middleware?: FunctionMiddleware<HttpContext, ApplicationHttpSourceAccept>
 }
 
 export class ApplicationHttpSourceAccept implements IUsable {
@@ -42,12 +44,18 @@ export class ApplicationHttpSourceAccept implements IUsable {
 
   public readonly piority: number
 
+  public readonly middleware?: FunctionMiddleware<
+    HttpContext,
+    ApplicationHttpSourceAccept
+  >
+
   constructor({
     accept,
     limit = Infinity,
     charset = 'utf-',
     priority = 0,
     start,
+    middleware,
   }: ApplicationHttpSourceAcceptConfiguration) {
     this.accept = Array.isArray(accept) ? accept : [accept]
 
@@ -59,6 +67,8 @@ export class ApplicationHttpSourceAccept implements IUsable {
     this.piority = priority
 
     this.#start = start
+
+    this.middleware = middleware
   }
 
   public use(

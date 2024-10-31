@@ -10,7 +10,7 @@ import { Context } from './Context.js'
 
 export type FunctionMiddleware<
   TContext extends Context = Context,
-  TThis extends Middleware<TContext> = Middleware<TContext>,
+  TThis = Middleware<TContext>,
 > = (this: TThis, context: TContext, next: Next) => unknown | Promise<unknown>
 
 export type AnyMiddleware<TContext extends Context = any> =

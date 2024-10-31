@@ -85,6 +85,13 @@ export class HttpRequestBodyMiddleware extends HttpMiddleware {
 
       context.request._body = context.request.body
 
+      if (accept.middleware)
+        return accept.middleware.call(accept, context, async () => {
+          context.request.body = await accept.parse(context)
+
+          return next()
+        })
+
       context.request.body = await accept.parse(context)
 
       return next()
