@@ -1,4 +1,5 @@
 export * from './decorators/Action.js'
+export * from './decorators/Catch.js'
 export * from './decorators/Controller.js'
 export * from './decorators/Inject.js'
 export * from './decorators/Injectable.js'
