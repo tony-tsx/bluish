@@ -7,9 +7,12 @@ import { UseMiddleware } from '../../decorators/UseMiddleware.js'
 import {
   Constructable,
   getMetadataArgsStorage,
+  Inject,
+  Injectable,
   Metadata,
   Middleware,
 } from '../../core.js'
+import BluishCoreTesting from '../../core-testing.js'
 
 describe('.run', () => {
   it('run static action', async () => {
@@ -357,4 +360,37 @@ it('call action decorator function virtually', async () => {
   await action!.run(context)
 
   expect(context.return).toBe('testResult')
+})
+
+it('middleware catch injectable throw', async () => {
+  class ServiceError extends Error {}
+
+  @Injectable('context')
+  class Service {
+    constructor() {
+      throw new ServiceError()
+    }
+  }
+
+  @Controller
+  @UseMiddleware(async (context, next) => {
+    try {
+      await next()
+    } catch (error) {
+      if (!(error instanceof ServiceError)) throw error
+
+      context.error = error
+    }
+  })
+  class Root {
+    @Action
+    public static act(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      @Inject(() => Service) _service: Service,
+    ) {}
+  }
+
+  await expect(BluishCoreTesting.run(Root, 'act')).resolves.toEqual(
+    expect.objectContaining({ error: expect.any(ServiceError) }),
+  )
 })

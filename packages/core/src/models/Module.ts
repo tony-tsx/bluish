@@ -106,7 +106,12 @@ export class Module {
     if (injectable.scope === 'context') {
       this.#context.set(ref, value)
 
-      value.then(value => this.#context.set(ref, value))
+      value.then(
+        value => this.#context.set(ref, value),
+        () => {
+          /* ignore here! */
+        },
+      )
 
       return value
     }
