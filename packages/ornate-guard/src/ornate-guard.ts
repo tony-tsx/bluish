@@ -41,6 +41,10 @@ namespace guard {
     input.value = await assert(input.value, input.inject as Constructable, {
       share: { context: input.module.context },
     })
+
+    input.module.guards ??= []
+
+    input.module.guards.push(input.value)
   }
 
   export function onCatch<TContext extends Context>(
@@ -55,6 +59,12 @@ namespace guard {
         return handle(error, context)
       }
     }
+  }
+}
+
+declare module '@bluish/core' {
+  interface Module {
+    guards?: object[]
   }
 }
 
