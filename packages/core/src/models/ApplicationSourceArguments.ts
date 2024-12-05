@@ -1,3 +1,5 @@
+import { Next } from '../decorators/Next.js'
+import { chain } from '../tools/chain.js'
 import { Class } from '../typings/Class.js'
 import { ApplicationSourceArgument } from './ApplicationSourceArgument.js'
 import { ApplicationSourcePipeCollection } from './ApplicationSourcePipeCollection.js'
@@ -10,8 +12,28 @@ import {
 } from './MetadataArgsStorage.js'
 import { Module } from './Module.js'
 
+function run(
+  this: any,
+  [parameterIndex, argument]: [number, ApplicationSourceArgument],
+  module: Module,
+  args: any[],
+  next: Next,
+) {
+  return argument.mount(this, module, value => {
+    args[parameterIndex] = value
+
+    return next()
+  })
+}
+
 export class ApplicationSourceArguments {
   #arguments = new Map<number, ApplicationSourceArgument>()
+  #fn!: (
+    this: any,
+    next: Next | null,
+    module: Module,
+    args: any[],
+  ) => Promise<unknown>
 
   public get length() {
     return this.#arguments.size
@@ -55,13 +77,15 @@ export class ApplicationSourceArguments {
     this.#get(_arg.parameterIndex).add(_arg)
   }
 
-  public async call<TThis>(target: TThis, module: Module) {
-    const args: unknown[] = []
+  public mount<TThis>(
+    target: TThis,
+    module: Module,
+    next: (args: unknown[]) => unknown,
+  ) {
+    if (!this.#fn) this.#fn = chain(Array.from(this.#arguments), run)
 
-    return Promise.all(
-      Array.from(this.#arguments).map(async ([parameterIndex, argument]) => {
-        args[parameterIndex] = await argument.call(target, module)
-      }),
-    ).then(() => args)
+    const args: any[] = []
+
+    return this.#fn.call(target, async () => next(args), module, args)
   }
 }

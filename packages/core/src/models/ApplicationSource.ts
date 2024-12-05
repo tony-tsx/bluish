@@ -193,13 +193,13 @@ export class ApplicationSource {
     await Promise.all(this.actions.map(action => action._constructor()))
   }
 
-  public async call(context: Context) {
-    const target = new this.target!(
-      ...(await this.arguments.call(this.target.prototype, context.module)),
-    )
+  public construct(context: Context, next: (target: any) => any): any {
+    return this.arguments.mount(this.target.prototype, context.module, args => {
+      const target = new this.target!(...args)
 
-    Object.assign(target, await this.properties.call(target, context.module))
-
-    return target
+      return this.properties.define(target, context.module, () => {
+        return next(target)
+      })
+    })
   }
 }

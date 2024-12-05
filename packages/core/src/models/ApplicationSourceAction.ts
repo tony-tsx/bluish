@@ -173,17 +173,7 @@ export class ApplicationSourceAction {
     await this._action.constructor?.(this, this._action.options)
   }
 
-  public async _run(context: Context) {
-    let target: any = this.target
-
-    if (!this._action.propertyKey) {
-      const args = await this.arguments.call(null, context.module)
-
-      return this._action.virtualizer!.handle!(...args)
-    }
-
-    if (typeof target === 'object') target = await this.controller.call(context)
-
+  private async __run(context: Context, target: any) {
     Object.defineProperty(context, 'target', {
       value: target,
       writable: false,
@@ -191,9 +181,25 @@ export class ApplicationSourceAction {
       configurable: false,
     })
 
-    const args = await this.arguments.call(target, context.module)
+    return this.arguments.mount(target, context.module, args => {
+      return target[this.propertyKey!](...args)
+    })
+  }
 
-    return await target[this.propertyKey!](...args)
+  private async _run(context: Context) {
+    const target: any = this.target
+
+    if (!this._action.propertyKey)
+      return this.arguments.mount(null, context.module, args => {
+        return this._action.virtualizer!.handle!(...args)
+      })
+
+    if (typeof target === 'object')
+      return this.controller.construct(context, target => {
+        return this.__run(context, target)
+      })
+
+    return this.__run(context, target)
   }
 
   public run(context: Context) {

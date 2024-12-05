@@ -103,24 +103,22 @@ export class ApplicationInjectable {
   }
 
   public async to(module: Module) {
-    if (this._injectable.virtualizer) {
-      const args = await this.arguments.call(null, module)
+    if (this._injectable.virtualizer)
+      return this.arguments.mount(null, module, args => {
+        return this._injectable.virtualizer!.handle(...args)
+      })
 
-      return this._injectable.virtualizer.handle(...args)
-    }
+    return this.arguments.mount(this.target!.prototype, module, args => {
+      const target = new this.target!(...args)
 
-    let target = new this.target!(
-      ...(await this.arguments.call(this.target!.prototype, module)),
-    )
+      return this.properties.define(target, module, () => {
+        if (!this.hoisting) return target
 
-    Object.assign(target, await this.properties.call(target, module))
+        if (typeof target[this.hoisting] === 'function')
+          return target[this.hoisting]()
 
-    if (this.hoisting) {
-      if (typeof target[this.hoisting] === 'function')
-        target = target[this.hoisting]()
-      else target = target[this.hoisting]
-    }
-
-    return target
+        return target[this.hoisting]
+      })
+    })
   }
 }

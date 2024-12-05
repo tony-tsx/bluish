@@ -181,7 +181,7 @@ export class Application {
 
         const controller = new ApplicationSource(this, _controller)
 
-        await controller.static.call(controller.target, module)
+        await controller.static.define(controller.target, module, () => {})
 
         await controller._constructor()
 

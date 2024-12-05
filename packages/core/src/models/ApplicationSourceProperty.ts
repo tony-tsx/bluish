@@ -80,7 +80,11 @@ export class ApplicationSourceProperty {
     }
   }
 
-  public async call<TThis>(target: TThis, module: Module) {
+  public async mount<TThis>(
+    target: TThis,
+    module: Module,
+    next: (value: unknown) => unknown,
+  ) {
     const arg: PipeInput = {
       this: target,
       target: this,
@@ -90,12 +94,12 @@ export class ApplicationSourceProperty {
       inject: null,
     }
 
-    arg.value = await this.input.call(target, module.context)
+    if (this.inject) arg.inject = this.inject.ref
 
-    if (this.inject) arg.inject = await this.inject.ref
+    return this.input.call(target, arg, async () => {
+      await this.pipes.run(arg)
 
-    await this.pipes.run(arg)
-
-    return arg.value
+      return next(arg.value)
+    })
   }
 }

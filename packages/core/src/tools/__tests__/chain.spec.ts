@@ -18,3 +18,27 @@ it('call chain fns', () => {
   expect(chain1).toHaveBeenCalledTimes(1)
   expect(chain2).toHaveBeenCalledTimes(1)
 })
+
+it('chain return next pivo value', async () => {
+  await expect(chain([])(async () => 'Joe')).resolves.toEqual('Joe')
+})
+
+it('chain return next pivo value', async () => {
+  await expect(chain([])(async () => 'Joe')).resolves.toEqual('Joe')
+})
+
+it('chain return with last value', async () => {
+  const chain1 = vi.fn(async next => next())
+  const chain2 = vi.fn(async next => next())
+
+  await expect(chain([chain1, chain2])(async () => 'Joe')).resolves.toEqual(
+    'Joe',
+  )
+})
+
+it('chain return with last value', async () => {
+  const chain1 = vi.fn(async next => next())
+  const chain2 = vi.fn(() => 2)
+
+  await expect(chain([chain1, chain2])(null)).resolves.toEqual(2)
+})

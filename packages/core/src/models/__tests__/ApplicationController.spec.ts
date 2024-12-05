@@ -549,7 +549,7 @@ it('adds injectable dependency in constructor arguments', async () => {
   // @ts-expect-error: TODO
   context.action = controller.actions.findByInstancePropertyKey('action')!
 
-  const instance = await controller.call(context)
+  const instance = await controller.construct(context, instance => instance)
 
   expect(instance).toBeInstanceOf(Test)
   expect(instance.service).toBeInstanceOf(Service)
@@ -579,7 +579,7 @@ it('adds injectable dependency in class properties', async () => {
   // @ts-expect-error: TODO
   context.action = controller.actions.findByInstancePropertyKey('action')!
 
-  const instance = await controller.call(context)
+  const instance = await controller.construct(context, instance => instance)
 
   expect(instance).toBeInstanceOf(Test)
   expect(instance.service).toBeInstanceOf(Service)
@@ -774,7 +774,7 @@ it('input with dependencies', async () => {
   // @ts-expect-error: TODO
   context.action = controller.actions.findByInstancePropertyKey('action')!
 
-  const instance = await controller.call(context)
+  const instance = await controller.construct(context, instance => instance)
 
   expect(instance).toEqual({
     number: 123,

@@ -1,11 +1,12 @@
 import { Class } from '../typings/Class.js'
-import { InputSelector } from '../decorators/Input.js'
+import { InputInjectSelector } from '../decorators/Input.js'
 import { Context } from './Context.js'
 import { MetadataInputArg } from './MetadataArgsStorage.js'
+import { PipeInput } from '../decorators/UsePipe.js'
 import { Next } from '../decorators/Next.js'
 
 export class ApplicationSourceInput {
-  public readonly get: InputSelector
+  public readonly get: InputInjectSelector
 
   public readonly context: Class<Context>
 
@@ -18,7 +19,11 @@ export class ApplicationSourceInput {
     this.context = _input.context ?? Context
   }
 
-  public call(target: any, context: Context, next: Next) {
-    return this.get.call(target, context, next)
+  public call(target: any, input: PipeInput, next: Next) {
+    return this.get.call(target, input.value, input.module.context, value => {
+      input.value = value
+
+      return next()
+    })
   }
 }

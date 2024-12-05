@@ -1,3 +1,5 @@
+import { Next } from '../decorators/Next.js'
+import { chain } from '../tools/chain.js'
 import { Class } from '../typings/Class.js'
 import { ApplicationSourcePipeCollection } from './ApplicationSourcePipeCollection.js'
 import { ApplicationSourceProperty } from './ApplicationSourceProperty.js'
@@ -10,8 +12,23 @@ import {
 } from './MetadataArgsStorage.js'
 import { Module } from './Module.js'
 
+function run(
+  this: any,
+  [propertyKey, property]: [string | symbol, ApplicationSourceProperty],
+  module: Module,
+  next: Next,
+) {
+  return property.mount(this, module, value => {
+    this[propertyKey] = value
+
+    return next()
+  })
+}
+
 export class ApplicationSourceProperties {
   #properties = new Map<string | symbol, ApplicationSourceProperty>()
+
+  #fn!: (this: any, next: Next | null, module: Module) => Promise<unknown>
 
   public get length() {
     return this.#properties.size
@@ -50,22 +67,13 @@ export class ApplicationSourceProperties {
     this.#get(_arg.propertyKey).add(_arg)
   }
 
-  public async call(target: any, module: Module) {
-    await Promise.all(
-      Array.from(this.#properties).map(async ([propertyKey, property]) => {
-        target[propertyKey] = (async () => {
-          if (property.dependencies.size)
-            await Promise.all(
-              Array.from(property.dependencies).map(
-                dependency => target[dependency],
-              ),
-            )
+  public define(
+    target: any,
+    module: Module,
+    next: () => unknown,
+  ): Promise<unknown> {
+    if (!this.#fn) this.#fn = chain(Array.from(this.#properties), run)
 
-          return await property.call(target, module)
-        })()
-
-        target[propertyKey] = await target[propertyKey]
-      }),
-    )
+    return this.#fn.call(target, async () => next(), module)
   }
 }

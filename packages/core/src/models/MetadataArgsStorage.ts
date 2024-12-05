@@ -1,5 +1,5 @@
 import { PipeFunction } from '../decorators/UsePipe.js'
-import { InputSelector } from '../decorators/Input.js'
+import { InputInjectSelector } from '../decorators/Input.js'
 import { Class, Constructable } from '../typings/Class.js'
 import { Context } from './Context.js'
 import { AnyMiddleware } from './Middleware.js'
@@ -86,7 +86,7 @@ export interface MetadataInputArg extends IMetadataArg<'input'> {
   parameterIndex?: undefined | number
   deps?: (string | symbol)[]
   context?: Class<Context>
-  selector: InputSelector
+  selector: InputInjectSelector
 }
 
 export interface MetadataInjectableArg extends IMetadataArg<'injectable'> {
