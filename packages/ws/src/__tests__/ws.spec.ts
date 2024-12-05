@@ -44,13 +44,11 @@ it('connected event allowed to http middlewares', async () => {
 
   const { request } = BluishHttpTesting.toContext('/')
 
-  const context = await BluishCoreTesting.run(
+  await BluishCoreTesting.run(
     Root,
     'connected',
     new WebSocketConnectedContext({}, request),
   )
-
-  console.log(context.response)
 
   expect(Root.connected).toHaveBeenCalledWith(
     expect.objectContaining({
