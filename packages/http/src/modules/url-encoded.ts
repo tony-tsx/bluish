@@ -76,6 +76,8 @@ export class ApplicationHttpSourceAcceptUrlEncoded extends ApplicationHttpSource
     if (!('middlewares' in target)) return
 
     target.middlewares.add(ApplicationHttpSourceAcceptUrlEncoded.#qs)
+
+    return super.use(target)
   }
 }
 
