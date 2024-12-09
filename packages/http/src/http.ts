@@ -8,8 +8,6 @@ import { HttpResponseStatusMiddleware } from './middlewares/HttpResponseStatusMi
 import { HttpRequestBodyMiddleware } from './middlewares/HttpRequestBodyMiddleware.js'
 import { HttpRequestParamsMiddleware } from './middlewares/HttpRequestParamsMiddleware.js'
 
-export * from './accepts/ApplicationHttpSourceAcceptUrlEncoded.js'
-
 export * from './constants/constants.js'
 
 export * from './decorators/Accept.js'
