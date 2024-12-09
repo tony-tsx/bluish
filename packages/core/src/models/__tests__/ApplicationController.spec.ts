@@ -781,3 +781,31 @@ it('input with dependencies', async () => {
     number2: 123,
   })
 })
+
+it('async property input', async () => {
+  @Controller
+  class Test {
+    @Input(async () => 'Promise!')
+    public promise!: string
+
+    constructor() {}
+
+    @Action
+    public action() {}
+  }
+
+  const app = await new Application().useController(Test).bootstrap()
+
+  const controller = app.controllers.findByConstructable(Test)!
+
+  const context = new Context()
+
+  // @ts-expect-error: TODO
+  context.action = controller.actions.findByInstancePropertyKey('action')!
+
+  const instance = await controller.construct(context, instance => instance)
+
+  expect(instance).toEqual({
+    promise: 'Promise!',
+  })
+})

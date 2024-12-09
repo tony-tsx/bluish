@@ -19,10 +19,16 @@ function run(
   args: any[],
   next: Next,
 ) {
-  return argument.mount(this, module, value => {
+  return argument.mount(this, module, async value => {
     args[parameterIndex] = value
 
-    return next()
+    const normalize = Promise.resolve(value).then(value => {
+      args[parameterIndex] = value
+    })
+
+    const [, data] = await Promise.all([normalize, next()])
+
+    return data
   })
 }
 
@@ -86,6 +92,11 @@ export class ApplicationSourceArguments {
 
     const args: any[] = []
 
-    return this.#fn.call(target, async () => next(args), module, args)
+    return this.#fn.call(
+      target,
+      () => Promise.all(args).then(args => next(args)),
+      module,
+      args,
+    )
   }
 }

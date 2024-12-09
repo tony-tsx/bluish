@@ -16,19 +16,33 @@ function run(
   this: any,
   [propertyKey, property]: [string | symbol, ApplicationSourceProperty],
   module: Module,
+  deps: unknown[],
   next: Next,
 ) {
-  return property.mount(this, module, value => {
+  return property.mount(this, module, async value => {
     this[propertyKey] = value
 
-    return next()
+    const normalize = Promise.resolve(value).then(value => {
+      this[propertyKey] = value
+    })
+
+    deps.push(normalize)
+
+    const [, data] = await Promise.all([normalize, next()])
+
+    return data
   })
 }
 
 export class ApplicationSourceProperties {
   #properties = new Map<string | symbol, ApplicationSourceProperty>()
 
-  #fn!: (this: any, next: Next | null, module: Module) => Promise<unknown>
+  #fn!: (
+    this: any,
+    next: Next | null,
+    module: Module,
+    deps: unknown[],
+  ) => Promise<unknown>
 
   public get length() {
     return this.#properties.size
@@ -74,6 +88,13 @@ export class ApplicationSourceProperties {
   ): Promise<unknown> {
     if (!this.#fn) this.#fn = chain(Array.from(this.#properties), run)
 
-    return this.#fn.call(target, async () => next(), module)
+    const deps: unknown[] = []
+
+    return this.#fn.call(
+      target,
+      () => Promise.all(deps).then(() => next()),
+      module,
+      deps,
+    )
   }
 }
