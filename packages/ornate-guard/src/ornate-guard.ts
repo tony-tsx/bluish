@@ -14,15 +14,17 @@ export interface GuardOptions {
     context: Class<Context>,
     handle: (error: ValidationError, context: Context) => unknown,
   ][]
+  share?: (context: Context) => object | Promise<object>
 }
 
-function guard({ catch: _catch = [] }: GuardOptions = {}): IUsable {
+function guard(options: GuardOptions = {}): IUsable {
+  const { catch: _catch = [] } = options
   return {
     use(target) {
       if (!(target instanceof Application))
         throw new TypeError(`Expected an Application instance`)
 
-      target.usePipe(guard.pipe)
+      target.usePipe(guard.pipe(options))
 
       for (const [context, handle] of _catch)
         target.useMiddleware(context, guard.onCatch(handle))
@@ -31,20 +33,25 @@ function guard({ catch: _catch = [] }: GuardOptions = {}): IUsable {
 }
 
 namespace guard {
-  export async function pipe(input: PipeInput, next: Next) {
-    if (typeof input.inject !== 'function') return next()
+  export function pipe({ share }: GuardOptions) {
+    return async (input: PipeInput, next: Next) => {
+      if (typeof input.inject !== 'function') return next()
 
-    if (!isGuard(input.inject)) return next()
+      if (!isGuard(input.inject)) return next()
 
-    await next()
+      await next()
 
-    input.value = await assert(input.value, input.inject as Constructable, {
-      share: { context: input.module.context },
-    })
+      input.value = await assert(input.value, input.inject as Constructable, {
+        share: {
+          context: input.module.context,
+          ...(await share?.(input.module.context)),
+        },
+      })
 
-    input.module.guards ??= []
+      input.module.guards ??= []
 
-    input.module.guards.push(input.value)
+      input.module.guards.push(input.value)
+    }
   }
 
   export function onCatch<TContext extends Context>(
@@ -65,6 +72,12 @@ namespace guard {
 declare module '@bluish/core' {
   interface Module {
     guards?: object[]
+  }
+}
+
+declare module 'ornate-guard' {
+  interface ContextShare {
+    context: Context
   }
 }
 
