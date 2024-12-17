@@ -44,6 +44,9 @@ export class HttpErrorMiddleware extends HttpMiddleware {
 
     context.response.status = error.status
 
+    for (const [name, value] of Object.entries(error.headers))
+      context.response.headers[name] = value
+
     if (context[HTTP_CONTEXT_ACTION_CONTENT_TYPE]) {
       const [type, contentType] = context[HTTP_CONTEXT_ACTION_CONTENT_TYPE]
 

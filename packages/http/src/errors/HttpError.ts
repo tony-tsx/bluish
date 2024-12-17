@@ -3,20 +3,28 @@ import { STATUS_CODES } from 'http'
 export interface HttpErrorOptions extends ErrorOptions {
   publicMessage?: string
   properties?: Record<string, unknown>
+  headers?: Record<string, undefined | string | string[]>
 }
 
 export class HttpError extends Error {
   public readonly publicMessage?: string
   public readonly properties: Record<string, unknown>
+  public readonly headers: Record<string, undefined | string | string[]>
 
   constructor(
     public readonly status: number,
     message = STATUS_CODES[status],
-    { publicMessage, properties = {}, ...options }: HttpErrorOptions = {},
+    {
+      publicMessage,
+      properties = {},
+      headers = {},
+      ...options
+    }: HttpErrorOptions = {},
   ) {
     super(message, options)
 
     this.properties = properties
+    this.headers = headers
     this.publicMessage = publicMessage
   }
 
