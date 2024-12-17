@@ -1,11 +1,11 @@
 import {
   PipeInput,
-  Next,
   FunctionMiddleware,
   Context,
   IUsable,
   Application,
   Class,
+  PipeNext,
 } from '@bluish/core'
 import { assert, Constructable, isGuard, ValidationError } from 'ornate-guard'
 
@@ -34,14 +34,12 @@ function guard(options: GuardOptions = {}): IUsable {
 
 namespace guard {
   export function pipe({ share }: GuardOptions) {
-    return async (input: PipeInput, next: Next) => {
+    return async (input: PipeInput, next: PipeNext) => {
       if (typeof input.inject !== 'function') return next()
 
       if (!isGuard(input.inject)) return next()
 
-      await next()
-
-      input.value = await assert(input.value, input.inject as Constructable, {
+      const value = await assert(input.value, input.inject as Constructable, {
         share: {
           context: input.module.context,
           ...(await share?.(input.module.context)),
@@ -51,6 +49,8 @@ namespace guard {
       input.module.guards ??= []
 
       input.module.guards.push(input.value)
+
+      return next(value)
     }
   }
 

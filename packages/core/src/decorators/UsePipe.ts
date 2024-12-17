@@ -4,7 +4,8 @@ import { ApplicationSourceMetadata } from '../models/ApplicationSourceMetadata.j
 import { getMetadataArgsStorage } from '../models/MetadataArgsStorage.js'
 import { Module } from '../models/Module.js'
 import { Class } from '../typings/Class.js'
-import { Next } from './Next.js'
+
+export type PipeNext = (value?: unknown) => Promise<unknown>
 
 export type PipeInput = {
   readonly this: unknown
@@ -15,7 +16,7 @@ export type PipeInput = {
   value: any
 }
 
-export type PipeFunction = (input: PipeInput, next: Next) => unknown
+export type PipeFunction = (input: PipeInput, next: PipeNext) => unknown
 
 export function UsePipe(pipe: PipeFunction) {
   return (

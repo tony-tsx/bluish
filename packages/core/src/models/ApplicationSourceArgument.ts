@@ -93,10 +93,8 @@ export class ApplicationSourceArgument {
 
     if (this.inject) arg.inject = this.inject.ref
 
-    return this.input.call(target, arg, async () => {
-      await this.pipes.run(arg)
-
-      return next(arg.value)
-    })
+    return this.input.call(target, arg, async () =>
+      this.pipes.run(arg, async () => next(arg.value)),
+    )
   }
 }

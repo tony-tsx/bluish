@@ -7,6 +7,7 @@ import { Application } from '../Application.js'
 import { Context } from '../Context.js'
 import { InjectableHoisting } from '../../decorators/InjectableHoisting.js'
 import { Constructable } from '../../typings/Class.js'
+import BluishCoreTesting from '../../core-testing.js'
 
 it('resolve injectable', async () => {
   @Injectable
@@ -113,7 +114,7 @@ it('use injectable hoisting to create custom injectable', async () => {
   )
 })
 
-it('', async () => {
+it('inject context', async () => {
   @Controller
   class Root {
     @Action
@@ -135,7 +136,7 @@ it('', async () => {
   expect(Root.action).toHaveBeenCalledWith(expect.any(Context))
 })
 
-it('', async () => {
+it('register injectable with string identifier', async () => {
   Injectable.register('t', 'context', c => c, Context)
 
   @Controller
@@ -149,12 +150,7 @@ it('', async () => {
 
   vi.spyOn(Root, 'action')
 
-  const application = await new Application().useController(Root).bootstrap()
-
-  await application.controllers
-    .findByConstructable(Root)!
-    .actions.findByStaticPropertyKey('action')!
-    .run(new Context())
+  await BluishCoreTesting.run(Root, 'action')
 
   expect(Root.action).toHaveBeenCalledWith(expect.any(Context))
 })
