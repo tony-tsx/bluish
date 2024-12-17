@@ -39,7 +39,7 @@ export class HttpError extends Error {
 
 function factory(status: number, name: string) {
   class AnonymousHttpError extends HttpError {
-    constructor(message?: string, options?: ErrorOptions) {
+    constructor(message?: string, options?: HttpErrorOptions) {
       super(status, message, options)
       Object.defineProperty(this, 'name', { value: name })
     }
