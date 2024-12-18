@@ -6,9 +6,14 @@ import { IHttpRequest } from '../interfaces/IHttpRequest.js'
 export abstract class HttpSessionStore<TSession extends object> {
   public abstract get(
     id: string,
+    context: HttpContext,
   ): TSession | null | undefined | Promise<TSession | null | undefined>
 
-  public abstract set(id: string, session: TSession): void | Promise<void>
+  public abstract set(
+    id: string,
+    session: TSession,
+    context: HttpContext,
+  ): void | Promise<void>
 
   public abstract delete(id: string): void | Promise<void>
 }
@@ -47,7 +52,7 @@ export function session<TSession extends object>({
 
     if (!cookie[key]) cookie.sign(key, sessionID, secret, options)
 
-    let session = await store.get(sessionID)
+    let session = await store.get(sessionID, context)
 
     if (!session) session = await create()
 
@@ -58,7 +63,7 @@ export function session<TSession extends object>({
     } finally {
       if (renew && cookie[key]) cookie.sign(key, sessionID, secret, options)
 
-      await store.set(sessionID, session)
+      await store.set(sessionID, session, context)
     }
   })
 }
