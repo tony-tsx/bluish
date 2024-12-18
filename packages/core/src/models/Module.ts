@@ -87,21 +87,21 @@ export class Module {
     )
   }
 
-  public resolve(ref: unknown) {
+  public resolve<T>(ref: unknown): T | Promise<T> {
     if (!this.has(ref))
       throw new TypeError(
         `reference not found in argument list: ${refToString(ref)}`,
       )
 
-    if (this.hasSingleton(ref)) return this.getSingleton(ref)
+    if (this.hasSingleton(ref)) return this.getSingleton(ref) as T
 
-    if (this.#context.has(ref)) return this.#context.get(ref)
+    if (this.#context.has(ref)) return this.#context.get(ref) as T
 
     const injectable = this.find(ref)
 
     const value = injectable.to(this)
 
-    if (injectable.scope === 'transient') return value
+    if (injectable.scope === 'transient') return value as T
 
     if (injectable.scope === 'context') {
       this.#context.set(ref, value)
@@ -113,9 +113,9 @@ export class Module {
         },
       )
 
-      return value
+      return value as T
     }
 
-    return value
+    return value as T
   }
 }
