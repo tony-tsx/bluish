@@ -7,13 +7,24 @@ import {
   getPath,
 } from '@bluish/http'
 import { RoutingStrategy } from './RoutingStrategy.js'
-import { match, MatchFunction, ParamData } from 'path-to-regexp'
+import {
+  Key,
+  match,
+  MatchFunction,
+  ParamData,
+  pathToRegexp,
+} from 'path-to-regexp'
 import { RoutingRunStrategy } from './RoutingRunStrategy.js'
 
 export class PathRoutingStrategyMatch {
-  #match: MatchFunction<ParamData>
+  readonly #match: MatchFunction<ParamData>
+
+  public readonly keys: Key[]
 
   constructor(public readonly path: string) {
+    const { keys } = pathToRegexp(path)
+
+    this.keys = keys
     this.#match = match(path)
   }
 
@@ -51,12 +62,23 @@ export class RoutingPathStrategy<
     let _path = this.paths.find(([match]) => match.path === path)
 
     if (!_path) {
-      _path = [
-        new PathRoutingStrategyMatch(path),
-        this.factoryRoutingStrategy(path, this.application),
-      ]
+      const match = new PathRoutingStrategyMatch(path)
 
-      this.paths.push(_path)
+      for (const [index, [_match]] of this.paths.entries()) {
+        if (match.keys.length >= _match.keys.length) continue
+
+        _path = [match, this.factoryRoutingStrategy(path, this.application)]
+
+        this.paths.splice(index, 0, _path)
+
+        break
+      }
+
+      if (!_path) {
+        _path = [match, this.factoryRoutingStrategy(path, this.application)]
+
+        this.paths.push(_path)
+      }
     }
 
     _path[1].track(action)

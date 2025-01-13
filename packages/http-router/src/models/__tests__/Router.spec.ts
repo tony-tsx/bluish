@@ -48,3 +48,55 @@ it('', async () => {
     )
   }
 })
+
+it('routing path ranking', async () => {
+  @HttpController
+  class MainController {
+    @GET('/users')
+    public static find() {
+      return {}
+    }
+
+    @GET('/users/:userId')
+    public static findOneById() {
+      return {}
+    }
+
+    @GET('/users/all')
+    public static findAll() {
+      return {}
+    }
+  }
+
+  vi.spyOn(MainController, 'find')
+  vi.spyOn(MainController, 'findOneById')
+  vi.spyOn(MainController, 'findAll')
+
+  const application = await new Application()
+    .use(http())
+    .use(json())
+    .useController(MainController)
+    .bootstrap()
+
+  const router = new Router(application)
+
+  {
+    const context = await router.run(
+      BluishHttpTesting.toContext({ url: '/users/all' }),
+    )
+
+    expect(MainController.findAll).toHaveBeenCalledTimes(1)
+    expect(MainController.findOneById).toHaveBeenCalledTimes(0)
+    expect(context.action.propertyKey).toBe('findAll')
+  }
+
+  {
+    const context = await router.run(
+      BluishHttpTesting.toContext({ url: '/users/test' }),
+    )
+
+    expect(MainController.findOneById).toHaveBeenCalledTimes(1)
+    expect(MainController.findAll).toHaveBeenCalledTimes(1)
+    expect(context.action.propertyKey).toBe('findOneById')
+  }
+})
