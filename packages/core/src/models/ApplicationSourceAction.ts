@@ -182,6 +182,13 @@ export class ApplicationSourceAction {
     })
 
     return this.arguments.mount(target, context.module, args => {
+      Object.defineProperty(context, 'arguments', {
+        value: Object.freeze(args),
+        enumerable: true,
+        writable: false,
+        configurable: false,
+      })
+
       return target[this.propertyKey!](...args)
     })
   }
@@ -191,6 +198,13 @@ export class ApplicationSourceAction {
 
     if (!this._action.propertyKey)
       return this.arguments.mount(null, context.module, args => {
+        Object.defineProperty(context, 'arguments', {
+          value: Object.freeze(args),
+          enumerable: true,
+          writable: false,
+          configurable: false,
+        })
+
         return this._action.virtualizer!.handle!(...args)
       })
 

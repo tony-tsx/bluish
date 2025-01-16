@@ -2,6 +2,8 @@ import { ApplicationSourceAction } from './ApplicationSourceAction.js'
 import { Module } from './Module.js'
 
 export class Context {
+  public readonly arguments!: unknown[]
+
   public readonly action!: ApplicationSourceAction
 
   public readonly module: Module = new Module(this)
