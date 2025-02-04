@@ -34,7 +34,7 @@
     "prepublish": "yarn run test && yarn run build"
   },
   "dependencies": {
-    "glob": "^11.0.0"
+    "globby": "^14.0.2"
   },
   "devDependencies": {
     "reflect-metadata": "^0.2.2",

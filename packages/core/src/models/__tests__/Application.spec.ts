@@ -5,12 +5,14 @@ import { Controller } from '../../decorators/Controller.js'
 import { Context } from '../Context.js'
 import { ApplicationSourceAction } from '../ApplicationSourceAction.js'
 import { Middleware } from '../Middleware.js'
+import { GlobEntry } from 'globby'
+import fs from 'node:fs'
 
 beforeEach(() => {
   BluishCoreTesting.resetMetadataArgsStorage()
 })
 
-vi.mock('glob')
+vi.mock('globby')
 
 it('isInitialized return false is not initialized', () => {
   const app = new Application()
@@ -142,9 +144,15 @@ it('adds virtual action with specific context to application', async () => {
 })
 
 it('adds controllers from glob path', async () => {
-  const glob = await import('glob')
+  const globby = await import('globby')
 
-  vi.spyOn(glob, 'glob').mockResolvedValueOnce([`/home/controllers/test-1.js`])
+  vi.spyOn(globby, 'globby').mockResolvedValueOnce([
+    // @ts-expect-error: TODO
+    {
+      path: '/home/controllers/test-1.js',
+      stats: { isFile: () => true } as fs.Stats,
+    } as GlobEntry,
+  ])
 
   vi.mock('/home/controllers/test-1.js', () => {
     @Controller
@@ -161,13 +169,14 @@ it('adds controllers from glob path', async () => {
 })
 
 it('adds multiple controllers from glob path', async () => {
-  const glob = await import('glob')
+  const glob = await import('globby')
 
-  vi.spyOn(glob, 'glob').mockResolvedValueOnce([
-    '/home/controllers/test-2-1.js',
-    '/home/controllers/test-2-2.js',
-    '/home/controllers/test-2-3.js',
-  ])
+  // @ts-expect-error: TODO
+  vi.spyOn(glob, 'globby').mockResolvedValueOnce([
+    { path: '/home/controllers/test-2-1.js', stats: { isFile: () => true } },
+    { path: '/home/controllers/test-2-2.js', stats: { isFile: () => true } },
+    { path: '/home/controllers/test-2-3.js', stats: { isFile: () => true } },
+  ] as GlobEntry[])
 
   vi.mock('/home/controllers/test-2-1.js', () => {
     @Controller
@@ -223,11 +232,12 @@ it('adds controllers directly in application configuration argument', async () =
 })
 
 it('adds controllers with mixed types in application configuration argument', async () => {
-  const glob = await import('glob')
+  const glob = await import('globby')
 
-  vi.spyOn(glob, 'glob').mockResolvedValueOnce([
-    '/home/controllers/test-3-1.js',
-  ])
+  // @ts-expect-error: TODO
+  vi.spyOn(glob, 'globby').mockResolvedValueOnce([
+    { path: '/home/controllers/test-3-1.js', stats: { isFile: () => true } },
+  ] as GlobEntry[])
 
   vi.mock('/home/controllers/test-3-1.js', () => {
     @Controller

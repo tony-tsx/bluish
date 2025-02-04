@@ -1,4 +1,4 @@
-import { glob } from 'glob'
+import { globby } from 'globby'
 
 import { Class } from '../typings/Class.js'
 import { Context } from './Context.js'
@@ -157,11 +157,18 @@ export class Application {
       this.#registers.map(async register => {
         if (typeof register === 'function') return register
 
-        const pathfiles = await glob(register)
+        const files = await globby(register, {
+          stats: true,
+          objectMode: true,
+        })
 
         const values = await Promise.all(
-          pathfiles.map(async pathfile => {
-            const module = await import(pathfile)
+          files.map(async file => {
+            if (!file.stats) return []
+
+            if (!file.stats.isFile()) return []
+
+            const module = await import(file.path)
 
             return Object.values(module).filter(
               (value): value is Class => typeof value === 'function',
