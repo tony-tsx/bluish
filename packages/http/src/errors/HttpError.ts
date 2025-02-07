@@ -14,6 +14,7 @@ function factory(status: number, name: string) {
   class AnonymousHttpError extends HttpError {
     constructor(message?: string, options?: ErrorOptions) {
       super(status, message, options)
+      Object.defineProperty(this, 'name', { value: name })
     }
   }
 
