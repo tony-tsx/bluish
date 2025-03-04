@@ -77,7 +77,7 @@ export class NodeWebSocketServer<
 
     this.on('connection', (ws, request) => {
       let ready: Promise<unknown> | undefined
-      const _ready = <T extends Function>(fn: T): T =>
+      const _ready = <T extends (...args: any[]) => any>(fn: T): T =>
         (async (...args: any[]) => {
           await ready
 

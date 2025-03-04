@@ -1,15 +1,15 @@
 export function getReflectMetadata<T = unknown>(
   metadataKey: any,
-  target: Object,
+  target: object,
 ): undefined | T
 export function getReflectMetadata<T = unknown>(
   metadataKey: any,
-  target: Object,
+  target: object,
   propertyKey: undefined | string | symbol,
 ): undefined | T
 export function getReflectMetadata(
   metadataKey: any,
-  target: Object,
+  target: object,
   propertyKey?: string | symbol,
 ) {
   if (!('getMetadata' in Reflect)) return undefined
