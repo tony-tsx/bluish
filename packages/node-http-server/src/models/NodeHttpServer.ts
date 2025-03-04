@@ -12,14 +12,12 @@ export interface PureNodeHttpServerOptions {
 export interface NodeHttpServerOptions<
   TRequest extends typeof NodeHttpRequest = typeof NodeHttpRequest,
   TResponse extends typeof NodeHttpResponse = typeof NodeHttpResponse,
-  // @ts-expect-error: TODO
 > extends http.ServerOptions<TRequest, TResponse>,
     PureNodeHttpServerOptions {}
 
 export class NodeHttpServer<
   TRequest extends typeof NodeHttpRequest = typeof NodeHttpRequest,
   TResponse extends typeof NodeHttpResponse = typeof NodeHttpResponse,
-  // @ts-expect-error: TODO
 > extends http.Server<TRequest, TResponse> {
   public readonly application!: Application
 

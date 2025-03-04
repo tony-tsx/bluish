@@ -31,7 +31,7 @@
   "dependencies": {
     "bytes": "^3.1.2",
     "content-type": "^1.0.5",
-    "qs": "^6.11.2",
+    "qs": "^6.14.0",
     "type-is": "^1.6.18"
   },
   "peerDependencies": {
@@ -43,13 +43,13 @@
     "@types/busboy": "^1",
     "@types/bytes": "^3",
     "@types/content-type": "^1",
-    "@types/qs": "^6.9.8",
+    "@types/qs": "^6.9.18",
     "@types/supertest": "^6.0.2",
     "@types/type-is": "^1",
-    "ornate-guard": "0.0.0-experimental-9f67356",
-    "path-to-regexp": "^7.0.0",
+    "ornate-guard": "0.0.0-experimental-cc99ef3",
+    "path-to-regexp": "^8.2.0",
     "supertest": "^7.0.0",
-    "vitest": "^2.1.1"
+    "vitest": "^3.0.7"
   },
   "packageManager": "yarn@4.3.1"
 }

@@ -190,7 +190,7 @@ it('skip non-validation error onCatch', async () => {
 
   const handleValidationError = vi.fn(() => {})
 
-  expect(
+  await expect(
     BluishCoreTesting.run(
       new Application().use(
         guard({
