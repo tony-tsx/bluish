@@ -2,7 +2,7 @@ import { Input } from '@bluish/core'
 import { HttpContext } from '../models/HttpContext.js'
 
 export function Query(
-  target: Function | Object,
+  target: ((...args: any[]) => any) | object,
   propertyKey: string | symbol,
   parameterIndex: number,
 ) {
