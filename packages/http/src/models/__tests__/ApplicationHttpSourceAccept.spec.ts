@@ -50,5 +50,5 @@ it('use with stream', async () => {
 
   readable.push(null)
 
-  expect(content).resolves.toBe('Hello, World!')
+  await expect(content).resolves.toBe('Hello, World!')
 })

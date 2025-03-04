@@ -29,7 +29,7 @@
     "prepublish": "yarn run test && yarn run build"
   },
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.1"
   },
   "peerDependencies": {
     "@bluish/core": "^0.0.0",
@@ -41,7 +41,7 @@
     "@bluish/http": "workspace:^",
     "@bluish/ws": "workspace:^",
     "@types/ws": "^8",
-    "vitest": "^2.1.1"
+    "vitest": "^3.0.7"
   },
   "optionalDependencies": {
     "@types/ws": "^8"

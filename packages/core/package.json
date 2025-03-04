@@ -34,11 +34,11 @@
     "prepublish": "yarn run test && yarn run build"
   },
   "dependencies": {
-    "globby": "^14.0.2"
+    "globby": "^14.1.0"
   },
   "devDependencies": {
     "reflect-metadata": "^0.2.2",
-    "vitest": "^2.1.1"
+    "vitest": "^3.0.7"
   },
   "packageManager": "yarn@4.3.1"
 }

@@ -35,8 +35,8 @@
   "devDependencies": {
     "@bluish/core": "workspace:^",
     "@types/amqplib": "^0",
-    "amqplib": "^0.10.4",
-    "vitest": "^2.1.1"
+    "amqplib": "^0.10.5",
+    "vitest": "^3.0.7"
   },
   "packageManager": "yarn@4.3.1"
 }
