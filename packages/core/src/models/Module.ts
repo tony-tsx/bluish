@@ -3,19 +3,11 @@ import { getMetadataArgsStorage } from './MetadataArgsStorage.js'
 import { ApplicationInjectable } from './ApplicationInjectable.js'
 import { Application } from './Application.js'
 import { InjectableNotFoundError } from '../errors/InjectableNotFoundError.js'
+import { refToString } from '../tools/refToString.js'
 
 const singletons = new Map<Application, Map<unknown, unknown>>()
 
 const refs = new Map<Application, Map<unknown, ApplicationInjectable>>()
-
-function refToString(ref: unknown) {
-  if (typeof ref === 'string') return `string:${ref}`
-  if (typeof ref === 'symbol') return `symbol:${ref.description}`
-  if (typeof ref === 'function') return `function:${ref.name}`
-  if (ref === null) return 'null'
-  if (typeof ref === 'object') return `object:${ref.constructor.name}`
-  return `unknown:${ref}`
-}
 
 export class Module {
   #context = new Map<unknown, unknown>()
@@ -73,7 +65,7 @@ export class Module {
         injectable => injectable.ref === ref,
       )
 
-      if (!_injectable) throw new InjectableNotFoundError('TODO')
+      if (!_injectable) throw new InjectableNotFoundError(ref)
 
       this.setRef(ref, new ApplicationInjectable(this.application, _injectable))
     }
